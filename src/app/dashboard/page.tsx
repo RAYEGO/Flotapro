@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { BadgeDollarSign, Percent, ReceiptText, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -18,6 +19,21 @@ type Alert = {
   proximoKm: number;
   kilometrajeActual: number;
   restanteKm: number;
+};
+type KpiCurrency = {
+  label: string;
+  icon: LucideIcon;
+  tone: string;
+  isCurrency: true;
+  currency?: string;
+  number?: string;
+};
+type KpiValue = {
+  label: string;
+  icon: LucideIcon;
+  tone: string;
+  isCurrency: false;
+  value: string;
 };
 
 export default function DashboardPage() {
@@ -47,13 +63,20 @@ export default function DashboardPage() {
     const parsed = Number(value.replace(/[^0-9.-]+/g, ""));
     return Number.isFinite(parsed) ? parsed : null;
   };
-  const formatCurrency = (value: number | null) => {
-    if (value === null) return "—";
-    return new Intl.NumberFormat("es-PE", {
+  const formatCurrencyParts = (value: number | null) => {
+    if (value === null) return { currency: undefined, number: undefined };
+    const parts = new Intl.NumberFormat("es-PE", {
       style: "currency",
       currency: "PEN",
       maximumFractionDigits: 0,
-    }).format(value);
+    }).formatToParts(value);
+    const currency = parts.find((part) => part.type === "currency")?.value ?? "S/";
+    const number = parts
+      .filter((part) => part.type !== "currency")
+      .map((part) => part.value)
+      .join("")
+      .trim();
+    return { currency, number };
   };
   const formatPercent = (value: number | null) => {
     if (value === null) return "—";
@@ -142,33 +165,37 @@ export default function DashboardPage() {
       <div className="rounded-3xl bg-white p-8 shadow-[0_20px_50px_rgba(15,42,61,0.08)] ring-1 ring-black/5">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary/80">
+            <p className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
               {greeting}
             </p>
-            <h1 className="mt-2 text-2xl font-semibold text-dark">
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-dark">
               Centro de control de flota
             </h1>
-            <p className="mt-2 text-sm text-dark/70">
+            <p className="mt-3 text-base text-[#A8C1D1]">
               Visión estratégica de ingresos, costos y alertas críticas.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex items-center gap-2 rounded-2xl bg-background px-4 py-3 text-sm text-dark/80 ring-1 ring-black/5">
+            <label className="flex items-center gap-2 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white transition-all duration-200 border border-white/10 focus-within:border-[#F4A300]">
               Mes
               <input
-                className="bg-transparent outline-none"
+                className="bg-transparent text-white placeholder:text-[#A8C1D1] focus:outline-none"
                 type="month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
               />
             </label>
             <div className="flex items-center gap-3 rounded-2xl bg-background px-4 py-3 text-sm text-dark/80 ring-1 ring-black/5">
-              <span className="text-dark/50">Mes actual</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+                  Mes actual
+                </span>
               <span className="font-semibold text-dark">{monthLabel}</span>
             </div>
             <div className="flex items-center gap-3 rounded-2xl bg-background px-4 py-3 text-sm text-dark/80 ring-1 ring-black/5">
-              <span className="text-dark/50">Camiones activos</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+                  Camiones activos
+                </span>
               <span className="font-semibold text-dark">
                 {activeTrucks === null ? "—" : activeTrucks}
               </span>
@@ -184,24 +211,28 @@ export default function DashboardPage() {
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {[
+        {(
+          [
           {
             label: "Ingresos",
-            value: formatCurrency(ingresosNum),
+            ...formatCurrencyParts(ingresosNum),
             icon: BadgeDollarSign,
             tone: "text-primary",
+            isCurrency: true,
           },
           {
             label: "Costos totales",
-            value: formatCurrency(costosNum),
+            ...formatCurrencyParts(costosNum),
             icon: ReceiptText,
             tone: "text-dark",
+            isCurrency: true,
           },
           {
             label: "Utilidad neta",
-            value: formatCurrency(utilidadNum),
+            ...formatCurrencyParts(utilidadNum),
             icon: TrendingUp,
             tone: utilidadNum !== null && utilidadNum < 0 ? "text-danger" : "text-secondary",
+            isCurrency: true,
           },
           {
             label: "Rentabilidad",
@@ -211,8 +242,10 @@ export default function DashboardPage() {
               rentabilidadNum !== null && rentabilidadNum < 0
                 ? "text-danger"
                 : "text-secondary",
+            isCurrency: false,
           },
-        ].map((kpi) => {
+        ] as (KpiCurrency | KpiValue)[]
+        ).map((kpi) => {
           const Icon = kpi.icon;
           return (
             <div
@@ -220,17 +253,34 @@ export default function DashboardPage() {
               className="rounded-2xl bg-white p-6 shadow-[0_15px_40px_rgba(15,42,61,0.08)] ring-1 ring-black/5"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-dark/50">
+                <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
                   {kpi.label}
                 </span>
                 <span className="rounded-full bg-background p-2 text-primary">
                   <Icon className="h-5 w-5" strokeWidth={1.5} />
                 </span>
               </div>
-              <div className={`mt-4 text-3xl font-semibold ${kpi.tone}`}>
-                {loading ? "..." : kpi.value}
+              <div className={`mt-5 ${kpi.tone}`}>
+                {loading ? (
+                  <span className="text-4xl font-bold tracking-tight leading-none">...</span>
+                ) : kpi.isCurrency && kpi.currency && kpi.number ? (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-medium text-dark/70">
+                      {kpi.currency}
+                    </span>
+                    <span className="text-4xl font-bold tracking-tight leading-none">
+                      {kpi.number}
+                    </span>
+                  </div>
+                ) : kpi.isCurrency ? (
+                  <span className="text-4xl font-bold tracking-tight leading-none">—</span>
+                ) : (
+                  <span className="text-4xl font-bold tracking-tight leading-none">
+                    {kpi.value}
+                  </span>
+                )}
               </div>
-              <div className="mt-2 text-xs text-dark/60">
+              <div className="mt-3 text-xs font-medium text-dark/70">
                 Vs mes anterior · <span className="font-semibold text-dark/80">—</span>
               </div>
             </div>

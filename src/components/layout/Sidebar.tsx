@@ -21,23 +21,23 @@ export default function Sidebar() {
 
   return (
     <aside className="rounded-[24px] bg-[#0F2A3D] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.15)] ring-1 ring-white/5">
-      <Link href="/dashboard" className="flex items-center px-3 py-4">
-        <span className="relative hidden h-10 w-40 md:block">
+      <Link href="/dashboard" className="flex items-center justify-center py-4">
+        <span className="relative hidden h-12 w-44 md:block">
           <Image
-            src="/logo.png"
+            src="/logo-flotapro.svg"
             alt="FlotaPro"
             fill
-            sizes="160px"
+            sizes="176px"
             className="object-contain"
             priority
           />
         </span>
-        <span className="relative h-10 w-10 md:hidden">
+        <span className="relative h-12 w-12 md:hidden">
           <Image
-            src="/logo.png"
+            src="/logo-flotapro.svg"
             alt="FlotaPro"
             fill
-            sizes="40px"
+            sizes="48px"
             className="object-contain"
           />
         </span>
