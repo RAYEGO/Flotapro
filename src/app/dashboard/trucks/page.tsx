@@ -23,7 +23,7 @@ export default function TrucksPage() {
   const [modelo, setModelo] = useState("");
   const [anio, setAnio] = useState<number>(2020);
   const [tipo, setTipo] = useState("");
-  const [kilometrajeActual, setKilometrajeActual] = useState<number>(0);
+  const [kilometrajeActual, setKilometrajeActual] = useState("");
   const [estado, setEstado] = useState<Truck["estado"]>("ACTIVO");
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,7 +61,7 @@ export default function TrucksPage() {
           modelo,
           anio,
           tipo,
-          kilometrajeActual,
+          kilometrajeActual: Number(kilometrajeActual),
           estado,
         }),
       });
@@ -71,7 +71,7 @@ export default function TrucksPage() {
       setMarca("");
       setModelo("");
       setTipo("");
-      setKilometrajeActual(0);
+      setKilometrajeActual("");
       setEstado("ACTIVO");
       await load();
     } catch (e) {
@@ -128,9 +128,9 @@ export default function TrucksPage() {
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Km actual"
+            placeholder="Km actual (ej. 120000)"
             value={kilometrajeActual}
-            onChange={(e) => setKilometrajeActual(Number(e.target.value))}
+            onChange={(e) => setKilometrajeActual(e.target.value)}
             type="number"
             min={0}
             required

@@ -28,9 +28,9 @@ export default function FuelsPage() {
   const [truckId, setTruckId] = useState("");
   const [driverId, setDriverId] = useState("");
   const [fecha, setFecha] = useState("");
-  const [kilometraje, setKilometraje] = useState<number>(0);
-  const [galones, setGalones] = useState<number>(0);
-  const [precioPorGalon, setPrecioPorGalon] = useState<number>(0);
+  const [kilometraje, setKilometraje] = useState("");
+  const [galones, setGalones] = useState("");
+  const [precioPorGalon, setPrecioPorGalon] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function load() {
@@ -85,9 +85,9 @@ export default function FuelsPage() {
           truckId,
           driverId,
           fecha: new Date(fecha).toISOString(),
-          kilometraje,
-          galones,
-          precioPorGalon,
+          kilometraje: Number(kilometraje),
+          galones: Number(galones),
+          precioPorGalon: Number(precioPorGalon),
         }),
       });
       const data = (await res.json().catch(() => null)) as any;
@@ -96,9 +96,9 @@ export default function FuelsPage() {
       setTruckId("");
       setDriverId("");
       setFecha("");
-      setKilometraje(0);
-      setGalones(0);
-      setPrecioPorGalon(0);
+      setKilometraje("");
+      setGalones("");
+      setPrecioPorGalon("");
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -152,18 +152,18 @@ export default function FuelsPage() {
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Kilometraje"
+            placeholder="Kilometraje (km)"
             value={kilometraje}
-            onChange={(e) => setKilometraje(Number(e.target.value))}
+            onChange={(e) => setKilometraje(e.target.value)}
             type="number"
             min={0}
             required
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Galones"
+            placeholder="Galones (ej. 30.5)"
             value={galones}
-            onChange={(e) => setGalones(Number(e.target.value))}
+            onChange={(e) => setGalones(e.target.value)}
             type="number"
             min={0}
             step="0.001"
@@ -171,9 +171,9 @@ export default function FuelsPage() {
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Precio/galón"
+            placeholder="Precio/galón (ej. 18.90)"
             value={precioPorGalon}
-            onChange={(e) => setPrecioPorGalon(Number(e.target.value))}
+            onChange={(e) => setPrecioPorGalon(e.target.value)}
             type="number"
             min={0}
             step="0.001"

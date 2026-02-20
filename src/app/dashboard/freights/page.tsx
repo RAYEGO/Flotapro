@@ -36,10 +36,10 @@ export default function FreightsPage() {
   const [cliente, setCliente] = useState("");
   const [origen, setOrigen] = useState("");
   const [destino, setDestino] = useState("");
-  const [ingreso, setIngreso] = useState<number>(0);
-  const [peajes, setPeajes] = useState<number>(0);
-  const [viaticos, setViaticos] = useState<number>(0);
-  const [otrosGastos, setOtrosGastos] = useState<number>(0);
+  const [ingreso, setIngreso] = useState("");
+  const [peajes, setPeajes] = useState("");
+  const [viaticos, setViaticos] = useState("");
+  const [otrosGastos, setOtrosGastos] = useState("");
   const [estado, setEstado] = useState<Freight["estado"]>("PENDIENTE");
   const [submitting, setSubmitting] = useState(false);
 
@@ -98,10 +98,10 @@ export default function FreightsPage() {
           cliente,
           origen,
           destino,
-          ingreso,
-          peajes,
-          viaticos,
-          otrosGastos,
+          ingreso: Number(ingreso),
+          peajes: peajes === "" ? 0 : Number(peajes),
+          viaticos: viaticos === "" ? 0 : Number(viaticos),
+          otrosGastos: otrosGastos === "" ? 0 : Number(otrosGastos),
           estado,
         }),
       });
@@ -113,10 +113,10 @@ export default function FreightsPage() {
       setCliente("");
       setOrigen("");
       setDestino("");
-      setIngreso(0);
-      setPeajes(0);
-      setViaticos(0);
-      setOtrosGastos(0);
+      setIngreso("");
+      setPeajes("");
+      setViaticos("");
+      setOtrosGastos("");
       setEstado("PENDIENTE");
       await load();
     } catch (e) {
@@ -207,9 +207,9 @@ export default function FreightsPage() {
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Ingreso"
+            placeholder="Ingreso (monto)"
             value={ingreso}
-            onChange={(e) => setIngreso(Number(e.target.value))}
+            onChange={(e) => setIngreso(e.target.value)}
             type="number"
             min={0}
             step="0.01"
@@ -217,27 +217,27 @@ export default function FreightsPage() {
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Peajes"
+            placeholder="Peajes (monto)"
             value={peajes}
-            onChange={(e) => setPeajes(Number(e.target.value))}
+            onChange={(e) => setPeajes(e.target.value)}
             type="number"
             min={0}
             step="0.01"
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Viáticos"
+            placeholder="Viáticos (monto)"
             value={viaticos}
-            onChange={(e) => setViaticos(Number(e.target.value))}
+            onChange={(e) => setViaticos(e.target.value)}
             type="number"
             min={0}
             step="0.01"
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-            placeholder="Otros gastos"
+            placeholder="Otros gastos (monto)"
             value={otrosGastos}
-            onChange={(e) => setOtrosGastos(Number(e.target.value))}
+            onChange={(e) => setOtrosGastos(e.target.value)}
             type="number"
             min={0}
             step="0.01"

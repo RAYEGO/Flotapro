@@ -37,14 +37,14 @@ export default function MaintenancePage() {
   const [planTruckId, setPlanTruckId] = useState("");
   const [planTipo, setPlanTipo] = useState("");
   const [cadaKm, setCadaKm] = useState<number>(5000);
-  const [ultimoServicioKm, setUltimoServicioKm] = useState<number>(0);
+  const [ultimoServicioKm, setUltimoServicioKm] = useState("");
   const [planSubmitting, setPlanSubmitting] = useState(false);
 
   const [recordTruckId, setRecordTruckId] = useState("");
   const [recordFecha, setRecordFecha] = useState("");
   const [recordTipo, setRecordTipo] = useState("");
-  const [recordKm, setRecordKm] = useState<number>(0);
-  const [recordCosto, setRecordCosto] = useState<number>(0);
+  const [recordKm, setRecordKm] = useState("");
+  const [recordCosto, setRecordCosto] = useState("");
   const [recordSubmitting, setRecordSubmitting] = useState(false);
 
   async function load() {
@@ -101,7 +101,7 @@ export default function MaintenancePage() {
           truckId: planTruckId,
           tipo: planTipo,
           cadaKm,
-          ultimoServicioKm,
+          ultimoServicioKm: Number(ultimoServicioKm),
           activo: true,
         }),
       });
@@ -111,7 +111,7 @@ export default function MaintenancePage() {
       setPlanTruckId("");
       setPlanTipo("");
       setCadaKm(5000);
-      setUltimoServicioKm(0);
+      setUltimoServicioKm("");
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -133,8 +133,8 @@ export default function MaintenancePage() {
           truckId: recordTruckId,
           fecha: new Date(recordFecha).toISOString(),
           tipo: recordTipo,
-          kilometraje: recordKm,
-          costo: recordCosto,
+          kilometraje: Number(recordKm),
+          costo: Number(recordCosto),
         }),
       });
       const data = (await res.json().catch(() => null)) as any;
@@ -143,8 +143,8 @@ export default function MaintenancePage() {
       setRecordTruckId("");
       setRecordFecha("");
       setRecordTipo("");
-      setRecordKm(0);
-      setRecordCosto(0);
+      setRecordKm("");
+      setRecordCosto("");
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -229,9 +229,9 @@ export default function MaintenancePage() {
               />
               <input
                 className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-                placeholder="Último servicio (Km)"
+                placeholder="Último servicio (km)"
                 value={ultimoServicioKm}
-                onChange={(e) => setUltimoServicioKm(Number(e.target.value))}
+                onChange={(e) => setUltimoServicioKm(e.target.value)}
                 type="number"
                 min={0}
                 required
@@ -328,18 +328,18 @@ export default function MaintenancePage() {
               />
               <input
                 className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-                placeholder="Kilometraje"
+                placeholder="Kilometraje (km)"
                 value={recordKm}
-                onChange={(e) => setRecordKm(Number(e.target.value))}
+                onChange={(e) => setRecordKm(e.target.value)}
                 type="number"
                 min={0}
                 required
               />
               <input
                 className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
-                placeholder="Costo"
+                placeholder="Costo (monto)"
                 value={recordCosto}
-                onChange={(e) => setRecordCosto(Number(e.target.value))}
+                onChange={(e) => setRecordCosto(e.target.value)}
                 type="number"
                 min={0}
                 step="0.01"
