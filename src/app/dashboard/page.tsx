@@ -180,7 +180,7 @@ export default function DashboardPage() {
             <label className="flex items-center gap-2 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white transition-all duration-200 border border-white/10 focus-within:border-[#F4A300]">
               Mes
               <input
-                className="bg-transparent text-white placeholder:text-[#A8C1D1] focus:outline-none [color-scheme:dark] appearance-none shadow-none"
+                className="bg-transparent text-[#D6E2EA] placeholder:text-[#A8C1D1] focus:outline-none [color-scheme:dark] appearance-none shadow-none"
                 type="month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
@@ -190,7 +190,7 @@ export default function DashboardPage() {
               <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
                 Mes actual
               </span>
-              <span className="text-base font-semibold text-white">{monthLabel}</span>
+              <span className="text-base font-semibold text-[#D6E2EA]">{monthLabel}</span>
             </div>
             <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white ring-1 ring-white/10">
               <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
@@ -262,20 +262,20 @@ export default function DashboardPage() {
               </div>
               <div className={`mt-5 ${kpi.tone}`}>
                 {loading ? (
-                  <span className="text-4xl font-bold tracking-tight leading-none">...</span>
+                  <span className="text-3xl font-bold tracking-tight leading-none">...</span>
                 ) : kpi.isCurrency && kpi.currency && kpi.number ? (
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-sm font-medium text-dark/70">
+                    <span className="text-xs font-medium text-dark/70">
                       {kpi.currency}
                     </span>
-                    <span className="text-4xl font-bold tracking-tight leading-none break-words">
+                    <span className="text-3xl font-bold tracking-tight leading-none break-words">
                       {kpi.number}
                     </span>
                   </div>
                 ) : kpi.isCurrency ? (
-                  <span className="text-4xl font-bold tracking-tight leading-none">—</span>
+                  <span className="text-3xl font-bold tracking-tight leading-none">—</span>
                 ) : (
-                  <span className="text-4xl font-bold tracking-tight leading-none break-words">
+                  <span className="text-3xl font-bold tracking-tight leading-none break-words">
                     {kpi.value}
                   </span>
                 )}
