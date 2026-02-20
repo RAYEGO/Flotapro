@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum TruckStatus {
+  ACTIVO
+  INACTIVO
+  TALLER
+  VENDIDO
+}
+
+enum FreightStatus {
+  PENDIENTE
+  COMPLETADO
+  ANULADO
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+  ruc  String? @db.VarChar(11)
+
+  users              User[]
+  trucks             Truck[]
+  drivers            Driver[]
+  freights           Freight[]
+  fuels              Fuel[]
+  maintenancePlans   MaintenancePlan[]
+  maintenanceRecords MaintenanceRecord[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  email        String @unique
+  name         String?
+  passwordHash String
+  role         Role   @default(ADMIN)
+
+  @@index([companyId])
+}
+
+model Truck {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  placa             String
+  marca             String
+  modelo            String
+  anio              Int
+  tipo              String
+  kilometrajeActual Int
+  estado            TruckStatus @default(ACTIVO)
+
+  drivers            Driver[]
+  freights           Freight[]
+  fuels              Fuel[]
+  maintenancePlans   MaintenancePlan[]
+  maintenanceRecords MaintenanceRecord[]
+
+  @@unique([companyId, placa])
+  @@index([companyId, estado])
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  nombre           String
+  dni              String @db.VarChar(8)
+  licencia         String
+  fechaVencimiento DateTime
+  telefono         String?
+
+  truckId String?
+  truck   Truck?   @relation(fields: [truckId], references: [id], onDelete: SetNull)
+
+  freights Freight[]
+  fuels    Fuel[]
+
+  @@unique([companyId, dni])
+  @@index([companyId, truckId])
+}
+
+model Freight {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  truckId  String
+  truck    Truck    @relation(fields: [truckId], references: [id], onDelete: Restrict)
+  driverId String
+  driver   Driver   @relation(fields: [driverId], references: [id], onDelete: Restrict)
+
+  fecha   DateTime
+  cliente String
+  origen  String
+  destino String
+
+  ingreso     Decimal @db.Decimal(12, 2)
+  peajes      Decimal @db.Decimal(12, 2) @default(0)
+  viaticos    Decimal @db.Decimal(12, 2) @default(0)
+  otrosGastos Decimal @db.Decimal(12, 2) @default(0)
+  ganancia    Decimal @db.Decimal(12, 2)
+
+  estado FreightStatus @default(PENDIENTE)
+
+  @@index([companyId, fecha])
+  @@index([companyId, truckId])
+  @@index([companyId, driverId])
+}
+
+model Fuel {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  truckId String
+  truck   Truck   @relation(fields: [truckId], references: [id], onDelete: Restrict)
+
+  driverId String
+  driver   Driver @relation(fields: [driverId], references: [id], onDelete: Restrict)
+
+  fecha       DateTime
+  kilometraje Int
+
+  galones        Decimal @db.Decimal(10, 3)
+  precioPorGalon Decimal @db.Decimal(12, 3)
+  total          Decimal @db.Decimal(12, 2)
+
+  @@index([companyId, fecha])
+  @@index([companyId, truckId])
+  @@index([companyId, driverId])
+}
+
+model MaintenancePlan {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  truckId String
+  truck   Truck   @relation(fields: [truckId], references: [id], onDelete: Cascade)
+
+  tipo            String
+  cadaKm          Int
+  ultimoServicioKm Int
+  proximoKm       Int
+  activo          Boolean @default(true)
+
+  @@index([companyId, truckId, activo])
+}
+
+model MaintenanceRecord {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  truckId String
+  truck   Truck   @relation(fields: [truckId], references: [id], onDelete: Restrict)
+
+  fecha       DateTime
+  tipo        String
+  kilometraje Int
+  costo       Decimal @db.Decimal(12, 2)
+
+  @@index([companyId, fecha])
+  @@index([companyId, truckId])
+}
