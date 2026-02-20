@@ -38,11 +38,11 @@ body {
 input,
 select,
 textarea {
-  color: color-mix(in oklab, var(--color-white) 10%);
-  background-color: #3f3b3b5d;
+  color: var(--dark);
+  background-color: #ffffff;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #6b7280;
+  color: #f4f6f8;
 }
