@@ -39,7 +39,7 @@ input,
 select,
 textarea {
   color: color-mix(in oklab, var(--color-white) 10%);
-  background-color: #ffffff00;
+  background-color: #3f3b3b5d;
 }
 
 input::placeholder,
