@@ -38,6 +38,9 @@ export default function MaintenancePage() {
   const [planTipo, setPlanTipo] = useState("");
   const [cadaKm, setCadaKm] = useState<number>(5000);
   const [ultimoServicioKm, setUltimoServicioKm] = useState("");
+  const [planActivo, setPlanActivo] = useState(true);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
   const [planSubmitting, setPlanSubmitting] = useState(false);
 
   const [recordTruckId, setRecordTruckId] = useState("");
@@ -45,6 +48,8 @@ export default function MaintenancePage() {
   const [recordTipo, setRecordTipo] = useState("");
   const [recordKm, setRecordKm] = useState("");
   const [recordCosto, setRecordCosto] = useState("");
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
+  const [deletingRecordId, setDeletingRecordId] = useState<string | null>(null);
   const [recordSubmitting, setRecordSubmitting] = useState(false);
 
   async function load() {
@@ -88,30 +93,72 @@ export default function MaintenancePage() {
     load();
   }, []);
 
+  const toDateTimeLocal = (value: string) => {
+    const date = new Date(value);
+    const offset = date.getTimezoneOffset();
+    return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
+  };
+
+  const resetPlanForm = () => {
+    setPlanTruckId("");
+    setPlanTipo("");
+    setCadaKm(5000);
+    setUltimoServicioKm("");
+    setPlanActivo(true);
+    setEditingPlanId(null);
+  };
+
+  const startEditPlan = (plan: Plan) => {
+    setEditingPlanId(plan.id);
+    setPlanTruckId(plan.truckId);
+    setPlanTipo(plan.tipo);
+    setCadaKm(plan.cadaKm);
+    setUltimoServicioKm(String(plan.ultimoServicioKm));
+    setPlanActivo(plan.activo);
+  };
+
+  const resetRecordForm = () => {
+    setRecordTruckId("");
+    setRecordFecha("");
+    setRecordTipo("");
+    setRecordKm("");
+    setRecordCosto("");
+    setEditingRecordId(null);
+  };
+
+  const startEditRecord = (record: Record) => {
+    setEditingRecordId(record.id);
+    setRecordTruckId(record.truckId);
+    setRecordFecha(toDateTimeLocal(record.fecha));
+    setRecordTipo(record.tipo);
+    setRecordKm(String(record.kilometraje));
+    setRecordCosto(String(record.costo));
+  };
+
   async function createPlan(e: FormEvent) {
     e.preventDefault();
     setPlanSubmitting(true);
     setError(null);
 
     try {
-      const res = await fetch("/api/maintenance-plans", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          truckId: planTruckId,
-          tipo: planTipo,
-          cadaKm,
-          ultimoServicioKm: Number(ultimoServicioKm),
-          activo: true,
-        }),
-      });
+      const res = await fetch(
+        editingPlanId ? `/api/maintenance-plans/${editingPlanId}` : "/api/maintenance-plans",
+        {
+          method: editingPlanId ? "PATCH" : "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            truckId: planTruckId,
+            tipo: planTipo,
+            cadaKm,
+            ultimoServicioKm: Number(ultimoServicioKm),
+            activo: planActivo,
+          }),
+        },
+      );
       const data = (await res.json().catch(() => null)) as any;
       if (!res.ok) throw new Error(data?.error ?? "No se pudo guardar");
 
-      setPlanTruckId("");
-      setPlanTipo("");
-      setCadaKm(5000);
-      setUltimoServicioKm("");
+      resetPlanForm();
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -126,30 +173,63 @@ export default function MaintenancePage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/maintenance-records", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          truckId: recordTruckId,
-          fecha: new Date(recordFecha).toISOString(),
-          tipo: recordTipo,
-          kilometraje: Number(recordKm),
-          costo: Number(recordCosto),
-        }),
-      });
+      const res = await fetch(
+        editingRecordId
+          ? `/api/maintenance-records/${editingRecordId}`
+          : "/api/maintenance-records",
+        {
+          method: editingRecordId ? "PATCH" : "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            truckId: recordTruckId,
+            fecha: new Date(recordFecha).toISOString(),
+            tipo: recordTipo,
+            kilometraje: Number(recordKm),
+            costo: Number(recordCosto),
+          }),
+        },
+      );
       const data = (await res.json().catch(() => null)) as any;
       if (!res.ok) throw new Error(data?.error ?? "No se pudo guardar");
 
-      setRecordTruckId("");
-      setRecordFecha("");
-      setRecordTipo("");
-      setRecordKm("");
-      setRecordCosto("");
+      resetRecordForm();
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setRecordSubmitting(false);
+    }
+  }
+
+  async function onDeletePlan(id: string) {
+    if (!confirm("¿Eliminar plan de mantenimiento?")) return;
+    setDeletingPlanId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/maintenance-plans/${id}`, { method: "DELETE" });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo eliminar");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setDeletingPlanId(null);
+    }
+  }
+
+  async function onDeleteRecord(id: string) {
+    if (!confirm("¿Eliminar registro de mantenimiento?")) return;
+    setDeletingRecordId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/maintenance-records/${id}`, { method: "DELETE" });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo eliminar");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setDeletingRecordId(null);
     }
   }
 
@@ -236,20 +316,31 @@ export default function MaintenancePage() {
                 min={0}
                 required
               />
-              <button
-                className="md:col-span-4 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
-                type="submit"
-                disabled={planSubmitting}
-              >
-                {planSubmitting ? "Guardando..." : "Agregar plan"}
-              </button>
+              <div className="md:col-span-4 flex flex-wrap gap-2">
+                <button
+                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                  type="submit"
+                  disabled={planSubmitting}
+                >
+                  {planSubmitting ? "Guardando..." : editingPlanId ? "Guardar cambios" : "Agregar plan"}
+                </button>
+                {editingPlanId ? (
+                  <button
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    type="button"
+                    onClick={resetPlanForm}
+                  >
+                    Cancelar
+                  </button>
+                ) : null}
+              </div>
             </form>
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
             <div className="mt-4 overflow-auto">
-              <table className="w-full min-w-[820px] text-left text-sm">
+              <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="text-xs text-zinc-500">
                   <tr>
                     <th className="py-2 pr-3">Camión</th>
@@ -258,18 +349,19 @@ export default function MaintenancePage() {
                     <th className="py-2 pr-3">Último</th>
                     <th className="py-2 pr-3">Próximo</th>
                     <th className="py-2 pr-3">Activo</th>
+                    <th className="py-2 pr-3">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {loading ? (
                     <tr>
-                      <td className="py-3 text-zinc-600" colSpan={6}>
+                      <td className="py-3 text-zinc-600" colSpan={7}>
                         Cargando...
                       </td>
                     </tr>
                   ) : plans.length === 0 ? (
                     <tr>
-                      <td className="py-3 text-zinc-600" colSpan={6}>
+                      <td className="py-3 text-zinc-600" colSpan={7}>
                         Sin registros
                       </td>
                     </tr>
@@ -284,6 +376,25 @@ export default function MaintenancePage() {
                         <td className="py-3 pr-3 text-zinc-700">{p.ultimoServicioKm}</td>
                         <td className="py-3 pr-3 text-zinc-700">{p.proximoKm}</td>
                         <td className="py-3 pr-3 text-zinc-700">{p.activo ? "Sí" : "No"}</td>
+                        <td className="py-3 pr-3">
+                          <div className="flex gap-2">
+                            <button
+                              className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                              type="button"
+                              onClick={() => startEditPlan(p)}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                              type="button"
+                              onClick={() => onDeletePlan(p.id)}
+                              disabled={deletingPlanId === p.id}
+                            >
+                              {deletingPlanId === p.id ? "Eliminando..." : "Eliminar"}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -345,20 +456,31 @@ export default function MaintenancePage() {
                 step="0.01"
                 required
               />
-              <button
-                className="md:col-span-5 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
-                type="submit"
-                disabled={recordSubmitting}
-              >
-                {recordSubmitting ? "Guardando..." : "Agregar registro"}
-              </button>
+              <div className="md:col-span-5 flex flex-wrap gap-2">
+                <button
+                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                  type="submit"
+                  disabled={recordSubmitting}
+                >
+                  {recordSubmitting ? "Guardando..." : editingRecordId ? "Guardar cambios" : "Agregar registro"}
+                </button>
+                {editingRecordId ? (
+                  <button
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    type="button"
+                    onClick={resetRecordForm}
+                  >
+                    Cancelar
+                  </button>
+                ) : null}
+              </div>
             </form>
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
             <div className="mt-4 overflow-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
                 <thead className="text-xs text-zinc-500">
                   <tr>
                     <th className="py-2 pr-3">Fecha</th>
@@ -366,18 +488,19 @@ export default function MaintenancePage() {
                     <th className="py-2 pr-3">Tipo</th>
                     <th className="py-2 pr-3">Km</th>
                     <th className="py-2 pr-3">Costo</th>
+                    <th className="py-2 pr-3">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {loading ? (
                     <tr>
-                      <td className="py-3 text-zinc-600" colSpan={5}>
+                      <td className="py-3 text-zinc-600" colSpan={6}>
                         Cargando...
                       </td>
                     </tr>
                   ) : records.length === 0 ? (
                     <tr>
-                      <td className="py-3 text-zinc-600" colSpan={5}>
+                      <td className="py-3 text-zinc-600" colSpan={6}>
                         Sin registros
                       </td>
                     </tr>
@@ -393,6 +516,25 @@ export default function MaintenancePage() {
                         <td className="py-3 pr-3 text-zinc-700">{r.tipo}</td>
                         <td className="py-3 pr-3 text-zinc-700">{r.kilometraje}</td>
                         <td className="py-3 pr-3 text-zinc-700">{r.costo}</td>
+                        <td className="py-3 pr-3">
+                          <div className="flex gap-2">
+                            <button
+                              className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                              type="button"
+                              onClick={() => startEditRecord(r)}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                              type="button"
+                              onClick={() => onDeleteRecord(r.id)}
+                              disabled={deletingRecordId === r.id}
+                            >
+                              {deletingRecordId === r.id ? "Eliminando..." : "Eliminar"}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   )}

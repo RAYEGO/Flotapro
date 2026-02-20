@@ -6,6 +6,7 @@ import {
   jsonNotFound,
   jsonOk,
   jsonServerError,
+  serializeMoney,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/tenant";
@@ -18,6 +19,8 @@ const updateTruckSchema = z.object({
   tipo: z.string().min(1).max(80).optional(),
   kilometrajeActual: z.number().int().min(0).max(10_000_000).optional(),
   estado: z.enum(["ACTIVO", "INACTIVO", "TALLER", "VENDIDO"]).optional(),
+  modoOperacion: z.enum(["DIRECTO", "ALQUILER"]).optional(),
+  montoPorVueltaDueno: z.coerce.number().nonnegative().optional(),
 });
 
 export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
@@ -29,7 +32,13 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
       where: { id: ctx.params.id, companyId: auth.session.companyId },
     });
     if (!truck) return jsonNotFound();
-    return jsonOk({ truck });
+    return jsonOk({
+      truck: {
+        ...truck,
+        montoPorVueltaDueno:
+          truck.montoPorVueltaDueno === null ? null : serializeMoney(truck.montoPorVueltaDueno),
+      },
+    });
   } catch {
     return jsonServerError();
   }
@@ -57,7 +66,13 @@ export async function PATCH(
       data: parsed.data,
     });
 
-    return jsonOk({ truck });
+    return jsonOk({
+      truck: {
+        ...truck,
+        montoPorVueltaDueno:
+          truck.montoPorVueltaDueno === null ? null : serializeMoney(truck.montoPorVueltaDueno),
+      },
+    });
   } catch (err) {
     if (err instanceof Error && err.message.includes("Unique constraint")) {
       return jsonBadRequest("Placa ya registrada");

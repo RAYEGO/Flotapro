@@ -45,22 +45,43 @@ export async function GET(req: NextRequest) {
 
     const companyId = auth.session.companyId;
 
-    const [freightAgg, fuelAgg, maintAgg] = await Promise.all([
-      prisma.freight.aggregate({
-        where: { companyId, fecha: { gte: start, lt: end }, estado: FreightStatus.COMPLETADO },
-        _sum: { ingreso: true, ganancia: true },
-      }),
-      prisma.fuel.aggregate({
-        where: { companyId, fecha: { gte: start, lt: end } },
-        _sum: { total: true },
-      }),
-      prisma.maintenanceRecord.aggregate({
-        where: { companyId, fecha: { gte: start, lt: end } },
-        _sum: { costo: true },
-      }),
-    ]);
+    const [freightAgg, ingresoDuenoAgg, ingresoChoferAgg, fuelAgg, maintAgg] =
+      await Promise.all([
+        prisma.freight.aggregate({
+          where: { companyId, fecha: { gte: start, lt: end }, estado: FreightStatus.COMPLETADO },
+          _sum: { ganancia: true },
+        }),
+        prisma.freight.aggregate({
+          where: {
+            companyId,
+            fecha: { gte: start, lt: end },
+            estado: FreightStatus.COMPLETADO,
+            tipoModelo: "DUENO_PAGA",
+          },
+          _sum: { ingreso: true },
+        }),
+        prisma.freight.aggregate({
+          where: {
+            companyId,
+            fecha: { gte: start, lt: end },
+            estado: FreightStatus.COMPLETADO,
+            tipoModelo: "CHOFER_PAGA",
+          },
+          _sum: { montoAcordado: true },
+        }),
+        prisma.fuel.aggregate({
+          where: { companyId, fecha: { gte: start, lt: end } },
+          _sum: { total: true },
+        }),
+        prisma.maintenanceRecord.aggregate({
+          where: { companyId, fecha: { gte: start, lt: end } },
+          _sum: { costo: true },
+        }),
+      ]);
 
-    const ingresos = freightAgg._sum.ingreso ?? new Prisma.Decimal(0);
+    const ingresosDueno = ingresoDuenoAgg._sum.ingreso ?? new Prisma.Decimal(0);
+    const ingresosChofer = ingresoChoferAgg._sum.montoAcordado ?? new Prisma.Decimal(0);
+    const ingresos = ingresosDueno.plus(ingresosChofer);
     const gananciaFletes = freightAgg._sum.ganancia ?? new Prisma.Decimal(0);
     const gastoCombustible = fuelAgg._sum.total ?? new Prisma.Decimal(0);
     const gastoMantenimiento = maintAgg._sum.costo ?? new Prisma.Decimal(0);

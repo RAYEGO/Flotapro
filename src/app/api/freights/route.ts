@@ -19,10 +19,12 @@ const createFreightSchema = z.object({
   cliente: z.string().min(2).max(120),
   origen: z.string().min(2).max(120),
   destino: z.string().min(2).max(120),
-  ingreso: z.coerce.number().nonnegative(),
+  ingreso: z.coerce.number().nonnegative().optional().default(0),
   peajes: z.coerce.number().nonnegative().optional().default(0),
   viaticos: z.coerce.number().nonnegative().optional().default(0),
   otrosGastos: z.coerce.number().nonnegative().optional().default(0),
+  tipoModelo: z.enum(["DUENO_PAGA", "CHOFER_PAGA"]).optional(),
+  montoAcordado: z.coerce.number().nonnegative().optional(),
   estado: z.enum(["PENDIENTE", "COMPLETADO", "ANULADO"]).optional(),
 });
 
@@ -45,6 +47,7 @@ export async function GET(req: NextRequest) {
         viaticos: serializeMoney(f.viaticos),
         otrosGastos: serializeMoney(f.otrosGastos),
         ganancia: serializeMoney(f.ganancia),
+        montoAcordado: serializeMoney(f.montoAcordado),
       })),
     });
   } catch {
@@ -65,7 +68,7 @@ export async function POST(req: NextRequest) {
     const [truck, driver] = await Promise.all([
       prisma.truck.findFirst({
         where: { id: parsed.data.truckId, companyId },
-        select: { id: true },
+        select: { id: true, modoOperacion: true, montoPorVueltaDueno: true },
       }),
       prisma.driver.findFirst({
         where: { id: parsed.data.driverId, companyId },
@@ -76,11 +79,27 @@ export async function POST(req: NextRequest) {
     if (!truck) return jsonBadRequest("Camión inválido");
     if (!driver) return jsonBadRequest("Chofer inválido");
 
-    const ingreso = decimal(parsed.data.ingreso, 2);
-    const peajes = decimal(parsed.data.peajes, 2);
-    const viaticos = decimal(parsed.data.viaticos, 2);
-    const otrosGastos = decimal(parsed.data.otrosGastos, 2);
-    const ganancia = ingreso.minus(peajes).minus(viaticos).minus(otrosGastos);
+    const tipoModelo =
+      parsed.data.tipoModelo ??
+      (truck.modoOperacion === "ALQUILER" ? "CHOFER_PAGA" : "DUENO_PAGA");
+    const montoAcordado =
+      parsed.data.montoAcordado === undefined
+        ? truck.montoPorVueltaDueno ?? 0
+        : parsed.data.montoAcordado;
+    const montoAcordadoDecimal = decimal(String(montoAcordado), 2);
+
+    const ingreso =
+      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.ingreso, 2);
+    const peajes =
+      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.peajes, 2);
+    const viaticos =
+      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.viaticos, 2);
+    const otrosGastos =
+      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.otrosGastos, 2);
+    const ganancia =
+      tipoModelo === "CHOFER_PAGA"
+        ? montoAcordadoDecimal
+        : ingreso.minus(peajes).minus(viaticos).minus(otrosGastos).minus(montoAcordadoDecimal);
 
     const freight = await prisma.freight.create({
       data: {
@@ -96,6 +115,8 @@ export async function POST(req: NextRequest) {
         viaticos,
         otrosGastos,
         ganancia,
+        tipoModelo,
+        montoAcordado: montoAcordadoDecimal,
         estado: parsed.data.estado,
       },
     });
@@ -108,6 +129,7 @@ export async function POST(req: NextRequest) {
         viaticos: serializeMoney(freight.viaticos),
         otrosGastos: serializeMoney(freight.otrosGastos),
         ganancia: serializeMoney(freight.ganancia),
+        montoAcordado: serializeMoney(freight.montoAcordado),
       },
     });
   } catch {

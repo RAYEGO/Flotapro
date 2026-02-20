@@ -24,6 +24,8 @@ export default function FuelsPage() {
   const [drivers, setDrivers] = useState<DriverOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [truckId, setTruckId] = useState("");
   const [driverId, setDriverId] = useState("");
@@ -72,14 +74,40 @@ export default function FuelsPage() {
     load();
   }, []);
 
+  const toDateTimeLocal = (value: string) => {
+    const date = new Date(value);
+    const offset = date.getTimezoneOffset();
+    return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
+  };
+
+  const resetForm = () => {
+    setTruckId("");
+    setDriverId("");
+    setFecha("");
+    setKilometraje("");
+    setGalones("");
+    setPrecioPorGalon("");
+    setEditingId(null);
+  };
+
+  const startEdit = (fuel: Fuel) => {
+    setEditingId(fuel.id);
+    setTruckId(fuel.truckId);
+    setDriverId(fuel.driverId);
+    setFecha(toDateTimeLocal(fuel.fecha));
+    setKilometraje(String(fuel.kilometraje));
+    setGalones(String(fuel.galones));
+    setPrecioPorGalon(String(fuel.precioPorGalon));
+  };
+
   async function onCreate(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
     try {
-      const res = await fetch("/api/fuels", {
-        method: "POST",
+      const res = await fetch(editingId ? `/api/fuels/${editingId}` : "/api/fuels", {
+        method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           truckId,
@@ -93,17 +121,28 @@ export default function FuelsPage() {
       const data = (await res.json().catch(() => null)) as any;
       if (!res.ok) throw new Error(data?.error ?? "No se pudo guardar");
 
-      setTruckId("");
-      setDriverId("");
-      setFecha("");
-      setKilometraje("");
-      setGalones("");
-      setPrecioPorGalon("");
+      resetForm();
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function onDelete(id: string) {
+    if (!confirm("¿Eliminar registro de combustible?")) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/fuels/${id}`, { method: "DELETE" });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo eliminar");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -180,13 +219,24 @@ export default function FuelsPage() {
             required
           />
 
-          <button
-            className="md:col-span-3 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
-            type="submit"
-            disabled={submitting}
-          >
-            {submitting ? "Guardando..." : "Agregar consumo"}
-          </button>
+          <div className="md:col-span-3 flex flex-wrap gap-2">
+            <button
+              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? "Guardando..." : editingId ? "Guardar cambios" : "Agregar consumo"}
+            </button>
+            {editingId ? (
+              <button
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                type="button"
+                onClick={resetForm}
+              >
+                Cancelar
+              </button>
+            ) : null}
+          </div>
         </form>
 
         {error ? (
@@ -199,7 +249,7 @@ export default function FuelsPage() {
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 overflow-auto">
-          <table className="w-full min-w-[920px] text-left text-sm">
+          <table className="w-full min-w-[980px] text-left text-sm">
             <thead className="text-xs text-zinc-500">
               <tr>
                 <th className="py-2 pr-3">Fecha</th>
@@ -209,18 +259,19 @@ export default function FuelsPage() {
                 <th className="py-2 pr-3">Galones</th>
                 <th className="py-2 pr-3">Precio/galón</th>
                 <th className="py-2 pr-3">Total</th>
+                <th className="py-2 pr-3">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {loading ? (
                 <tr>
-                  <td className="py-3 text-zinc-600" colSpan={7}>
+                  <td className="py-3 text-zinc-600" colSpan={8}>
                     Cargando...
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td className="py-3 text-zinc-600" colSpan={7}>
+                  <td className="py-3 text-zinc-600" colSpan={8}>
                     Sin registros
                   </td>
                 </tr>
@@ -240,6 +291,25 @@ export default function FuelsPage() {
                     <td className="py-3 pr-3 text-zinc-700">{f.galones}</td>
                     <td className="py-3 pr-3 text-zinc-700">{f.precioPorGalon}</td>
                     <td className="py-3 pr-3 text-zinc-700">{f.total}</td>
+                    <td className="py-3 pr-3">
+                      <div className="flex gap-2">
+                        <button
+                          className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                          type="button"
+                          onClick={() => startEdit(f)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                          type="button"
+                          onClick={() => onDelete(f.id)}
+                          disabled={deletingId === f.id}
+                        >
+                          {deletingId === f.id ? "Eliminando..." : "Eliminar"}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}

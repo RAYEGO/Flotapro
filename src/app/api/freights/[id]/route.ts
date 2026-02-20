@@ -23,6 +23,8 @@ const updateFreightSchema = z.object({
   peajes: z.coerce.number().nonnegative().optional(),
   viaticos: z.coerce.number().nonnegative().optional(),
   otrosGastos: z.coerce.number().nonnegative().optional(),
+  tipoModelo: z.enum(["DUENO_PAGA", "CHOFER_PAGA"]).optional(),
+  montoAcordado: z.coerce.number().nonnegative().optional(),
   estado: z.enum(["PENDIENTE", "COMPLETADO", "ANULADO"]).optional(),
 });
 
@@ -44,6 +46,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
         viaticos: serializeMoney(freight.viaticos),
         otrosGastos: serializeMoney(freight.otrosGastos),
         ganancia: serializeMoney(freight.ganancia),
+        montoAcordado: serializeMoney(freight.montoAcordado),
       },
     });
   } catch {
@@ -72,30 +75,59 @@ export async function PATCH(
     const nextDriverId = parsed.data.driverId ?? existing.driverId;
 
     const [truck, driver] = await Promise.all([
-      prisma.truck.findFirst({ where: { id: nextTruckId, companyId }, select: { id: true } }),
+      prisma.truck.findFirst({
+        where: { id: nextTruckId, companyId },
+        select: { id: true, modoOperacion: true, montoPorVueltaDueno: true },
+      }),
       prisma.driver.findFirst({ where: { id: nextDriverId, companyId }, select: { id: true } }),
     ]);
     if (!truck) return jsonBadRequest("Camión inválido");
     if (!driver) return jsonBadRequest("Chofer inválido");
 
-    const ingreso =
-      parsed.data.ingreso === undefined
-        ? existing.ingreso
-        : decimal(parsed.data.ingreso, 2);
-    const peajes =
-      parsed.data.peajes === undefined
-        ? existing.peajes
-        : decimal(parsed.data.peajes, 2);
-    const viaticos =
-      parsed.data.viaticos === undefined
-        ? existing.viaticos
-        : decimal(parsed.data.viaticos, 2);
-    const otrosGastos =
-      parsed.data.otrosGastos === undefined
-        ? existing.otrosGastos
-        : decimal(parsed.data.otrosGastos, 2);
+    const tipoModelo =
+      parsed.data.tipoModelo ??
+      (parsed.data.truckId
+        ? truck.modoOperacion === "ALQUILER"
+          ? "CHOFER_PAGA"
+          : "DUENO_PAGA"
+        : existing.tipoModelo);
+    const montoAcordadoValue =
+      parsed.data.montoAcordado === undefined
+        ? tipoModelo === "CHOFER_PAGA" && parsed.data.truckId
+          ? truck.montoPorVueltaDueno ?? existing.montoAcordado
+          : existing.montoAcordado
+        : decimal(parsed.data.montoAcordado, 2);
+    const montoAcordadoDecimal = decimal(String(montoAcordadoValue), 2);
 
-    const ganancia = ingreso.minus(peajes).minus(viaticos).minus(otrosGastos);
+    const ingreso =
+      tipoModelo === "CHOFER_PAGA"
+        ? decimal(0, 2)
+        : parsed.data.ingreso === undefined
+          ? existing.ingreso
+          : decimal(parsed.data.ingreso, 2);
+    const peajes =
+      tipoModelo === "CHOFER_PAGA"
+        ? decimal(0, 2)
+        : parsed.data.peajes === undefined
+          ? existing.peajes
+          : decimal(parsed.data.peajes, 2);
+    const viaticos =
+      tipoModelo === "CHOFER_PAGA"
+        ? decimal(0, 2)
+        : parsed.data.viaticos === undefined
+          ? existing.viaticos
+          : decimal(parsed.data.viaticos, 2);
+    const otrosGastos =
+      tipoModelo === "CHOFER_PAGA"
+        ? decimal(0, 2)
+        : parsed.data.otrosGastos === undefined
+          ? existing.otrosGastos
+          : decimal(parsed.data.otrosGastos, 2);
+
+    const ganancia =
+      tipoModelo === "CHOFER_PAGA"
+        ? montoAcordadoDecimal
+        : ingreso.minus(peajes).minus(viaticos).minus(otrosGastos).minus(montoAcordadoDecimal);
 
     const freight = await prisma.freight.update({
       where: { id: existing.id },
@@ -109,6 +141,8 @@ export async function PATCH(
         viaticos,
         otrosGastos,
         ganancia,
+        tipoModelo,
+        montoAcordado: montoAcordadoDecimal,
       },
     });
 
@@ -120,6 +154,7 @@ export async function PATCH(
         viaticos: serializeMoney(freight.viaticos),
         otrosGastos: serializeMoney(freight.otrosGastos),
         ganancia: serializeMoney(freight.ganancia),
+        montoAcordado: serializeMoney(freight.montoAcordado),
       },
     });
   } catch {
