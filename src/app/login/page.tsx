@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useMemo, useState } from "react";
@@ -77,7 +78,7 @@ function LoginForm() {
       <div className="relative flex min-h-screen items-center justify-center px-6 py-10">
         <div className="w-full max-w-md rounded-2xl bg-white/95 p-6 shadow-sm ring-1 ring-black/10 backdrop-blur">
           <div className="flex justify-center">
-            <img src="/logo-flotapro.svg" alt="FlotaPro" className="h-10 w-auto" />
+            <Image src="/logo.png" alt="FlotaPro" width={160} height={40} className="h-10 w-auto" priority />
           </div>
           <h1 className="mt-4 text-xl font-semibold text-zinc-900">Ingresar</h1>
           <p className="mt-2 text-sm text-zinc-600">

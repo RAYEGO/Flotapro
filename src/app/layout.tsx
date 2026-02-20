@@ -13,8 +13,11 @@ const mono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FlotaPro",
-  description: "Gestión para transportistas",
+  title: "FlotaPro | Gestión Inteligente de Flotas",
+  description: "SaaS para control de camiones, fletes y mantenimiento en Perú.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
