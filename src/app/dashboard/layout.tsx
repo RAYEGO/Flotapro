@@ -19,7 +19,7 @@ export default async function DashboardLayout({
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[260px_1fr]">
         <Sidebar />
 
-        <main className="min-w-0">{children}</main>
+        <main className="min-w-0 pb-28 md:pb-0">{children}</main>
       </div>
     </div>
   );
