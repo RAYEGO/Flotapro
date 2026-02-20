@@ -76,7 +76,10 @@ function LoginForm() {
       <div className="absolute inset-0 bg-zinc-950/40" />
       <div className="relative flex min-h-screen items-center justify-center px-6 py-10">
         <div className="w-full max-w-md rounded-2xl bg-white/95 p-6 shadow-sm ring-1 ring-black/10 backdrop-blur">
-          <h1 className="text-xl font-semibold text-zinc-900">Ingresar</h1>
+          <div className="flex justify-center">
+            <img src="/logo-flotapro.svg" alt="FlotaPro" className="h-10 w-auto" />
+          </div>
+          <h1 className="mt-4 text-xl font-semibold text-zinc-900">Ingresar</h1>
           <p className="mt-2 text-sm text-zinc-600">
             Accede a tu empresa en FlotaPro.
           </p>

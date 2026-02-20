@@ -125,6 +125,8 @@ export default function DriversPage() {
             onChange={(e) => setFechaVencimiento(e.target.value)}
             type="date"
             required
+            aria-label="Vencimiento de licencia"
+            title="Vencimiento de licencia"
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
@@ -136,6 +138,8 @@ export default function DriversPage() {
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
+            aria-label="Camión asignado"
+            title="Camión asignado"
           >
             <option value="">Sin camión</option>
             {trucks.map((t) => (

@@ -167,12 +167,16 @@ export default function FreightsPage() {
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
             required
+            aria-label="Fecha y hora del viaje"
+            title="Fecha y hora del viaje"
           />
 
           <select
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
             value={estado}
             onChange={(e) => setEstado(e.target.value as Freight["estado"])}
+            aria-label="Estado del flete"
+            title="Estado del flete"
           >
             <option value="PENDIENTE">PENDIENTE</option>
             <option value="COMPLETADO">COMPLETADO</option>

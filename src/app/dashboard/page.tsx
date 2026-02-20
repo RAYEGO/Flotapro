@@ -30,6 +30,21 @@ export default function DashboardPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const query = useMemo(() => new URLSearchParams({ month }).toString(), [month]);
+  const metricColor = (label: string) => {
+    if (label === "Utilidad neta") return "text-secondary";
+    if (label === "Combustible" || label === "Mantenimiento") return "text-danger";
+    if (label === "Ingresos") return "text-primary";
+    return "text-dark";
+  };
+  const alertStatus = (restanteKm: number) => {
+    if (restanteKm <= 100) {
+      return { label: "Urgente", className: "bg-danger/15 text-danger" };
+    }
+    if (restanteKm <= 300) {
+      return { label: "Próximo mantenimiento", className: "bg-accent/20 text-accent" };
+    }
+    return { label: "OK", className: "bg-secondary/15 text-secondary" };
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -72,13 +87,13 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-900">Resumen</h1>
-          <p className="mt-1 text-sm text-zinc-600">
+          <h1 className="text-lg font-semibold text-dark">Resumen</h1>
+          <p className="mt-1 text-sm text-dark/70">
             Ingresos, gastos y alertas de mantenimiento.
           </p>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-zinc-700">
+        <label className="flex items-center gap-2 text-sm text-dark/80">
           Mes
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
@@ -106,8 +121,8 @@ export default function DashboardPage() {
             key={label}
             className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
           >
-            <div className="text-xs font-medium text-zinc-500">{label}</div>
-            <div className="mt-2 text-lg font-semibold text-zinc-900">
+            <div className="text-xs font-medium text-dark/60">{label}</div>
+            <div className={`mt-2 text-lg font-semibold ${metricColor(label)}`}>
               {loading ? "..." : value}
             </div>
           </div>
@@ -115,51 +130,58 @@ export default function DashboardPage() {
       </div>
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-zinc-900">
+        <h2 className="text-sm font-semibold text-dark">
           Alertas de mantenimiento
         </h2>
-        <p className="mt-1 text-sm text-zinc-600">
+        <p className="mt-1 text-sm text-dark/70">
           Planes activos a 500 km o menos del próximo mantenimiento.
         </p>
 
         <div className="mt-4 overflow-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="text-xs text-zinc-500">
+            <thead className="text-xs text-dark/60">
               <tr>
                 <th className="py-2 pr-3">Placa</th>
                 <th className="py-2 pr-3">Tipo</th>
                 <th className="py-2 pr-3">Km actual</th>
                 <th className="py-2 pr-3">Próximo</th>
                 <th className="py-2 pr-3">Restante</th>
+                <th className="py-2 pr-3">Estado</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {loading ? (
                 <tr>
-                  <td className="py-3 text-zinc-600" colSpan={5}>
+                  <td className="py-3 text-dark/70" colSpan={6}>
                     Cargando...
                   </td>
                 </tr>
               ) : alerts.length === 0 ? (
                 <tr>
-                  <td className="py-3 text-zinc-600" colSpan={5}>
+                  <td className="py-3 text-dark/70" colSpan={6}>
                     Sin alertas
                   </td>
                 </tr>
               ) : (
-                alerts.map((a) => (
-                  <tr key={a.id}>
-                    <td className="py-3 pr-3 font-medium text-zinc-900">
-                      {a.placa}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{a.tipo}</td>
-                    <td className="py-3 pr-3 text-zinc-700">
-                      {a.kilometrajeActual}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{a.proximoKm}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{a.restanteKm}</td>
-                  </tr>
-                ))
+                alerts.map((a) => {
+                  const status = alertStatus(a.restanteKm);
+                  return (
+                    <tr key={a.id}>
+                      <td className="py-3 pr-3 font-medium text-dark">{a.placa}</td>
+                      <td className="py-3 pr-3 text-dark/80">{a.tipo}</td>
+                      <td className="py-3 pr-3 text-dark/80">{a.kilometrajeActual}</td>
+                      <td className="py-3 pr-3 text-dark/80">{a.proximoKm}</td>
+                      <td className="py-3 pr-3 text-dark/80">{a.restanteKm}</td>
+                      <td className="py-3 pr-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}
+                        >
+                          {status.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

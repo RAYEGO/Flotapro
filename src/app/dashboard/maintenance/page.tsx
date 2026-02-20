@@ -316,6 +316,8 @@ export default function MaintenancePage() {
                 value={recordFecha}
                 onChange={(e) => setRecordFecha(e.target.value)}
                 required
+                aria-label="Fecha y hora del servicio"
+                title="Fecha y hora del servicio"
               />
               <input
                 className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"

@@ -146,6 +146,8 @@ export default function FuelsPage() {
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
             required
+            aria-label="Fecha y hora"
+            title="Fecha y hora"
           />
 
           <input

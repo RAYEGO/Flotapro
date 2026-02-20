@@ -139,6 +139,8 @@ export default function TrucksPage() {
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
             value={estado}
             onChange={(e) => setEstado(e.target.value as Truck["estado"])}
+            aria-label="Estado del camión"
+            title="Estado del camión"
           >
             <option value="ACTIVO">ACTIVO</option>
             <option value="INACTIVO">INACTIVO</option>

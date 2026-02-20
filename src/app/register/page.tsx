@@ -46,7 +46,10 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-zinc-50">
       <div className="mx-auto max-w-md px-6 py-14">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
-          <h1 className="text-xl font-semibold text-zinc-900">Crear empresa</h1>
+          <div className="flex justify-center">
+            <img src="/logo-flotapro.svg" alt="FlotaPro" className="h-10 w-auto" />
+          </div>
+          <h1 className="mt-4 text-xl font-semibold text-zinc-900">Crear empresa</h1>
           <p className="mt-2 text-sm text-zinc-600">
             Registra tu empresa y crea el usuario administrador.
           </p>
