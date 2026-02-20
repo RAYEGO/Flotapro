@@ -1,9 +1,26 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Fuel,
+  LayoutDashboard,
+  LogOut,
+  Map,
+  Settings,
+  Truck,
+  Users,
+  Wrench,
+} from "lucide-react";
 
 export default function Sidebar() {
+  const pathname = usePathname();
+  const isActive = (href: string) =>
+    href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+
   return (
-    <aside className="rounded-2xl bg-primary p-4 shadow-sm ring-1 ring-black/10 transition-all duration-300">
+    <aside className="rounded-[24px] bg-[#0F2A3D] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.15)] ring-1 ring-white/5">
       <Link href="/dashboard" className="flex items-center px-3 py-4">
         <span className="relative hidden h-10 w-40 md:block">
           <Image
@@ -28,59 +45,115 @@ export default function Sidebar() {
 
       <div className="space-y-1 text-sm">
         <Link
-          className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white/90 transition-colors hover:bg-white/10 md:justify-start"
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
           href="/dashboard"
         >
-          <svg className="h-4 w-4 text-white/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 3.172 3 10.5V21a1 1 0 0 0 1 1h5v-7h6v7h5a1 1 0 0 0 1-1V10.5l-9-7.328Z" />
-          </svg>
+          <LayoutDashboard
+            className={`h-5 w-5 ${isActive("/dashboard") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
           <span className="hidden md:inline">Resumen</span>
         </Link>
         <Link
-          className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white/90 transition-colors hover:bg-white/10 md:justify-start"
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard/trucks")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
           href="/dashboard/trucks"
         >
-          <svg className="h-4 w-4 text-white/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M3 7a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v6h1.5a2 2 0 0 1 1.6.8l1.9 2.533A2 2 0 0 1 21 17.5V19a1 1 0 0 1-1 1h-1a2.5 2.5 0 0 1-5 0H9.5a2.5 2.5 0 0 1-5 0H4a1 1 0 0 1-1-1V7Zm13 8V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v8h12Zm3.8 1-1.6-2.133A1 1 0 0 0 17.5 13H16v3h3.8ZM7 19.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Zm8 0a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Z" />
-          </svg>
+          <Truck
+            className={`h-5 w-5 ${isActive("/dashboard/trucks") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
           <span className="hidden md:inline">Camiones</span>
         </Link>
         <Link
-          className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white/90 transition-colors hover:bg-white/10 md:justify-start"
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard/drivers")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
           href="/dashboard/drivers"
         >
-          <svg className="h-4 w-4 text-white/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm-7 15a7 7 0 0 1 14 0v1H5v-1Z" />
-          </svg>
+          <Users
+            className={`h-5 w-5 ${isActive("/dashboard/drivers") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
           <span className="hidden md:inline">Choferes</span>
         </Link>
         <Link
-          className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white/90 transition-colors hover:bg-white/10 md:justify-start"
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard/freights")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
           href="/dashboard/freights"
         >
-          <svg className="h-4 w-4 text-white/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M4 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-4.8 4.2A1 1 0 0 1 3 19.4V4Zm5 5a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H9Zm0-3a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H9Z" />
-          </svg>
+          <Map
+            className={`h-5 w-5 ${isActive("/dashboard/freights") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
           <span className="hidden md:inline">Fletes</span>
         </Link>
         <Link
-          className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white/90 transition-colors hover:bg-white/10 md:justify-start"
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard/fuels")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
           href="/dashboard/fuels"
         >
-          <svg className="h-4 w-4 text-white/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6Zm8 6h1.586l1.707 1.707A1 1 0 0 0 18 11h1v6a2 2 0 0 1-2 2h-1V9ZM6 7h6v4H6V7Z" />
-          </svg>
+          <Fuel
+            className={`h-5 w-5 ${isActive("/dashboard/fuels") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
           <span className="hidden md:inline">Combustible</span>
         </Link>
         <Link
-          className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white/90 transition-colors hover:bg-white/10 md:justify-start"
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard/maintenance")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
           href="/dashboard/maintenance"
         >
-          <svg className="h-4 w-4 text-white/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19.14 12.936a7 7 0 0 0-8.076-8.076l2.12 2.12-2.121 2.122-4.95-4.95L7.235 3.03A7 7 0 0 0 4.94 12.93l-1.768 1.768a2.5 2.5 0 0 0 3.536 3.536l1.768-1.768a7.001 7.001 0 0 0 8.082-8.082l-2.12 2.12-2.12-2.12 4.95-4.95 1.872 1.872-4.95 4.95 2.12 2.12 2.12-2.12Z" />
-          </svg>
+          <Wrench
+            className={`h-5 w-5 ${isActive("/dashboard/maintenance") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
           <span className="hidden md:inline">Mantenimiento</span>
         </Link>
+        <Link
+          className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+            isActive("/dashboard/settings")
+              ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
+              : "border-transparent"
+          }`}
+          href="/dashboard/settings"
+        >
+          <Settings
+            className={`h-5 w-5 ${isActive("/dashboard/settings") ? "text-[#F4A300]" : "text-white"}`}
+            strokeWidth={1.5}
+          />
+          <span className="hidden md:inline">Configuración</span>
+        </Link>
+      </div>
+
+      <div className="mt-6 border-t border-white/10 pt-4">
+        <form action="/api/auth/logout" method="post">
+          <button
+            className="group flex w-full items-center justify-center gap-3 rounded-xl border-l-[3px] border-transparent px-3 py-2 pl-2 text-sm text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start"
+            type="submit"
+          >
+            <LogOut className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <span className="hidden md:inline">Salir</span>
+          </button>
+        </form>
       </div>
     </aside>
   );
