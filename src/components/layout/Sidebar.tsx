@@ -35,11 +35,11 @@ export default function Sidebar() {
   return (
     <>
       <aside className="md:hidden">
-        <div className="flex items-center justify-between rounded-[24px] bg-[#0F2A3D] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/10">
+        <div className="flex items-center justify-between rounded-[24px] bg-[#0D1B2C] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
           <button
             type="button"
             onClick={() => setIsMobileOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-white/90 hover:bg-white/10"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#8DBBFF] hover:bg-white/10"
           >
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
@@ -64,7 +64,7 @@ export default function Sidebar() {
               onClick={() => setIsMobileOpen(false)}
               className="absolute inset-0 bg-black/40"
             />
-            <div className="absolute inset-y-0 left-0 w-72 bg-[#0F2A3D] p-6 shadow-[0_12px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/10">
+            <div className="absolute inset-y-0 left-0 w-72 bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-6 shadow-[0_12px_30px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
               <div className="flex items-center justify-between">
                 <span className="relative h-10 w-32">
                   <Image
@@ -79,7 +79,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setIsMobileOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl text-white/90 hover:bg-white/10"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-white/80 hover:bg-white/10"
                 >
                   <X className="h-5 w-5" strokeWidth={1.5} />
                 </button>
@@ -91,16 +91,16 @@ export default function Sidebar() {
                   return (
                     <Link
                       key={item.href}
-                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-white/80 transition-colors duration-200 ${
+                      className={`flex items-center gap-3 rounded-2xl border-l-2 px-4 py-3 text-[15px] transition-colors duration-200 ${
                         active
-                          ? "bg-[#163E5C] text-white shadow-[inset_0_0_0_1px_rgba(244,163,0,0.4)]"
-                          : "hover:bg-[#163E5C]"
+                          ? "border-[#7FB5FF] bg-[#111F35] text-[#8DBBFF]"
+                          : "border-transparent text-[#9FB2C5] hover:bg-[#111F35]"
                       }`}
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
                     >
                       <Icon
-                        className={`h-5 w-5 ${active ? "text-[#F4A300]" : "text-white"}`}
+                        className={`h-5 w-5 ${active ? "text-[#7FB5FF]" : "text-[#93A8BB]"}`}
                         strokeWidth={1.5}
                       />
                       <span>{item.label}</span>
@@ -111,10 +111,10 @@ export default function Sidebar() {
               <div className="mt-6 border-t border-white/10 pt-4">
                 <form action="/api/auth/logout" method="post">
                   <button
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-white/80 transition-colors duration-200 hover:bg-[#163E5C]"
+                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-[#9FB2C5] transition-colors duration-200 hover:bg-[#111F35]"
                     type="submit"
                   >
-                    <LogOut className="h-5 w-5 text-white" strokeWidth={1.5} />
+                    <LogOut className="h-5 w-5 text-[#93A8BB]" strokeWidth={1.5} />
                     <span>Salir</span>
                   </button>
                 </form>
@@ -124,7 +124,7 @@ export default function Sidebar() {
         )}
       </aside>
 
-      <aside className="hidden rounded-[24px] bg-[#0F2A3D] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.15)] ring-1 ring-white/5 md:block">
+      <aside className="hidden rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ring-1 ring-white/5 md:block">
         <Link href="/dashboard" className="flex items-center justify-center py-4">
           <span className="relative hidden h-16 w-56 md:block">
             <Image
@@ -145,15 +145,15 @@ export default function Sidebar() {
             return (
               <Link
                 key={item.href}
-                className={`group flex items-center justify-center gap-3 rounded-xl border-l-[3px] px-3 py-2 pl-2 text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start ${
+                className={`group flex items-center justify-center gap-3 rounded-2xl border-l-2 px-3 py-2 pl-2 text-[15px] transition-colors duration-200 md:justify-start ${
                   active
-                    ? "border-[#F4A300] bg-[#163E5C] text-white font-semibold"
-                    : "border-transparent"
+                    ? "border-[#7FB5FF] bg-[#111F35] text-[#8DBBFF] font-semibold"
+                    : "border-transparent text-[#9FB2C5] hover:bg-[#111F35]"
                 }`}
                 href={item.href}
               >
                 <Icon
-                  className={`h-5 w-5 ${active ? "text-[#F4A300]" : "text-white"}`}
+                  className={`h-5 w-5 ${active ? "text-[#7FB5FF]" : "text-[#93A8BB]"}`}
                   strokeWidth={1.5}
                 />
                 <span className="hidden md:inline">{item.label}</span>
@@ -165,10 +165,10 @@ export default function Sidebar() {
         <div className="mt-6 border-t border-white/10 pt-4">
           <form action="/api/auth/logout" method="post">
             <button
-              className="group flex w-full items-center justify-center gap-3 rounded-xl border-l-[3px] border-transparent px-3 py-2 pl-2 text-sm text-white/80 transition-colors duration-200 hover:bg-[#163E5C] md:justify-start"
+              className="group flex w-full items-center justify-center gap-3 rounded-2xl border-l-2 border-transparent px-3 py-2 pl-2 text-sm text-[#9FB2C5] transition-colors duration-200 hover:bg-[#111F35] md:justify-start"
               type="submit"
             >
-              <LogOut className="h-5 w-5 text-white" strokeWidth={1.5} />
+              <LogOut className="h-5 w-5 text-[#93A8BB]" strokeWidth={1.5} />
               <span className="hidden md:inline">Salir</span>
             </button>
           </form>
