@@ -1,10 +1,19 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { verifySessionToken } from "@/lib/auth";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const token = (await cookies()).get("fp_session")?.value;
+  const session = token ? await verifySessionToken(token) : null;
+  if (!session) {
+    redirect("/login?next=/dashboard");
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
