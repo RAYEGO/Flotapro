@@ -41,6 +41,10 @@ export async function POST(req: Request) {
 
     const user = result.users[0];
 
+    if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
+      return jsonServerError("Falta JWT_SECRET en el entorno.");
+    }
+
     await setSessionCookie({
       userId: user.id,
       companyId: result.id,
