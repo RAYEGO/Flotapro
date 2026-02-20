@@ -180,23 +180,23 @@ export default function DashboardPage() {
             <label className="flex items-center gap-2 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white transition-all duration-200 border border-white/10 focus-within:border-[#F4A300]">
               Mes
               <input
-                className="bg-transparent text-white placeholder:text-[#A8C1D1] focus:outline-none"
+                className="bg-transparent text-white placeholder:text-[#A8C1D1] focus:outline-none [color-scheme:dark]"
                 type="month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
               />
             </label>
-            <div className="flex items-center gap-3 rounded-2xl bg-background px-4 py-3 text-sm text-dark/80 ring-1 ring-black/5">
-                <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
-                  Mes actual
-                </span>
-              <span className="font-semibold text-dark">{monthLabel}</span>
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white ring-1 ring-white/10">
+              <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+                Mes actual
+              </span>
+              <span className="text-base font-semibold text-white">{monthLabel}</span>
             </div>
-            <div className="flex items-center gap-3 rounded-2xl bg-background px-4 py-3 text-sm text-dark/80 ring-1 ring-black/5">
-                <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
-                  Camiones activos
-                </span>
-              <span className="font-semibold text-dark">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white ring-1 ring-white/10">
+              <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+                Camiones activos
+              </span>
+              <span className="text-base font-semibold text-white">
                 {activeTrucks === null ? "—" : activeTrucks}
               </span>
             </div>
@@ -250,7 +250,7 @@ export default function DashboardPage() {
           return (
             <div
               key={kpi.label}
-              className="rounded-2xl bg-white p-6 shadow-[0_15px_40px_rgba(15,42,61,0.08)] ring-1 ring-black/5"
+              className="rounded-2xl bg-white p-6 shadow-[0_15px_40px_rgba(15,42,61,0.08)] ring-1 ring-black/5 overflow-hidden"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
@@ -264,18 +264,18 @@ export default function DashboardPage() {
                 {loading ? (
                   <span className="text-4xl font-bold tracking-tight leading-none">...</span>
                 ) : kpi.isCurrency && kpi.currency && kpi.number ? (
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-sm font-medium text-dark/70">
                       {kpi.currency}
                     </span>
-                    <span className="text-4xl font-bold tracking-tight leading-none">
+                    <span className="text-4xl font-bold tracking-tight leading-none break-words">
                       {kpi.number}
                     </span>
                   </div>
                 ) : kpi.isCurrency ? (
                   <span className="text-4xl font-bold tracking-tight leading-none">—</span>
                 ) : (
-                  <span className="text-4xl font-bold tracking-tight leading-none">
+                  <span className="text-4xl font-bold tracking-tight leading-none break-words">
                     {kpi.value}
                   </span>
                 )}
