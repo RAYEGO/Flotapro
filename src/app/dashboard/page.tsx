@@ -180,7 +180,7 @@ export default function DashboardPage() {
             <label className="flex items-center gap-2 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white transition-all duration-200 border border-white/10 focus-within:border-[#F4A300]">
               Mes
               <input
-                className="bg-transparent text-white placeholder:text-[#A8C1D1] focus:outline-none [color-scheme:dark]"
+                className="bg-transparent text-white placeholder:text-[#A8C1D1] focus:outline-none [color-scheme:dark] appearance-none shadow-none"
                 type="month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
@@ -256,8 +256,8 @@ export default function DashboardPage() {
                 <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
                   {kpi.label}
                 </span>
-                <span className="rounded-full bg-background p-2 text-primary">
-                  <Icon className="h-5 w-5" strokeWidth={1.5} />
+                <span className="rounded-full bg-[#112E42] p-2 text-white">
+                  <Icon className="h-5 w-5 text-[#F4A300]" strokeWidth={1.5} />
                 </span>
               </div>
               <div className={`mt-5 ${kpi.tone}`}>
@@ -302,11 +302,11 @@ export default function DashboardPage() {
         </div>
 
         {loading ? (
-          <div className="mt-6 rounded-2xl bg-background px-4 py-6 text-sm text-dark/70">
+          <div className="mt-6 rounded-2xl bg-[#1C374B] px-4 py-6 text-sm text-white/80">
             Cargando alertas...
           </div>
         ) : alerts.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-background px-4 py-6 text-sm text-dark/70">
+          <div className="mt-6 rounded-2xl bg-[#1C374B] px-4 py-6 text-sm text-white/80">
             Sin alertas. Todo en orden con los mantenimientos.
           </div>
         ) : (

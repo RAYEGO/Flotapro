@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "FlotaPro | Gestión Inteligente de Flotas",
   description: "SaaS para control de camiones, fletes, combustible y mantenimiento en Perú.",
   icons: {
-    icon: "/favicon.png",
+    icon: "/logo-flotapro.svg",
   },
   metadataBase: new URL("https://flotapro-rosy.vercel.app"),
   openGraph: {
