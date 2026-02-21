@@ -16,7 +16,19 @@ export const metadata: Metadata = {
   title: "FlotaPro | Gestión Inteligente de Flotas",
   description: "SaaS para control de camiones, fletes, combustible y mantenimiento en Perú.",
   icons: {
-    icon: "/logo-flotapro.svg",
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
+  themeColor: "#0b3c5d",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "FlotaPro",
   },
   metadataBase: new URL("https://flotapro-rosy.vercel.app"),
   openGraph: {
