@@ -152,9 +152,9 @@ export default function FuelsPage() {
         <h1 className="text-lg font-semibold text-zinc-900">Combustible</h1>
         <p className="mt-1 text-sm text-zinc-600">Registro de consumos.</p>
 
-        <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3" onSubmit={onCreate}>
+        <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3" onSubmit={onCreate}>
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             required
@@ -167,7 +167,7 @@ export default function FuelsPage() {
             ))}
           </select>
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             required
@@ -180,7 +180,7 @@ export default function FuelsPage() {
             ))}
           </select>
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             type="datetime-local"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
@@ -190,7 +190,7 @@ export default function FuelsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Kilometraje (km)"
             value={kilometraje}
             onChange={(e) => setKilometraje(e.target.value)}
@@ -199,7 +199,7 @@ export default function FuelsPage() {
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Galones (ej. 30.5)"
             value={galones}
             onChange={(e) => setGalones(e.target.value)}
@@ -209,7 +209,7 @@ export default function FuelsPage() {
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Precio/galón (ej. 18.90)"
             value={precioPorGalon}
             onChange={(e) => setPrecioPorGalon(e.target.value)}
@@ -219,9 +219,9 @@ export default function FuelsPage() {
             required
           />
 
-          <div className="md:col-span-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3">
             <button
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
               disabled={submitting}
             >
@@ -229,7 +229,7 @@ export default function FuelsPage() {
             </button>
             {editingId ? (
               <button
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
                 type="button"
                 onClick={resetForm}
               >

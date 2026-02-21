@@ -277,9 +277,12 @@ export default function MaintenancePage() {
         <>
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <h2 className="text-sm font-semibold text-zinc-900">Nuevo plan</h2>
-            <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-4" onSubmit={createPlan}>
+            <form
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4"
+              onSubmit={createPlan}
+            >
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={planTruckId}
                 onChange={(e) => setPlanTruckId(e.target.value)}
                 required
@@ -292,14 +295,14 @@ export default function MaintenancePage() {
                 ))}
               </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Tipo (ej. Cambio de aceite)"
                 value={planTipo}
                 onChange={(e) => setPlanTipo(e.target.value)}
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Cada Km"
                 value={cadaKm}
                 onChange={(e) => setCadaKm(Number(e.target.value))}
@@ -308,7 +311,7 @@ export default function MaintenancePage() {
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Último servicio (km)"
                 value={ultimoServicioKm}
                 onChange={(e) => setUltimoServicioKm(e.target.value)}
@@ -316,9 +319,9 @@ export default function MaintenancePage() {
                 min={0}
                 required
               />
-              <div className="md:col-span-4 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-4">
                 <button
-                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
                   disabled={planSubmitting}
                 >
@@ -326,7 +329,7 @@ export default function MaintenancePage() {
                 </button>
                 {editingPlanId ? (
                   <button
-                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
                     type="button"
                     onClick={resetPlanForm}
                   >
@@ -407,9 +410,12 @@ export default function MaintenancePage() {
         <>
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <h2 className="text-sm font-semibold text-zinc-900">Nuevo registro</h2>
-            <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5" onSubmit={createRecord}>
+            <form
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              onSubmit={createRecord}
+            >
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={recordTruckId}
                 onChange={(e) => setRecordTruckId(e.target.value)}
                 required
@@ -422,7 +428,7 @@ export default function MaintenancePage() {
                 ))}
               </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 type="datetime-local"
                 value={recordFecha}
                 onChange={(e) => setRecordFecha(e.target.value)}
@@ -431,14 +437,14 @@ export default function MaintenancePage() {
                 title="Fecha y hora del servicio"
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Tipo"
                 value={recordTipo}
                 onChange={(e) => setRecordTipo(e.target.value)}
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Kilometraje (km)"
                 value={recordKm}
                 onChange={(e) => setRecordKm(e.target.value)}
@@ -447,7 +453,7 @@ export default function MaintenancePage() {
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Costo (monto)"
                 value={recordCosto}
                 onChange={(e) => setRecordCosto(e.target.value)}
@@ -456,9 +462,9 @@ export default function MaintenancePage() {
                 step="0.01"
                 required
               />
-              <div className="md:col-span-5 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
                 <button
-                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
                   disabled={recordSubmitting}
                 >
@@ -466,7 +472,7 @@ export default function MaintenancePage() {
                 </button>
                 {editingRecordId ? (
                   <button
-                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
                     type="button"
                     onClick={resetRecordForm}
                   >

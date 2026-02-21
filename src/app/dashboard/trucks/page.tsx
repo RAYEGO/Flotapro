@@ -133,30 +133,33 @@ export default function TrucksPage() {
         <h1 className="text-lg font-semibold text-zinc-900">Camiones</h1>
         <p className="mt-1 text-sm text-zinc-600">Registro de unidades.</p>
 
-        <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-9" onSubmit={onCreate}>
+        <form
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+          onSubmit={onCreate}
+        >
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Placa"
             value={placa}
             onChange={(e) => setPlaca(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Marca"
             value={marca}
             onChange={(e) => setMarca(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Modelo"
             value={modelo}
             onChange={(e) => setModelo(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Año"
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
@@ -166,14 +169,14 @@ export default function TrucksPage() {
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Tipo"
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Km actual (ej. 120000)"
             value={kilometrajeActual}
             onChange={(e) => setKilometrajeActual(e.target.value)}
@@ -182,7 +185,7 @@ export default function TrucksPage() {
             required
           />
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={estado}
             onChange={(e) => setEstado(e.target.value as Truck["estado"])}
             aria-label="Estado del camión"
@@ -194,7 +197,7 @@ export default function TrucksPage() {
             <option value="VENDIDO">VENDIDO</option>
           </select>
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={modoOperacion}
             onChange={(e) => {
               const value = e.target.value as Truck["modoOperacion"];
@@ -209,7 +212,7 @@ export default function TrucksPage() {
             <option value="ALQUILER">Alquiler (chofer paga)</option>
           </select>
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Monto por vuelta dueño"
             value={montoPorVueltaDueno}
             onChange={(e) => setMontoPorVueltaDueno(e.target.value)}
@@ -218,9 +221,9 @@ export default function TrucksPage() {
             step="0.01"
             disabled={modoOperacion === "DIRECTO"}
           />
-          <div className="md:col-span-9 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
             <button
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
               disabled={submitting}
             >
@@ -228,7 +231,7 @@ export default function TrucksPage() {
             </button>
             {editingId ? (
               <button
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
                 type="button"
                 onClick={resetForm}
               >

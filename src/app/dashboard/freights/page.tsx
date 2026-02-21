@@ -199,9 +199,12 @@ export default function FreightsPage() {
         <h1 className="text-lg font-semibold text-zinc-900">Fletes</h1>
         <p className="mt-1 text-sm text-zinc-600">Control de viajes e ingresos.</p>
 
-        <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5" onSubmit={onCreate}>
+        <form
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          onSubmit={onCreate}
+        >
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={truckId}
             onChange={(e) => {
               const nextId = e.target.value;
@@ -231,7 +234,7 @@ export default function FreightsPage() {
           </select>
 
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             required
@@ -245,7 +248,7 @@ export default function FreightsPage() {
           </select>
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             type="datetime-local"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
@@ -255,7 +258,7 @@ export default function FreightsPage() {
           />
 
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={tipoModelo}
             onChange={(e) => {
               const value = e.target.value as Freight["tipoModelo"];
@@ -279,7 +282,7 @@ export default function FreightsPage() {
           </select>
 
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={estado}
             onChange={(e) => setEstado(e.target.value as Freight["estado"])}
             aria-label="Estado del flete"
@@ -291,21 +294,21 @@ export default function FreightsPage() {
           </select>
 
           <input
-            className="md:col-span-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
             placeholder="Cliente"
             value={cliente}
             onChange={(e) => setCliente(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Origen"
             value={origen}
             onChange={(e) => setOrigen(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Destino"
             value={destino}
             onChange={(e) => setDestino(e.target.value)}
@@ -313,7 +316,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Ingreso (monto)"
             value={ingreso}
             onChange={(e) => setIngreso(e.target.value)}
@@ -324,7 +327,7 @@ export default function FreightsPage() {
             disabled={tipoModelo === "CHOFER_PAGA"}
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Peajes (monto)"
             value={peajes}
             onChange={(e) => setPeajes(e.target.value)}
@@ -334,7 +337,7 @@ export default function FreightsPage() {
             disabled={tipoModelo === "CHOFER_PAGA"}
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Viáticos (monto)"
             value={viaticos}
             onChange={(e) => setViaticos(e.target.value)}
@@ -344,7 +347,7 @@ export default function FreightsPage() {
             disabled={tipoModelo === "CHOFER_PAGA"}
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Otros gastos (monto)"
             value={otrosGastos}
             onChange={(e) => setOtrosGastos(e.target.value)}
@@ -354,7 +357,7 @@ export default function FreightsPage() {
             disabled={tipoModelo === "CHOFER_PAGA"}
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Monto acordado"
             value={montoAcordado}
             onChange={(e) => setMontoAcordado(e.target.value)}
@@ -364,9 +367,9 @@ export default function FreightsPage() {
             required
           />
 
-          <div className="md:col-span-5 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
             <button
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
               disabled={submitting}
             >
@@ -374,7 +377,7 @@ export default function FreightsPage() {
             </button>
             {editingId ? (
               <button
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
                 type="button"
                 onClick={resetForm}
               >
