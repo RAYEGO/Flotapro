@@ -98,7 +98,7 @@ export default function Sidebar() {
             </div>
           </div>
         )}
-        <nav className="fixed bottom-4 left-4 right-4 z-40">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2">
           <div className="rounded-[24px] bg-[#0D1B2C] px-2 py-2 shadow-[0_16px_36px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
             <div className="flex items-center justify-between gap-2 px-1">
               {primaryMobileItems.map((item) => {
