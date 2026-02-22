@@ -166,8 +166,6 @@ export default function FreightsPage() {
     setError(null);
 
     try {
-      const selectedTruck = trucks.find((t) => t.id === truckId);
-      const isChoferPaga = selectedTruck?.modeloPago === "CHOFER_PAGA";
       const res = await fetch(editingId ? `/api/freights/${editingId}` : "/api/freights", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
@@ -183,11 +181,10 @@ export default function FreightsPage() {
             usarMontoPersonalizado && montoPersonalizado !== ""
               ? Number(montoPersonalizado)
               : undefined,
-          ingreso: isChoferPaga ? 0 : Number(ingreso),
-          peajes: isChoferPaga ? 0 : peajes === "" ? 0 : Number(peajes),
-          viaticos: isChoferPaga ? 0 : viaticos === "" ? 0 : Number(viaticos),
-          otrosGastos:
-            isChoferPaga ? 0 : otrosGastos === "" ? 0 : Number(otrosGastos),
+          ingreso: Number(ingreso),
+          peajes: peajes === "" ? 0 : Number(peajes),
+          viaticos: viaticos === "" ? 0 : Number(viaticos),
+          otrosGastos: otrosGastos === "" ? 0 : Number(otrosGastos),
           estado,
         }),
       });
@@ -219,7 +216,6 @@ export default function FreightsPage() {
   }
 
   const selectedTruck = trucks.find((t) => t.id === truckId);
-  const isChoferPaga = selectedTruck?.modeloPago === "CHOFER_PAGA";
   const tipoCalculoLabel =
     selectedTruck?.tipoCalculo === "IDA_VUELTA"
       ? "Ida y vuelta"
@@ -282,11 +278,11 @@ export default function FreightsPage() {
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-            placeholder="Monto automático"
+            placeholder="Pago chofer/dueño"
             value={montoAutomatico}
             readOnly
-            aria-label="Monto automático"
-            title="Monto automático"
+            aria-label="Pago chofer o dueño"
+            title="Pago chofer o dueño"
           />
 
           <input
@@ -354,14 +350,13 @@ export default function FreightsPage() {
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
-            placeholder="Ingreso (monto)"
+            placeholder="Monto flete"
             value={ingreso}
             onChange={(e) => setIngreso(e.target.value)}
             type="number"
             min={0}
             step="0.01"
-            required={!isChoferPaga}
-            disabled={isChoferPaga}
+            required
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -371,7 +366,6 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={isChoferPaga}
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -381,7 +375,6 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={isChoferPaga}
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -391,7 +384,6 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={isChoferPaga}
           />
 
           <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
@@ -488,11 +480,11 @@ export default function FreightsPage() {
                     </span>
                   </div>
                   <div>
-                    Ingreso:{" "}
+                    Monto flete:{" "}
                     <span className="font-medium text-zinc-900">{f.ingreso}</span>
                   </div>
                   <div>
-                    Monto automático:{" "}
+                    Pago chofer/dueño:{" "}
                     <span
                       className={
                         f.usarMontoPersonalizado
@@ -551,8 +543,8 @@ export default function FreightsPage() {
                   <th className="py-2 pr-3">Ruta</th>
                   <th className="py-2 pr-3">Modelo</th>
                   <th className="py-2 pr-3">Tipo cálculo</th>
-                  <th className="py-2 pr-3">Ingreso</th>
-                  <th className="py-2 pr-3">Monto automático</th>
+                  <th className="py-2 pr-3">Monto flete</th>
+                  <th className="py-2 pr-3">Pago chofer/dueño</th>
                   <th className="py-2 pr-3">Monto final</th>
                   <th className="py-2 pr-3">Dirección</th>
                   <th className="py-2 pr-3">Ganancia</th>

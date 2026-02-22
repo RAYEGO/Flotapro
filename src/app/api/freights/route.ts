@@ -107,14 +107,10 @@ export async function POST(req: NextRequest) {
       : montoCalculado;
     const direccionPago = tipoModelo === "CHOFER_PAGA" ? "POR_COBRAR" : "POR_PAGAR";
 
-    const ingreso =
-      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.ingreso, 2);
-    const peajes =
-      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.peajes, 2);
-    const viaticos =
-      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.viaticos, 2);
-    const otrosGastos =
-      tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.otrosGastos, 2);
+    const ingreso = decimal(parsed.data.ingreso, 2);
+    const peajes = decimal(parsed.data.peajes, 2);
+    const viaticos = decimal(parsed.data.viaticos, 2);
+    const otrosGastos = decimal(parsed.data.otrosGastos, 2);
     const ganancia =
       tipoModelo === "CHOFER_PAGA"
         ? montoFinal

@@ -210,7 +210,7 @@ export default function TrucksPage() {
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
-            placeholder="Km actual (ej. 120000)"
+            placeholder="Km actual"
             value={kilometrajeActual}
             onChange={(e) => setKilometrajeActual(e.target.value)}
             type="number"

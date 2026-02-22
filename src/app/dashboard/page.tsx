@@ -302,11 +302,11 @@ export default function DashboardPage() {
         </div>
 
         {loading ? (
-          <div className="mt-6 rounded-2xl bg-[#1C374B] px-4 py-6 text-sm text-white/80">
+          <div className="mt-6 rounded-2xl bg-white px-4 py-6 text-sm text-zinc-600 ring-1 ring-black/5">
             Cargando alertas...
           </div>
         ) : alerts.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-[#1C374B] px-4 py-6 text-sm text-white/80">
+          <div className="mt-6 rounded-2xl bg-white px-4 py-6 text-sm text-zinc-600 ring-1 ring-black/5">
             Sin alertas. Todo en orden con los mantenimientos.
           </div>
         ) : (
@@ -316,7 +316,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={a.id}
-                  className="rounded-2xl border border-transparent bg-background p-4 shadow-[0_10px_24px_rgba(15,42,61,0.08)]"
+                  className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_10px_24px_rgba(15,42,61,0.08)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
