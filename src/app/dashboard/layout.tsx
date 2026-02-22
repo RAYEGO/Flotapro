@@ -15,8 +15,16 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[260px_1fr]">
+    <div className="relative min-h-screen overflow-hidden bg-[#0B1F2E]">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 20% 10%, #163E5C 0%, #0F2A3D 40%, #0B1F2E 100%)",
+        }}
+      />
+      <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-[#2C7FD1]/12 blur-[140px]" />
+      <div className="relative mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[260px_1fr]">
         <Sidebar />
 
         <main className="min-w-0 pb-28 md:pb-0">{children}</main>
