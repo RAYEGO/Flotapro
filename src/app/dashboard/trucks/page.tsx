@@ -12,7 +12,6 @@ type Truck = {
   tipo: string;
   kilometrajeActual: number;
   estado: "ACTIVO" | "INACTIVO" | "TALLER" | "VENDIDO";
-  modoOperacion: "DIRECTO" | "ALQUILER";
   tipoPago: "VUELTA" | "MENSUAL";
   montoPorVueltaDueno?: string | null;
   modeloPago: "DUENO_PAGA" | "CHOFER_PAGA";
@@ -33,7 +32,6 @@ export default function TrucksPage() {
   const [tipo, setTipo] = useState("");
   const [kilometrajeActual, setKilometrajeActual] = useState("");
   const [estado, setEstado] = useState<Truck["estado"]>("ACTIVO");
-  const [modoOperacion, setModoOperacion] = useState<Truck["modoOperacion"]>("DIRECTO");
   const [modeloPago, setModeloPago] = useState<Truck["modeloPago"]>("DUENO_PAGA");
   const [tipoCalculo, setTipoCalculo] = useState<Truck["tipoCalculo"]>("VIAJE");
   const [montoBase, setMontoBase] = useState("");
@@ -68,7 +66,6 @@ export default function TrucksPage() {
     setTipo("");
     setKilometrajeActual("");
     setEstado("ACTIVO");
-    setModoOperacion("DIRECTO");
     setModeloPago("DUENO_PAGA");
     setTipoCalculo("VIAJE");
     setMontoBase("");
@@ -84,7 +81,6 @@ export default function TrucksPage() {
     setTipo(truck.tipo);
     setKilometrajeActual(String(truck.kilometrajeActual));
     setEstado(truck.estado);
-    setModoOperacion(truck.modoOperacion);
     setModeloPago(truck.modeloPago ?? "DUENO_PAGA");
     setTipoCalculo(truck.tipoCalculo ?? "VIAJE");
     setMontoBase(truck.montoBase ?? truck.montoPorVueltaDueno ?? "");
@@ -96,6 +92,7 @@ export default function TrucksPage() {
     setError(null);
     try {
       const tipoPago = tipoCalculo === "MENSUAL" ? "MENSUAL" : "VUELTA";
+      const modoOperacion = modeloPago === "CHOFER_PAGA" ? "ALQUILER" : "DIRECTO";
       const res = await fetch(editingId ? `/api/trucks/${editingId}` : "/api/trucks", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
@@ -217,17 +214,6 @@ export default function TrucksPage() {
             min={0}
             required
           />
-          <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-            value={modoOperacion}
-            onChange={(e) => setModoOperacion(e.target.value as Truck["modoOperacion"])}
-            id="modelo-operacion-camion"
-            aria-label="Modo de operación"
-            title="Modo de operación"
-          >
-            <option value="DIRECTO">Directo (dueño paga)</option>
-            <option value="ALQUILER">Alquiler (chofer paga)</option>
-          </select>
           <select
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={modeloPago}

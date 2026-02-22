@@ -166,6 +166,11 @@ export default function FreightsPage() {
     setError(null);
 
     try {
+      if (usarMontoPersonalizado && (montoPersonalizado === "" || Number.isNaN(Number(montoPersonalizado)))) {
+        setError("Monto personalizado requerido");
+        return;
+      }
+
       const res = await fetch(editingId ? `/api/freights/${editingId}` : "/api/freights", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
@@ -310,14 +315,24 @@ export default function FreightsPage() {
             <input
               type="checkbox"
               checked={usarMontoPersonalizado}
-              onChange={(e) => setUsarMontoPersonalizado(e.target.checked)}
+              onChange={(e) => {
+                const next = e.target.checked;
+                setUsarMontoPersonalizado(next);
+                if (!next) {
+                  setMontoPersonalizado("");
+                  return;
+                }
+                if (montoPersonalizado === "" && montoAutomatico !== "") {
+                  setMontoPersonalizado(montoAutomatico);
+                }
+              }}
             />
-            Usar monto personalizado
+            Usar pago personalizado
           </label>
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base disabled:bg-zinc-50"
-            placeholder="Monto personalizado"
+            placeholder="Pago personalizado chofer/dueño"
             value={montoPersonalizado}
             onChange={(e) => setMontoPersonalizado(e.target.value)}
             disabled={!usarMontoPersonalizado}
