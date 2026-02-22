@@ -20,6 +20,7 @@ const updateTruckSchema = z.object({
   kilometrajeActual: z.number().int().min(0).max(10_000_000).optional(),
   estado: z.enum(["ACTIVO", "INACTIVO", "TALLER", "VENDIDO"]).optional(),
   modoOperacion: z.enum(["DIRECTO", "ALQUILER"]).optional(),
+  tipoPago: z.enum(["VUELTA", "MENSUAL"]).optional(),
   montoPorVueltaDueno: z.coerce.number().nonnegative().optional(),
 });
 

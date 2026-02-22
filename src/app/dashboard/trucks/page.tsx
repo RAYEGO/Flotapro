@@ -13,6 +13,7 @@ type Truck = {
   kilometrajeActual: number;
   estado: "ACTIVO" | "INACTIVO" | "TALLER" | "VENDIDO";
   modoOperacion: "DIRECTO" | "ALQUILER";
+  tipoPago: "VUELTA" | "MENSUAL";
   montoPorVueltaDueno?: string | null;
 };
 
@@ -30,8 +31,10 @@ export default function TrucksPage() {
   const [kilometrajeActual, setKilometrajeActual] = useState("");
   const [estado, setEstado] = useState<Truck["estado"]>("ACTIVO");
   const [modoOperacion, setModoOperacion] = useState<Truck["modoOperacion"]>("DIRECTO");
+  const [tipoPago, setTipoPago] = useState<"VUELTA" | "MENSUAL">("VUELTA");
   const [montoPorVueltaDueno, setMontoPorVueltaDueno] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -62,6 +65,7 @@ export default function TrucksPage() {
     setKilometrajeActual("");
     setEstado("ACTIVO");
     setModoOperacion("DIRECTO");
+    setTipoPago("VUELTA");
     setMontoPorVueltaDueno("");
     setEditingId(null);
   };
@@ -76,6 +80,7 @@ export default function TrucksPage() {
     setKilometrajeActual(String(truck.kilometrajeActual));
     setEstado(truck.estado);
     setModoOperacion(truck.modoOperacion);
+    setTipoPago(truck.tipoPago ?? "VUELTA");
     setMontoPorVueltaDueno(truck.montoPorVueltaDueno ?? "");
   };
 
@@ -96,6 +101,7 @@ export default function TrucksPage() {
           kilometrajeActual: Number(kilometrajeActual),
           estado,
           modoOperacion,
+          tipoPago,
           montoPorVueltaDueno:
             montoPorVueltaDueno === "" ? undefined : Number(montoPorVueltaDueno),
         }),
@@ -108,6 +114,27 @@ export default function TrucksPage() {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function updateEstado(id: string, nextEstado: Truck["estado"]) {
+    setUpdatingId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/trucks/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ estado: nextEstado }),
+      });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo guardar");
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, estado: nextEstado } : item)),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setUpdatingId(null);
     }
   }
 
@@ -196,9 +223,19 @@ export default function TrucksPage() {
             <option value="DIRECTO">Directo (dueño paga)</option>
             <option value="ALQUILER">Alquiler (chofer paga)</option>
           </select>
+          <select
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            value={tipoPago}
+            onChange={(e) => setTipoPago(e.target.value as "VUELTA" | "MENSUAL")}
+            aria-label="Tipo de pago"
+            title="Tipo de pago"
+          >
+            <option value="VUELTA">Por vuelta</option>
+            <option value="MENSUAL">Mensual</option>
+          </select>
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
-            placeholder="Monto por vuelta dueño"
+            placeholder="Monto"
             value={montoPorVueltaDueno}
             onChange={(e) => setMontoPorVueltaDueno(e.target.value)}
             type="number"
@@ -278,6 +315,24 @@ export default function TrucksPage() {
                         {t.kilometrajeActual}
                       </span>
                     </div>
+                    <div className="pt-1">
+                      <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                        Estado
+                      </label>
+                      <select
+                        className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+                        value={t.estado}
+                        onChange={(e) => updateEstado(t.id, e.target.value as Truck["estado"])}
+                        disabled={updatingId === t.id}
+                        aria-label="Estado del camión"
+                        title="Estado del camión"
+                      >
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                        <option value="TALLER">Taller</option>
+                        <option value="VENDIDO">Vendido</option>
+                      </select>
+                    </div>
                   </div>
                   <div className="mt-3 flex justify-end">
                     <button
@@ -306,10 +361,10 @@ export default function TrucksPage() {
                   <th className="py-2 pr-3">Año</th>
                   <th className="py-2 pr-3">Tipo</th>
                   <th className="py-2 pr-3">Km</th>
-                  <th className="py-2 pr-3">Estado</th>
                   <th className="py-2 pr-3">Modelo</th>
                   <th className="py-2 pr-3">Monto dueño</th>
                   <th className="py-2 pr-3">Acciones</th>
+                  <th className="py-2 pr-3">Estado</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -338,13 +393,6 @@ export default function TrucksPage() {
                       <td className="py-3 pr-3 text-zinc-700">
                         {t.kilometrajeActual}
                       </td>
-                      <td className="py-3 pr-3">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${estadoBadge(t.estado).className}`}
-                        >
-                          {estadoBadge(t.estado).label}
-                        </span>
-                      </td>
                       <td className="py-3 pr-3 text-zinc-700">
                         {t.modoOperacion === "DIRECTO" ? "Dueño paga" : "Chofer paga"}
                       </td>
@@ -361,6 +409,23 @@ export default function TrucksPage() {
                         >
                           <Pencil className="h-4 w-4" strokeWidth={1.75} />
                         </button>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <select
+                          className="h-9 rounded-lg border border-zinc-200 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+                          value={t.estado}
+                          onChange={(e) =>
+                            updateEstado(t.id, e.target.value as Truck["estado"])
+                          }
+                          disabled={updatingId === t.id}
+                          aria-label="Estado del camión"
+                          title="Estado del camión"
+                        >
+                          <option value="ACTIVO">Activo</option>
+                          <option value="INACTIVO">Inactivo</option>
+                          <option value="TALLER">Taller</option>
+                          <option value="VENDIDO">Vendido</option>
+                        </select>
                       </td>
                     </tr>
                   ))

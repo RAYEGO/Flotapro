@@ -49,6 +49,7 @@ model Truck {
   kilometrajeActual  Int
   estado             TruckStatus         @default(ACTIVO)
   modoOperacion      TruckOperationMode  @default(DIRECTO)
+  tipoPago           TruckPaymentType    @default(VUELTA)
   montoPorVueltaDueno Decimal?           @db.Decimal(12, 2)
   drivers            Driver[]
   freights           Freight[]
@@ -185,6 +186,11 @@ enum FreightStatus {
 enum TruckOperationMode {
   DIRECTO
   ALQUILER
+}
+
+enum TruckPaymentType {
+  VUELTA
+  MENSUAL
 }
 
 enum FreightModelType {
