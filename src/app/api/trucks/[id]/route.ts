@@ -22,6 +22,9 @@ const updateTruckSchema = z.object({
   modoOperacion: z.enum(["DIRECTO", "ALQUILER"]).optional(),
   tipoPago: z.enum(["VUELTA", "MENSUAL"]).optional(),
   montoPorVueltaDueno: z.coerce.number().nonnegative().optional(),
+  modeloPago: z.enum(["DUENO_PAGA", "CHOFER_PAGA"]).optional(),
+  tipoCalculo: z.enum(["VIAJE", "IDA_VUELTA", "MENSUAL"]).optional(),
+  montoBase: z.coerce.number().nonnegative().optional(),
 });
 
 export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
@@ -38,6 +41,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
         ...truck,
         montoPorVueltaDueno:
           truck.montoPorVueltaDueno === null ? null : serializeMoney(truck.montoPorVueltaDueno),
+        montoBase: serializeMoney(truck.montoBase),
       },
     });
   } catch {

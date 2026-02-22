@@ -23,8 +23,8 @@ const createFreightSchema = z.object({
   peajes: z.coerce.number().nonnegative().optional().default(0),
   viaticos: z.coerce.number().nonnegative().optional().default(0),
   otrosGastos: z.coerce.number().nonnegative().optional().default(0),
-  tipoModelo: z.enum(["DUENO_PAGA", "CHOFER_PAGA"]).optional(),
-  montoAcordado: z.coerce.number().nonnegative().optional(),
+  usarMontoPersonalizado: z.boolean().optional().default(false),
+  montoPersonalizado: z.coerce.number().nonnegative().optional(),
   estado: z.enum(["PENDIENTE", "COMPLETADO", "ANULADO"]).optional(),
 });
 
@@ -48,6 +48,11 @@ export async function GET(req: NextRequest) {
         otrosGastos: serializeMoney(f.otrosGastos),
         ganancia: serializeMoney(f.ganancia),
         montoAcordado: serializeMoney(f.montoAcordado),
+        montoBase: serializeMoney(f.montoBase),
+        montoCalculado: serializeMoney(f.montoCalculado),
+        montoPersonalizado:
+          f.montoPersonalizado === null ? null : serializeMoney(f.montoPersonalizado),
+        montoFinal: serializeMoney(f.montoFinal),
       })),
     });
   } catch {
@@ -68,7 +73,12 @@ export async function POST(req: NextRequest) {
     const [truck, driver] = await Promise.all([
       prisma.truck.findFirst({
         where: { id: parsed.data.truckId, companyId },
-        select: { id: true, modoOperacion: true, montoPorVueltaDueno: true },
+        select: {
+          id: true,
+          modeloPago: true,
+          tipoCalculo: true,
+          montoBase: true,
+        },
       }),
       prisma.driver.findFirst({
         where: { id: parsed.data.driverId, companyId },
@@ -79,14 +89,23 @@ export async function POST(req: NextRequest) {
     if (!truck) return jsonBadRequest("Camión inválido");
     if (!driver) return jsonBadRequest("Chofer inválido");
 
-    const tipoModelo =
-      parsed.data.tipoModelo ??
-      (truck.modoOperacion === "ALQUILER" ? "CHOFER_PAGA" : "DUENO_PAGA");
-    const montoAcordado =
-      parsed.data.montoAcordado === undefined
-        ? truck.montoPorVueltaDueno ?? 0
-        : parsed.data.montoAcordado;
-    const montoAcordadoDecimal = decimal(String(montoAcordado), 2);
+    if (parsed.data.usarMontoPersonalizado && parsed.data.montoPersonalizado === undefined) {
+      return jsonBadRequest("Monto personalizado requerido");
+    }
+
+    const tipoModelo = truck.modeloPago;
+    const tipoCalculo = truck.tipoCalculo;
+    const montoBase = decimal(String(truck.montoBase), 2);
+    const montoCalculado =
+      tipoCalculo === "IDA_VUELTA" ? decimal(montoBase.mul(2).toFixed(2), 2) : montoBase;
+    const usarMontoPersonalizado = parsed.data.usarMontoPersonalizado ?? false;
+    const montoPersonalizado = usarMontoPersonalizado
+      ? decimal(String(parsed.data.montoPersonalizado), 2)
+      : null;
+    const montoFinal = usarMontoPersonalizado
+      ? decimal(montoPersonalizado?.toFixed(2) ?? "0", 2)
+      : montoCalculado;
+    const direccionPago = tipoModelo === "CHOFER_PAGA" ? "POR_COBRAR" : "POR_PAGAR";
 
     const ingreso =
       tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.ingreso, 2);
@@ -98,8 +117,8 @@ export async function POST(req: NextRequest) {
       tipoModelo === "CHOFER_PAGA" ? decimal(0, 2) : decimal(parsed.data.otrosGastos, 2);
     const ganancia =
       tipoModelo === "CHOFER_PAGA"
-        ? montoAcordadoDecimal
-        : ingreso.minus(peajes).minus(viaticos).minus(otrosGastos).minus(montoAcordadoDecimal);
+        ? montoFinal
+        : ingreso.minus(peajes).minus(viaticos).minus(otrosGastos).minus(montoFinal);
 
     const freight = await prisma.freight.create({
       data: {
@@ -116,7 +135,14 @@ export async function POST(req: NextRequest) {
         otrosGastos,
         ganancia,
         tipoModelo,
-        montoAcordado: montoAcordadoDecimal,
+        montoAcordado: montoFinal,
+        tipoCalculo,
+        montoBase,
+        montoCalculado,
+        usarMontoPersonalizado,
+        montoPersonalizado,
+        montoFinal,
+        direccionPago,
         estado: parsed.data.estado,
       },
     });
@@ -130,6 +156,11 @@ export async function POST(req: NextRequest) {
         otrosGastos: serializeMoney(freight.otrosGastos),
         ganancia: serializeMoney(freight.ganancia),
         montoAcordado: serializeMoney(freight.montoAcordado),
+        montoBase: serializeMoney(freight.montoBase),
+        montoCalculado: serializeMoney(freight.montoCalculado),
+        montoPersonalizado:
+          freight.montoPersonalizado === null ? null : serializeMoney(freight.montoPersonalizado),
+        montoFinal: serializeMoney(freight.montoFinal),
       },
     });
   } catch {

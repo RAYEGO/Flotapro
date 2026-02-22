@@ -15,6 +15,9 @@ type Truck = {
   modoOperacion: "DIRECTO" | "ALQUILER";
   tipoPago: "VUELTA" | "MENSUAL";
   montoPorVueltaDueno?: string | null;
+  modeloPago: "DUENO_PAGA" | "CHOFER_PAGA";
+  tipoCalculo: "VIAJE" | "IDA_VUELTA" | "MENSUAL";
+  montoBase: string;
 };
 
 export default function TrucksPage() {
@@ -31,8 +34,9 @@ export default function TrucksPage() {
   const [kilometrajeActual, setKilometrajeActual] = useState("");
   const [estado, setEstado] = useState<Truck["estado"]>("ACTIVO");
   const [modoOperacion, setModoOperacion] = useState<Truck["modoOperacion"]>("DIRECTO");
-  const [tipoPago, setTipoPago] = useState<"VUELTA" | "MENSUAL">("VUELTA");
-  const [montoPorVueltaDueno, setMontoPorVueltaDueno] = useState("");
+  const [modeloPago, setModeloPago] = useState<Truck["modeloPago"]>("DUENO_PAGA");
+  const [tipoCalculo, setTipoCalculo] = useState<Truck["tipoCalculo"]>("VIAJE");
+  const [montoBase, setMontoBase] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -65,8 +69,9 @@ export default function TrucksPage() {
     setKilometrajeActual("");
     setEstado("ACTIVO");
     setModoOperacion("DIRECTO");
-    setTipoPago("VUELTA");
-    setMontoPorVueltaDueno("");
+    setModeloPago("DUENO_PAGA");
+    setTipoCalculo("VIAJE");
+    setMontoBase("");
     setEditingId(null);
   };
 
@@ -80,8 +85,9 @@ export default function TrucksPage() {
     setKilometrajeActual(String(truck.kilometrajeActual));
     setEstado(truck.estado);
     setModoOperacion(truck.modoOperacion);
-    setTipoPago(truck.tipoPago ?? "VUELTA");
-    setMontoPorVueltaDueno(truck.montoPorVueltaDueno ?? "");
+    setModeloPago(truck.modeloPago ?? "DUENO_PAGA");
+    setTipoCalculo(truck.tipoCalculo ?? "VIAJE");
+    setMontoBase(truck.montoBase ?? truck.montoPorVueltaDueno ?? "");
   };
 
   async function onCreate(e: FormEvent) {
@@ -89,6 +95,7 @@ export default function TrucksPage() {
     setSubmitting(true);
     setError(null);
     try {
+      const tipoPago = tipoCalculo === "MENSUAL" ? "MENSUAL" : "VUELTA";
       const res = await fetch(editingId ? `/api/trucks/${editingId}` : "/api/trucks", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
@@ -102,8 +109,10 @@ export default function TrucksPage() {
           estado,
           modoOperacion,
           tipoPago,
-          montoPorVueltaDueno:
-            montoPorVueltaDueno === "" ? undefined : Number(montoPorVueltaDueno),
+          montoPorVueltaDueno: montoBase === "" ? undefined : Number(montoBase),
+          modeloPago,
+          tipoCalculo,
+          montoBase: montoBase === "" ? undefined : Number(montoBase),
         }),
       });
       const data = (await res.json().catch(() => null)) as any;
@@ -211,11 +220,7 @@ export default function TrucksPage() {
           <select
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={modoOperacion}
-            onChange={(e) => {
-              const value = e.target.value as Truck["modoOperacion"];
-              setModoOperacion(value);
-              if (value === "DIRECTO") setMontoPorVueltaDueno("");
-            }}
+            onChange={(e) => setModoOperacion(e.target.value as Truck["modoOperacion"])}
             id="modelo-operacion-camion"
             aria-label="Modo de operación"
             title="Modo de operación"
@@ -225,23 +230,33 @@ export default function TrucksPage() {
           </select>
           <select
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-            value={tipoPago}
-            onChange={(e) => setTipoPago(e.target.value as "VUELTA" | "MENSUAL")}
-            aria-label="Tipo de pago"
-            title="Tipo de pago"
+            value={modeloPago}
+            onChange={(e) => setModeloPago(e.target.value as Truck["modeloPago"])}
+            aria-label="Modelo de pago"
+            title="Modelo de pago"
           >
-            <option value="VUELTA">Por vuelta</option>
+            <option value="DUENO_PAGA">Dueño paga al chofer</option>
+            <option value="CHOFER_PAGA">Chofer paga al dueño</option>
+          </select>
+          <select
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            value={tipoCalculo}
+            onChange={(e) => setTipoCalculo(e.target.value as Truck["tipoCalculo"])}
+            aria-label="Tipo de cálculo"
+            title="Tipo de cálculo"
+          >
+            <option value="VIAJE">Por viaje</option>
+            <option value="IDA_VUELTA">Por ida y vuelta</option>
             <option value="MENSUAL">Mensual</option>
           </select>
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Monto"
-            value={montoPorVueltaDueno}
-            onChange={(e) => setMontoPorVueltaDueno(e.target.value)}
+            value={montoBase}
+            onChange={(e) => setMontoBase(e.target.value)}
             type="number"
             min={0}
             step="0.01"
-            disabled={modoOperacion === "DIRECTO" && !editingId}
           />
           <div className="flex flex-wrap gap-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
             <button
@@ -315,6 +330,28 @@ export default function TrucksPage() {
                         {t.kilometrajeActual}
                       </span>
                     </div>
+                    <div>
+                      Modelo pago:{" "}
+                      <span className="font-medium text-zinc-900">
+                        {t.modeloPago === "CHOFER_PAGA"
+                          ? "Chofer paga al dueño"
+                          : "Dueño paga al chofer"}
+                      </span>
+                    </div>
+                    <div>
+                      Tipo cálculo:{" "}
+                      <span className="font-medium text-zinc-900">
+                        {t.tipoCalculo === "IDA_VUELTA"
+                          ? "Ida y vuelta"
+                          : t.tipoCalculo === "MENSUAL"
+                            ? "Mensual"
+                            : "Viaje"}
+                      </span>
+                    </div>
+                    <div>
+                      Monto base:{" "}
+                      <span className="font-medium text-zinc-900">{t.montoBase ?? "—"}</span>
+                    </div>
                     <div className="pt-1">
                       <label className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                         Estado
@@ -361,8 +398,9 @@ export default function TrucksPage() {
                   <th className="py-2 pr-3">Año</th>
                   <th className="py-2 pr-3">Tipo</th>
                   <th className="py-2 pr-3">Km</th>
-                  <th className="py-2 pr-3">Modelo</th>
-                  <th className="py-2 pr-3">Monto dueño</th>
+                  <th className="py-2 pr-3">Modelo pago</th>
+                  <th className="py-2 pr-3">Tipo cálculo</th>
+                  <th className="py-2 pr-3">Monto base</th>
                   <th className="py-2 pr-3">Acciones</th>
                   <th className="py-2 pr-3">Estado</th>
                 </tr>
@@ -370,13 +408,13 @@ export default function TrucksPage() {
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={10}>
+                    <td className="py-3 text-zinc-600" colSpan={11}>
                       Cargando...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={10}>
+                    <td className="py-3 text-zinc-600" colSpan={11}>
                       Sin registros
                     </td>
                   </tr>
@@ -394,10 +432,17 @@ export default function TrucksPage() {
                         {t.kilometrajeActual}
                       </td>
                       <td className="py-3 pr-3 text-zinc-700">
-                        {t.modoOperacion === "DIRECTO" ? "Dueño paga" : "Chofer paga"}
+                        {t.modeloPago === "CHOFER_PAGA" ? "Chofer paga" : "Dueño paga"}
                       </td>
                       <td className="py-3 pr-3 text-zinc-700">
-                        {t.montoPorVueltaDueno ?? "—"}
+                        {t.tipoCalculo === "IDA_VUELTA"
+                          ? "Ida y vuelta"
+                          : t.tipoCalculo === "MENSUAL"
+                            ? "Mensual"
+                            : "Viaje"}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {t.montoBase ?? "—"}
                       </td>
                       <td className="py-3 pr-3">
                         <button

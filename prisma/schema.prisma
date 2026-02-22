@@ -51,6 +51,9 @@ model Truck {
   modoOperacion      TruckOperationMode  @default(DIRECTO)
   tipoPago           TruckPaymentType    @default(VUELTA)
   montoPorVueltaDueno Decimal?           @db.Decimal(12, 2)
+  modeloPago         FreightModelType    @default(DUENO_PAGA)
+  tipoCalculo        FreightCalcType     @default(VIAJE)
+  montoBase          Decimal             @default(0) @db.Decimal(12, 2)
   drivers            Driver[]
   freights           Freight[]
   fuels              Fuel[]
@@ -100,6 +103,13 @@ model Freight {
   ganancia    Decimal       @db.Decimal(12, 2)
   tipoModelo  FreightModelType @default(DUENO_PAGA)
   montoAcordado Decimal     @default(0) @db.Decimal(12, 2)
+  tipoCalculo FreightCalcType @default(VIAJE)
+  montoBase   Decimal        @default(0) @db.Decimal(12, 2)
+  montoCalculado Decimal     @default(0) @db.Decimal(12, 2)
+  usarMontoPersonalizado Boolean @default(false)
+  montoPersonalizado Decimal? @db.Decimal(12, 2)
+  montoFinal Decimal         @default(0) @db.Decimal(12, 2)
+  direccionPago PaymentDirection @default(POR_PAGAR)
   estado      FreightStatus @default(PENDIENTE)
   company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   driver      Driver        @relation(fields: [driverId], references: [id])
@@ -196,4 +206,15 @@ enum TruckPaymentType {
 enum FreightModelType {
   DUENO_PAGA
   CHOFER_PAGA
+}
+
+enum FreightCalcType {
+  VIAJE
+  IDA_VUELTA
+  MENSUAL
+}
+
+enum PaymentDirection {
+  POR_PAGAR
+  POR_COBRAR
 }

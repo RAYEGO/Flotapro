@@ -314,7 +314,7 @@ export default function MaintenancePage() {
                 onChange={(e) => setPlanTruckId(e.target.value)}
                 required
               >
-                <option value="">Camión</option>
+                <option value="">Selecciona camión</option>
                 {trucks.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.placa}

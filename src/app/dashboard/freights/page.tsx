@@ -5,8 +5,9 @@ import { FormEvent, useEffect, useState } from "react";
 type TruckOption = {
   id: string;
   placa: string;
-  modoOperacion: "DIRECTO" | "ALQUILER";
-  montoPorVueltaDueno: string | null;
+  modeloPago: "DUENO_PAGA" | "CHOFER_PAGA";
+  tipoCalculo: "VIAJE" | "IDA_VUELTA" | "MENSUAL";
+  montoBase: string;
 };
 type DriverOption = { id: string; nombre: string; dni: string };
 
@@ -23,6 +24,13 @@ type Freight = {
   ganancia: string;
   tipoModelo: "DUENO_PAGA" | "CHOFER_PAGA";
   montoAcordado: string;
+  tipoCalculo: "VIAJE" | "IDA_VUELTA" | "MENSUAL";
+  montoBase: string;
+  montoCalculado: string;
+  usarMontoPersonalizado: boolean;
+  montoPersonalizado: string | null;
+  montoFinal: string;
+  direccionPago: "POR_PAGAR" | "POR_COBRAR";
   estado: "PENDIENTE" | "COMPLETADO" | "ANULADO";
   truck?: { id: string; placa: string } | null;
   driver?: { id: string; nombre: string; dni: string } | null;
@@ -49,8 +57,9 @@ export default function FreightsPage() {
   const [peajes, setPeajes] = useState("");
   const [viaticos, setViaticos] = useState("");
   const [otrosGastos, setOtrosGastos] = useState("");
-  const [tipoModelo, setTipoModelo] = useState<Freight["tipoModelo"]>("DUENO_PAGA");
-  const [montoAcordado, setMontoAcordado] = useState("");
+  const [montoAutomatico, setMontoAutomatico] = useState("");
+  const [usarMontoPersonalizado, setUsarMontoPersonalizado] = useState(false);
+  const [montoPersonalizado, setMontoPersonalizado] = useState("");
   const [estado, setEstado] = useState<Freight["estado"]>("PENDIENTE");
   const [submitting, setSubmitting] = useState(false);
 
@@ -75,8 +84,9 @@ export default function FreightsPage() {
         (trucksData.trucks as any[]).map((t) => ({
           id: t.id,
           placa: t.placa,
-          modoOperacion: t.modoOperacion,
-          montoPorVueltaDueno: t.montoPorVueltaDueno,
+          modeloPago: t.modeloPago ?? "DUENO_PAGA",
+          tipoCalculo: t.tipoCalculo ?? "VIAJE",
+          montoBase: t.montoBase ?? "0",
         })),
       );
       setDrivers(
@@ -106,6 +116,14 @@ export default function FreightsPage() {
     return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
   };
 
+  const calcularMontoAutomatico = (truck: TruckOption | undefined) => {
+    if (!truck) return "";
+    const base = Number(truck.montoBase ?? 0);
+    const multiplicador = truck.tipoCalculo === "IDA_VUELTA" ? 2 : 1;
+    if (Number.isNaN(base)) return "0.00";
+    return (base * multiplicador).toFixed(2);
+  };
+
   const resetForm = () => {
     setTruckId("");
     setDriverId("");
@@ -117,8 +135,9 @@ export default function FreightsPage() {
     setPeajes("");
     setViaticos("");
     setOtrosGastos("");
-    setTipoModelo("DUENO_PAGA");
-    setMontoAcordado("");
+    setMontoAutomatico("");
+    setUsarMontoPersonalizado(false);
+    setMontoPersonalizado("");
     setEstado("PENDIENTE");
     setEditingId(null);
   };
@@ -135,8 +154,9 @@ export default function FreightsPage() {
     setPeajes(String(freight.peajes));
     setViaticos(String(freight.viaticos));
     setOtrosGastos(String(freight.otrosGastos));
-    setTipoModelo(freight.tipoModelo);
-    setMontoAcordado(String(freight.montoAcordado));
+    setMontoAutomatico(String(freight.montoCalculado));
+    setUsarMontoPersonalizado(freight.usarMontoPersonalizado);
+    setMontoPersonalizado(freight.montoPersonalizado ?? "");
     setEstado(freight.estado);
   };
 
@@ -146,6 +166,8 @@ export default function FreightsPage() {
     setError(null);
 
     try {
+      const selectedTruck = trucks.find((t) => t.id === truckId);
+      const isChoferPaga = selectedTruck?.modeloPago === "CHOFER_PAGA";
       const res = await fetch(editingId ? `/api/freights/${editingId}` : "/api/freights", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
@@ -156,13 +178,16 @@ export default function FreightsPage() {
           cliente,
           origen,
           destino,
-          tipoModelo,
-          montoAcordado: montoAcordado === "" ? undefined : Number(montoAcordado),
-          ingreso: tipoModelo === "CHOFER_PAGA" ? 0 : Number(ingreso),
-          peajes: tipoModelo === "CHOFER_PAGA" ? 0 : peajes === "" ? 0 : Number(peajes),
-          viaticos: tipoModelo === "CHOFER_PAGA" ? 0 : viaticos === "" ? 0 : Number(viaticos),
+          usarMontoPersonalizado,
+          montoPersonalizado:
+            usarMontoPersonalizado && montoPersonalizado !== ""
+              ? Number(montoPersonalizado)
+              : undefined,
+          ingreso: isChoferPaga ? 0 : Number(ingreso),
+          peajes: isChoferPaga ? 0 : peajes === "" ? 0 : Number(peajes),
+          viaticos: isChoferPaga ? 0 : viaticos === "" ? 0 : Number(viaticos),
           otrosGastos:
-            tipoModelo === "CHOFER_PAGA" ? 0 : otrosGastos === "" ? 0 : Number(otrosGastos),
+            isChoferPaga ? 0 : otrosGastos === "" ? 0 : Number(otrosGastos),
           estado,
         }),
       });
@@ -193,6 +218,15 @@ export default function FreightsPage() {
     }
   }
 
+  const selectedTruck = trucks.find((t) => t.id === truckId);
+  const isChoferPaga = selectedTruck?.modeloPago === "CHOFER_PAGA";
+  const tipoCalculoLabel =
+    selectedTruck?.tipoCalculo === "IDA_VUELTA"
+      ? "Ida y vuelta"
+      : selectedTruck?.tipoCalculo === "MENSUAL"
+        ? "Mensual"
+        : "Viaje";
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
@@ -210,18 +244,7 @@ export default function FreightsPage() {
               const nextId = e.target.value;
               setTruckId(nextId);
               const selected = trucks.find((t) => t.id === nextId);
-              if (selected) {
-                const nextModelo =
-                  selected.modoOperacion === "ALQUILER" ? "CHOFER_PAGA" : "DUENO_PAGA";
-                setTipoModelo(nextModelo);
-                if (nextModelo === "CHOFER_PAGA" && montoAcordado === "") {
-                  setMontoAcordado(selected.montoPorVueltaDueno ?? "");
-                  setIngreso("0");
-                  setPeajes("0");
-                  setViaticos("0");
-                  setOtrosGastos("0");
-                }
-              }
+              setMontoAutomatico(calcularMontoAutomatico(selected));
             }}
             required
           >
@@ -257,29 +280,23 @@ export default function FreightsPage() {
             title="Fecha y hora del viaje"
           />
 
-          <select
+          <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-            value={tipoModelo}
-            onChange={(e) => {
-              const value = e.target.value as Freight["tipoModelo"];
-              setTipoModelo(value);
-              if (value === "CHOFER_PAGA" && montoAcordado === "") {
-                const selected = trucks.find((t) => t.id === truckId);
-                if (selected?.montoPorVueltaDueno) {
-                  setMontoAcordado(selected.montoPorVueltaDueno);
-                }
-                setIngreso("0");
-                setPeajes("0");
-                setViaticos("0");
-                setOtrosGastos("0");
-              }
-            }}
-            aria-label="Modelo operativo"
-            title="Modelo operativo"
-          >
-            <option value="DUENO_PAGA">Dueño paga al chofer</option>
-            <option value="CHOFER_PAGA">Chofer paga al dueño</option>
-          </select>
+            placeholder="Monto automático"
+            value={montoAutomatico}
+            readOnly
+            aria-label="Monto automático"
+            title="Monto automático"
+          />
+
+          <input
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            placeholder="Tipo de cálculo"
+            value={tipoCalculoLabel}
+            readOnly
+            aria-label="Tipo de cálculo"
+            title="Tipo de cálculo"
+          />
 
           <select
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
@@ -292,6 +309,26 @@ export default function FreightsPage() {
             <option value="COMPLETADO">COMPLETADO</option>
             <option value="ANULADO">ANULADO</option>
           </select>
+
+          <label className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700 md:px-4 md:py-3 md:text-base">
+            <input
+              type="checkbox"
+              checked={usarMontoPersonalizado}
+              onChange={(e) => setUsarMontoPersonalizado(e.target.checked)}
+            />
+            Usar monto personalizado
+          </label>
+
+          <input
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base disabled:bg-zinc-50"
+            placeholder="Monto personalizado"
+            value={montoPersonalizado}
+            onChange={(e) => setMontoPersonalizado(e.target.value)}
+            disabled={!usarMontoPersonalizado}
+            type="number"
+            min={0}
+            step="0.01"
+          />
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
@@ -323,8 +360,8 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            required={tipoModelo === "DUENO_PAGA"}
-            disabled={tipoModelo === "CHOFER_PAGA"}
+            required={!isChoferPaga}
+            disabled={isChoferPaga}
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -334,7 +371,7 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={tipoModelo === "CHOFER_PAGA"}
+            disabled={isChoferPaga}
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -344,7 +381,7 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={tipoModelo === "CHOFER_PAGA"}
+            disabled={isChoferPaga}
           />
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -354,17 +391,7 @@ export default function FreightsPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={tipoModelo === "CHOFER_PAGA"}
-          />
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
-            placeholder="Monto acordado"
-            value={montoAcordado}
-            onChange={(e) => setMontoAcordado(e.target.value)}
-            type="number"
-            min={0}
-            step="0.01"
-            required
+            disabled={isChoferPaga}
           />
 
           <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
@@ -419,6 +446,11 @@ export default function FreightsPage() {
                     <div className="mt-1 text-sm text-zinc-600">
                       {new Date(f.fecha).toLocaleString()}
                     </div>
+                    {f.usarMontoPersonalizado ? (
+                      <span className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+                        Override
+                      </span>
+                    ) : null}
                   </div>
                   <div className="text-sm font-semibold text-zinc-900">{f.ganancia}</div>
                 </div>
@@ -446,12 +478,40 @@ export default function FreightsPage() {
                     </span>
                   </div>
                   <div>
+                    Tipo cálculo:{" "}
+                    <span className="font-medium text-zinc-900">
+                      {f.tipoCalculo === "IDA_VUELTA"
+                        ? "Ida y vuelta"
+                        : f.tipoCalculo === "MENSUAL"
+                          ? "Mensual"
+                          : "Viaje"}
+                    </span>
+                  </div>
+                  <div>
                     Ingreso:{" "}
                     <span className="font-medium text-zinc-900">{f.ingreso}</span>
                   </div>
                   <div>
-                    Monto acordado:{" "}
-                    <span className="font-medium text-zinc-900">{f.montoAcordado}</span>
+                    Monto automático:{" "}
+                    <span
+                      className={
+                        f.usarMontoPersonalizado
+                          ? "font-medium text-zinc-900"
+                          : "font-semibold text-emerald-700"
+                      }
+                    >
+                      {f.montoCalculado}
+                    </span>
+                  </div>
+                  <div>
+                    Monto final:{" "}
+                    <span className="font-semibold text-emerald-700">{f.montoFinal}</span>
+                  </div>
+                  <div>
+                    Dirección:{" "}
+                    <span className="font-medium text-zinc-900">
+                      {f.direccionPago === "POR_COBRAR" ? "Por cobrar" : "Por pagar"}
+                    </span>
                   </div>
                   <div>
                     Estado:{" "}
@@ -490,8 +550,11 @@ export default function FreightsPage() {
                   <th className="py-2 pr-3">Cliente</th>
                   <th className="py-2 pr-3">Ruta</th>
                   <th className="py-2 pr-3">Modelo</th>
+                  <th className="py-2 pr-3">Tipo cálculo</th>
                   <th className="py-2 pr-3">Ingreso</th>
-                  <th className="py-2 pr-3">Monto acordado</th>
+                  <th className="py-2 pr-3">Monto automático</th>
+                  <th className="py-2 pr-3">Monto final</th>
+                  <th className="py-2 pr-3">Dirección</th>
                   <th className="py-2 pr-3">Ganancia</th>
                   <th className="py-2 pr-3">Estado</th>
                   <th className="py-2 pr-3">Acciones</th>
@@ -500,13 +563,13 @@ export default function FreightsPage() {
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={11}>
+                    <td className="py-3 text-zinc-600" colSpan={14}>
                       Cargando...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={11}>
+                    <td className="py-3 text-zinc-600" colSpan={14}>
                       Sin registros
                     </td>
                   </tr>
@@ -529,8 +592,38 @@ export default function FreightsPage() {
                       <td className="py-3 pr-3 text-zinc-700">
                         {f.tipoModelo === "DUENO_PAGA" ? "Dueño paga" : "Chofer paga"}
                       </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {f.tipoCalculo === "IDA_VUELTA"
+                          ? "Ida y vuelta"
+                          : f.tipoCalculo === "MENSUAL"
+                            ? "Mensual"
+                            : "Viaje"}
+                      </td>
                       <td className="py-3 pr-3 text-zinc-700">{f.ingreso}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.montoAcordado}</td>
+                      <td className="py-3 pr-3">
+                        <span
+                          className={
+                            f.usarMontoPersonalizado
+                              ? "text-zinc-700"
+                              : "font-semibold text-emerald-700"
+                          }
+                        >
+                          {f.montoCalculado}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-emerald-700">{f.montoFinal}</span>
+                          {f.usarMontoPersonalizado ? (
+                            <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-700">
+                              Override
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {f.direccionPago === "POR_COBRAR" ? "Por cobrar" : "Por pagar"}
+                      </td>
                       <td className="py-3 pr-3 text-zinc-700">{f.ganancia}</td>
                       <td className="py-3 pr-3 text-zinc-700">{f.estado}</td>
                       <td className="py-3 pr-3">

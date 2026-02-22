@@ -23,8 +23,8 @@ const updateFreightSchema = z.object({
   peajes: z.coerce.number().nonnegative().optional(),
   viaticos: z.coerce.number().nonnegative().optional(),
   otrosGastos: z.coerce.number().nonnegative().optional(),
-  tipoModelo: z.enum(["DUENO_PAGA", "CHOFER_PAGA"]).optional(),
-  montoAcordado: z.coerce.number().nonnegative().optional(),
+  usarMontoPersonalizado: z.boolean().optional(),
+  montoPersonalizado: z.coerce.number().nonnegative().optional(),
   estado: z.enum(["PENDIENTE", "COMPLETADO", "ANULADO"]).optional(),
 });
 
@@ -47,6 +47,11 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
         otrosGastos: serializeMoney(freight.otrosGastos),
         ganancia: serializeMoney(freight.ganancia),
         montoAcordado: serializeMoney(freight.montoAcordado),
+        montoBase: serializeMoney(freight.montoBase),
+        montoCalculado: serializeMoney(freight.montoCalculado),
+        montoPersonalizado:
+          freight.montoPersonalizado === null ? null : serializeMoney(freight.montoPersonalizado),
+        montoFinal: serializeMoney(freight.montoFinal),
       },
     });
   } catch {
@@ -77,27 +82,38 @@ export async function PATCH(
     const [truck, driver] = await Promise.all([
       prisma.truck.findFirst({
         where: { id: nextTruckId, companyId },
-        select: { id: true, modoOperacion: true, montoPorVueltaDueno: true },
+        select: {
+          id: true,
+          modeloPago: true,
+          tipoCalculo: true,
+          montoBase: true,
+        },
       }),
       prisma.driver.findFirst({ where: { id: nextDriverId, companyId }, select: { id: true } }),
     ]);
     if (!truck) return jsonBadRequest("Camión inválido");
     if (!driver) return jsonBadRequest("Chofer inválido");
 
-    const tipoModelo =
-      parsed.data.tipoModelo ??
-      (parsed.data.truckId
-        ? truck.modoOperacion === "ALQUILER"
-          ? "CHOFER_PAGA"
-          : "DUENO_PAGA"
-        : existing.tipoModelo);
-    const montoAcordadoValue =
-      parsed.data.montoAcordado === undefined
-        ? tipoModelo === "CHOFER_PAGA" && parsed.data.truckId
-          ? truck.montoPorVueltaDueno ?? existing.montoAcordado
-          : existing.montoAcordado
-        : decimal(parsed.data.montoAcordado, 2);
-    const montoAcordadoDecimal = decimal(String(montoAcordadoValue), 2);
+    const tipoModelo = truck.modeloPago;
+    const tipoCalculo = truck.tipoCalculo;
+    const montoBase = decimal(String(truck.montoBase), 2);
+    const montoCalculado =
+      tipoCalculo === "IDA_VUELTA" ? decimal(montoBase.mul(2).toFixed(2), 2) : montoBase;
+
+    const usarMontoPersonalizado =
+      parsed.data.usarMontoPersonalizado ?? existing.usarMontoPersonalizado;
+    const montoPersonalizadoValue =
+      parsed.data.montoPersonalizado === undefined
+        ? existing.montoPersonalizado
+        : decimal(parsed.data.montoPersonalizado, 2);
+    if (usarMontoPersonalizado && montoPersonalizadoValue === null) {
+      return jsonBadRequest("Monto personalizado requerido");
+    }
+    const montoPersonalizado = usarMontoPersonalizado ? montoPersonalizadoValue : null;
+    const montoFinal = usarMontoPersonalizado
+      ? decimal(String(montoPersonalizado), 2)
+      : montoCalculado;
+    const direccionPago = tipoModelo === "CHOFER_PAGA" ? "POR_COBRAR" : "POR_PAGAR";
 
     const ingreso =
       tipoModelo === "CHOFER_PAGA"
@@ -126,8 +142,8 @@ export async function PATCH(
 
     const ganancia =
       tipoModelo === "CHOFER_PAGA"
-        ? montoAcordadoDecimal
-        : ingreso.minus(peajes).minus(viaticos).minus(otrosGastos).minus(montoAcordadoDecimal);
+        ? montoFinal
+        : ingreso.minus(peajes).minus(viaticos).minus(otrosGastos).minus(montoFinal);
 
     const freight = await prisma.freight.update({
       where: { id: existing.id },
@@ -142,7 +158,14 @@ export async function PATCH(
         otrosGastos,
         ganancia,
         tipoModelo,
-        montoAcordado: montoAcordadoDecimal,
+        montoAcordado: montoFinal,
+        tipoCalculo,
+        montoBase,
+        montoCalculado,
+        usarMontoPersonalizado,
+        montoPersonalizado,
+        montoFinal,
+        direccionPago,
       },
     });
 
@@ -155,6 +178,11 @@ export async function PATCH(
         otrosGastos: serializeMoney(freight.otrosGastos),
         ganancia: serializeMoney(freight.ganancia),
         montoAcordado: serializeMoney(freight.montoAcordado),
+        montoBase: serializeMoney(freight.montoBase),
+        montoCalculado: serializeMoney(freight.montoCalculado),
+        montoPersonalizado:
+          freight.montoPersonalizado === null ? null : serializeMoney(freight.montoPersonalizado),
+        montoFinal: serializeMoney(freight.montoFinal),
       },
     });
   } catch {
