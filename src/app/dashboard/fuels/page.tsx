@@ -248,73 +248,142 @@ export default function FuelsPage() {
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
-        <div className="mt-4 overflow-auto">
-          <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="text-xs text-zinc-500">
-              <tr>
-                <th className="py-2 pr-3">Fecha</th>
-                <th className="py-2 pr-3">Camión</th>
-                <th className="py-2 pr-3">Chofer</th>
-                <th className="py-2 pr-3">Km</th>
-                <th className="py-2 pr-3">Galones</th>
-                <th className="py-2 pr-3">Precio/galón</th>
-                <th className="py-2 pr-3">Total</th>
-                <th className="py-2 pr-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {loading ? (
-                <tr>
-                  <td className="py-3 text-zinc-600" colSpan={8}>
-                    Cargando...
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td className="py-3 text-zinc-600" colSpan={8}>
-                    Sin registros
-                  </td>
-                </tr>
-              ) : (
-                items.map((f) => (
-                  <tr key={f.id}>
-                    <td className="py-3 pr-3 text-zinc-700">
-                      {new Date(f.fecha).toLocaleString()}
-                    </td>
-                    <td className="py-3 pr-3 font-medium text-zinc-900">
+        <div className="mt-4 space-y-4 md:hidden">
+          {loading ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Cargando...
+            </div>
+          ) : items.length === 0 ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Sin registros
+            </div>
+          ) : (
+            items.map((f) => (
+              <div
+                key={f.id}
+                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-base font-semibold text-zinc-900">
                       {f.truck?.placa ?? "—"}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">
+                    </div>
+                    <div className="mt-1 text-sm text-zinc-600">
+                      {new Date(f.fecha).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-sm font-semibold text-zinc-900">{f.total}</div>
+                </div>
+                <div className="mt-3 space-y-1 text-sm text-zinc-700">
+                  <div>
+                    Chofer:{" "}
+                    <span className="font-medium text-zinc-900">
                       {f.driver ? `${f.driver.nombre} (${f.driver.dni})` : "—"}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{f.kilometraje}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{f.galones}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{f.precioPorGalon}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{f.total}</td>
-                    <td className="py-3 pr-3">
-                      <div className="flex gap-2">
-                        <button
-                          className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
-                          type="button"
-                          onClick={() => startEdit(f)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
-                          type="button"
-                          onClick={() => onDelete(f.id)}
-                          disabled={deletingId === f.id}
-                        >
-                          {deletingId === f.id ? "Eliminando..." : "Eliminar"}
-                        </button>
-                      </div>
+                    </span>
+                  </div>
+                  <div>
+                    Km:{" "}
+                    <span className="font-medium text-zinc-900">{f.kilometraje}</span>
+                  </div>
+                  <div>
+                    Galones:{" "}
+                    <span className="font-medium text-zinc-900">{f.galones}</span>
+                  </div>
+                  <div>
+                    Precio/galón:{" "}
+                    <span className="font-medium text-zinc-900">{f.precioPorGalon}</span>
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    type="button"
+                    onClick={() => startEdit(f)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+                    type="button"
+                    onClick={() => onDelete(f.id)}
+                    disabled={deletingId === f.id}
+                  >
+                    {deletingId === f.id ? "Eliminando..." : "Eliminar"}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="mt-4 hidden md:block">
+          <div className="overflow-auto">
+            <table className="w-full min-w-[980px] text-left text-sm">
+              <thead className="text-xs text-zinc-500">
+                <tr>
+                  <th className="py-2 pr-3">Fecha</th>
+                  <th className="py-2 pr-3">Camión</th>
+                  <th className="py-2 pr-3">Chofer</th>
+                  <th className="py-2 pr-3">Km</th>
+                  <th className="py-2 pr-3">Galones</th>
+                  <th className="py-2 pr-3">Precio/galón</th>
+                  <th className="py-2 pr-3">Total</th>
+                  <th className="py-2 pr-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {loading ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={8}>
+                      Cargando...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : items.length === 0 ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={8}>
+                      Sin registros
+                    </td>
+                  </tr>
+                ) : (
+                  items.map((f) => (
+                    <tr key={f.id}>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {new Date(f.fecha).toLocaleString()}
+                      </td>
+                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                        {f.truck?.placa ?? "—"}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {f.driver ? `${f.driver.nombre} (${f.driver.dni})` : "—"}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">{f.kilometraje}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{f.galones}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{f.precioPorGalon}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{f.total}</td>
+                      <td className="py-3 pr-3">
+                        <div className="flex gap-2">
+                          <button
+                            className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                            type="button"
+                            onClick={() => startEdit(f)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                            type="button"
+                            onClick={() => onDelete(f.id)}
+                            disabled={deletingId === f.id}
+                          >
+                            {deletingId === f.id ? "Eliminando..." : "Eliminar"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

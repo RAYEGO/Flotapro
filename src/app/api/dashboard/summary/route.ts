@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
 
     const utilidadNeta = gananciaFletes.minus(gastoCombustible).minus(gastoMantenimiento);
 
-    const thresholdKm = 500;
+    const thresholdKm = 1000;
     const plans = await prisma.maintenancePlan.findMany({
       where: { companyId, activo: true },
       include: { truck: { select: { id: true, placa: true, kilometrajeActual: true } } },
@@ -97,18 +97,19 @@ export async function GET(req: NextRequest) {
 
     const alerts = plans
       .map((p) => {
-        const restanteKm = p.proximoKm - p.truck.kilometrajeActual;
+        const proximoKm = p.ultimoServicioKm + p.cadaKm;
+        const restanteKm = proximoKm - p.truck.kilometrajeActual;
         return {
           id: p.id,
           truckId: p.truckId,
           placa: p.truck.placa,
           tipo: p.tipo,
-          proximoKm: p.proximoKm,
+          proximoKm,
           kilometrajeActual: p.truck.kilometrajeActual,
           restanteKm,
         };
       })
-      .filter((a) => a.restanteKm >= 0 && a.restanteKm <= thresholdKm);
+      .filter((a) => a.restanteKm <= thresholdKm);
 
     return jsonOk({
       month,

@@ -117,6 +117,33 @@ export default function MaintenancePage() {
     setPlanActivo(plan.activo);
   };
 
+  const getTruckKm = (plan: Plan) => {
+    if (plan.truck?.kilometrajeActual !== undefined) return plan.truck.kilometrajeActual;
+    const truck = trucks.find((t) => t.id === plan.truckId);
+    return truck ? truck.kilometrajeActual : null;
+  };
+
+  const getProximoKm = (plan: Plan) => plan.ultimoServicioKm + plan.cadaKm;
+
+  const getRestanteKm = (plan: Plan) => {
+    const kmActual = getTruckKm(plan);
+    if (kmActual === null) return null;
+    return getProximoKm(plan) - kmActual;
+  };
+
+  const getStatus = (restanteKm: number | null) => {
+    if (restanteKm === null) {
+      return { label: "—", className: "bg-zinc-100 text-zinc-600" };
+    }
+    if (restanteKm <= 0) {
+      return { label: "Urgente", className: "bg-red-100 text-red-700" };
+    }
+    if (restanteKm <= 1000) {
+      return { label: "Próximo", className: "bg-amber-100 text-amber-700" };
+    }
+    return { label: "OK", className: "bg-emerald-100 text-emerald-700" };
+  };
+
   const resetRecordForm = () => {
     setRecordTruckId("");
     setRecordFecha("");
@@ -342,67 +369,158 @@ export default function MaintenancePage() {
 
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
-            <div className="mt-4 overflow-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
-                <thead className="text-xs text-zinc-500">
-                  <tr>
-                    <th className="py-2 pr-3">Camión</th>
-                    <th className="py-2 pr-3">Tipo</th>
-                    <th className="py-2 pr-3">Cada Km</th>
-                    <th className="py-2 pr-3">Último</th>
-                    <th className="py-2 pr-3">Próximo</th>
-                    <th className="py-2 pr-3">Activo</th>
-                    <th className="py-2 pr-3">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {loading ? (
-                    <tr>
-                      <td className="py-3 text-zinc-600" colSpan={7}>
-                        Cargando...
-                      </td>
-                    </tr>
-                  ) : plans.length === 0 ? (
-                    <tr>
-                      <td className="py-3 text-zinc-600" colSpan={7}>
-                        Sin registros
-                      </td>
-                    </tr>
-                  ) : (
-                    plans.map((p) => (
-                      <tr key={p.id}>
-                        <td className="py-3 pr-3 font-medium text-zinc-900">
-                          {p.truck?.placa ?? "—"}
-                        </td>
-                        <td className="py-3 pr-3 text-zinc-700">{p.tipo}</td>
-                        <td className="py-3 pr-3 text-zinc-700">{p.cadaKm}</td>
-                        <td className="py-3 pr-3 text-zinc-700">{p.ultimoServicioKm}</td>
-                        <td className="py-3 pr-3 text-zinc-700">{p.proximoKm}</td>
-                        <td className="py-3 pr-3 text-zinc-700">{p.activo ? "Sí" : "No"}</td>
-                        <td className="py-3 pr-3">
-                          <div className="flex gap-2">
-                            <button
-                              className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
-                              type="button"
-                              onClick={() => startEditPlan(p)}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
-                              type="button"
-                              onClick={() => onDeletePlan(p.id)}
-                              disabled={deletingPlanId === p.id}
-                            >
-                              {deletingPlanId === p.id ? "Eliminando..." : "Eliminar"}
-                            </button>
+            <div className="mt-4 space-y-4 md:hidden">
+              {loading ? (
+                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+                  Cargando...
+                </div>
+              ) : plans.length === 0 ? (
+                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+                  Sin registros
+                </div>
+              ) : (
+                plans.map((p) => {
+                  const kmActual = getTruckKm(p);
+                  const proximoKm = getProximoKm(p);
+                  const restanteKm = getRestanteKm(p);
+                  const status = getStatus(restanteKm);
+                  return (
+                    <div
+                      key={p.id}
+                      className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-base font-semibold text-zinc-900">
+                            {p.truck?.placa ?? "—"}
                           </div>
+                          <div className="mt-1 text-sm text-zinc-600">{p.tipo}</div>
+                        </div>
+                        <span
+                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}
+                        >
+                          {status.label}
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-1 text-sm text-zinc-700">
+                        <div>
+                          Km actual:{" "}
+                          <span className="font-medium text-zinc-900">
+                            {kmActual ?? "—"}
+                          </span>
+                        </div>
+                        <div>
+                          Próximo mantenimiento:{" "}
+                          <span className="font-medium text-zinc-900">{proximoKm}</span>
+                        </div>
+                        <div>
+                          Km restantes:{" "}
+                          <span className="font-medium text-zinc-900">
+                            {restanteKm === null ? "—" : restanteKm}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                          type="button"
+                          onClick={() => startEditPlan(p)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+                          type="button"
+                          onClick={() => onDeletePlan(p.id)}
+                          disabled={deletingPlanId === p.id}
+                        >
+                          {deletingPlanId === p.id ? "Eliminando..." : "Eliminar"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            <div className="mt-4 hidden md:block">
+              <div className="overflow-auto">
+                <table className="w-full min-w-[980px] text-left text-sm">
+                  <thead className="text-xs text-zinc-500">
+                    <tr>
+                      <th className="py-2 pr-3">Camión</th>
+                      <th className="py-2 pr-3">Tipo de servicio</th>
+                      <th className="py-2 pr-3">Km actual</th>
+                      <th className="py-2 pr-3">Próximo mantenimiento</th>
+                      <th className="py-2 pr-3">Km restantes</th>
+                      <th className="py-2 pr-3">Estado</th>
+                      <th className="py-2 pr-3">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {loading ? (
+                      <tr>
+                        <td className="py-3 text-zinc-600" colSpan={7}>
+                          Cargando...
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : plans.length === 0 ? (
+                      <tr>
+                        <td className="py-3 text-zinc-600" colSpan={7}>
+                          Sin registros
+                        </td>
+                      </tr>
+                    ) : (
+                      plans.map((p) => (
+                        <tr key={p.id}>
+                          {(() => {
+                            const kmActual = getTruckKm(p);
+                            const proximoKm = getProximoKm(p);
+                            const restanteKm = getRestanteKm(p);
+                            const status = getStatus(restanteKm);
+                            return (
+                              <>
+                          <td className="py-3 pr-3 font-medium text-zinc-900">
+                            {p.truck?.placa ?? "—"}
+                          </td>
+                          <td className="py-3 pr-3 text-zinc-700">{p.tipo}</td>
+                          <td className="py-3 pr-3 text-zinc-700">{kmActual ?? "—"}</td>
+                          <td className="py-3 pr-3 text-zinc-700">{proximoKm}</td>
+                          <td className="py-3 pr-3 text-zinc-700">
+                            {restanteKm === null ? "—" : restanteKm}
+                          </td>
+                          <td className="py-3 pr-3">
+                            <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}>
+                              {status.label}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-3">
+                            <div className="flex gap-2">
+                              <button
+                                className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                                type="button"
+                                onClick={() => startEditPlan(p)}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                                type="button"
+                                onClick={() => onDeletePlan(p.id)}
+                                disabled={deletingPlanId === p.id}
+                              >
+                                {deletingPlanId === p.id ? "Eliminando..." : "Eliminar"}
+                              </button>
+                            </div>
+                          </td>
+                              </>
+                            );
+                          })()}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </>
@@ -485,67 +603,125 @@ export default function MaintenancePage() {
 
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
-            <div className="mt-4 overflow-auto">
-              <table className="w-full min-w-[980px] text-left text-sm">
-                <thead className="text-xs text-zinc-500">
-                  <tr>
-                    <th className="py-2 pr-3">Fecha</th>
-                    <th className="py-2 pr-3">Camión</th>
-                    <th className="py-2 pr-3">Tipo</th>
-                    <th className="py-2 pr-3">Km</th>
-                    <th className="py-2 pr-3">Costo</th>
-                    <th className="py-2 pr-3">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {loading ? (
-                    <tr>
-                      <td className="py-3 text-zinc-600" colSpan={6}>
-                        Cargando...
-                      </td>
-                    </tr>
-                  ) : records.length === 0 ? (
-                    <tr>
-                      <td className="py-3 text-zinc-600" colSpan={6}>
-                        Sin registros
-                      </td>
-                    </tr>
-                  ) : (
-                    records.map((r) => (
-                      <tr key={r.id}>
-                        <td className="py-3 pr-3 text-zinc-700">
-                          {new Date(r.fecha).toLocaleString()}
-                        </td>
-                        <td className="py-3 pr-3 font-medium text-zinc-900">
+            <div className="mt-4 space-y-4 md:hidden">
+              {loading ? (
+                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+                  Cargando...
+                </div>
+              ) : records.length === 0 ? (
+                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+                  Sin registros
+                </div>
+              ) : (
+                records.map((r) => (
+                  <div
+                    key={r.id}
+                    className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-base font-semibold text-zinc-900">
                           {r.truck?.placa ?? "—"}
-                        </td>
-                        <td className="py-3 pr-3 text-zinc-700">{r.tipo}</td>
-                        <td className="py-3 pr-3 text-zinc-700">{r.kilometraje}</td>
-                        <td className="py-3 pr-3 text-zinc-700">{r.costo}</td>
-                        <td className="py-3 pr-3">
-                          <div className="flex gap-2">
-                            <button
-                              className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
-                              type="button"
-                              onClick={() => startEditRecord(r)}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
-                              type="button"
-                              onClick={() => onDeleteRecord(r.id)}
-                              disabled={deletingRecordId === r.id}
-                            >
-                              {deletingRecordId === r.id ? "Eliminando..." : "Eliminar"}
-                            </button>
-                          </div>
+                        </div>
+                        <div className="mt-1 text-sm text-zinc-600">
+                          {new Date(r.fecha).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="text-sm font-semibold text-zinc-900">{r.costo}</div>
+                    </div>
+                    <div className="mt-3 space-y-1 text-sm text-zinc-700">
+                      <div>
+                        Tipo: <span className="font-medium text-zinc-900">{r.tipo}</span>
+                      </div>
+                      <div>
+                        Km:{" "}
+                        <span className="font-medium text-zinc-900">{r.kilometraje}</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                        type="button"
+                        onClick={() => startEditRecord(r)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+                        type="button"
+                        onClick={() => onDeleteRecord(r.id)}
+                        disabled={deletingRecordId === r.id}
+                      >
+                        {deletingRecordId === r.id ? "Eliminando..." : "Eliminar"}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="mt-4 hidden md:block">
+              <div className="overflow-auto">
+                <table className="w-full min-w-[980px] text-left text-sm">
+                  <thead className="text-xs text-zinc-500">
+                    <tr>
+                      <th className="py-2 pr-3">Fecha</th>
+                      <th className="py-2 pr-3">Camión</th>
+                      <th className="py-2 pr-3">Tipo</th>
+                      <th className="py-2 pr-3">Km</th>
+                      <th className="py-2 pr-3">Costo</th>
+                      <th className="py-2 pr-3">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {loading ? (
+                      <tr>
+                        <td className="py-3 text-zinc-600" colSpan={6}>
+                          Cargando...
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : records.length === 0 ? (
+                      <tr>
+                        <td className="py-3 text-zinc-600" colSpan={6}>
+                          Sin registros
+                        </td>
+                      </tr>
+                    ) : (
+                      records.map((r) => (
+                        <tr key={r.id}>
+                          <td className="py-3 pr-3 text-zinc-700">
+                            {new Date(r.fecha).toLocaleString()}
+                          </td>
+                          <td className="py-3 pr-3 font-medium text-zinc-900">
+                            {r.truck?.placa ?? "—"}
+                          </td>
+                          <td className="py-3 pr-3 text-zinc-700">{r.tipo}</td>
+                          <td className="py-3 pr-3 text-zinc-700">{r.kilometraje}</td>
+                          <td className="py-3 pr-3 text-zinc-700">{r.costo}</td>
+                          <td className="py-3 pr-3">
+                            <div className="flex gap-2">
+                              <button
+                                className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                                type="button"
+                                onClick={() => startEditRecord(r)}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                                type="button"
+                                onClick={() => onDeleteRecord(r.id)}
+                                disabled={deletingRecordId === r.id}
+                              >
+                                {deletingRecordId === r.id ? "Eliminando..." : "Eliminar"}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </>

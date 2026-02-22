@@ -1,5 +1,6 @@
 "use client";
 
+import { Pencil } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
 type Truck = {
@@ -20,7 +21,6 @@ export default function TrucksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [placa, setPlaca] = useState("");
   const [marca, setMarca] = useState("");
@@ -111,21 +111,18 @@ export default function TrucksPage() {
     }
   }
 
-  async function onDelete(id: string) {
-    if (!confirm("¿Eliminar camión?")) return;
-    setDeletingId(id);
-    setError(null);
-    try {
-      const res = await fetch(`/api/trucks/${id}`, { method: "DELETE" });
-      const data = (await res.json().catch(() => null)) as any;
-      if (!res.ok) throw new Error(data?.error ?? "No se pudo eliminar");
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
-    } finally {
-      setDeletingId(null);
+  const estadoBadge = (estadoValue: Truck["estado"]) => {
+    if (estadoValue === "ACTIVO") {
+      return { label: "Activo", className: "bg-emerald-100 text-emerald-700" };
     }
-  }
+    if (estadoValue === "INACTIVO") {
+      return { label: "Inactivo", className: "bg-zinc-200 text-zinc-700" };
+    }
+    if (estadoValue === "TALLER") {
+      return { label: "Taller", className: "bg-amber-100 text-amber-700" };
+    }
+    return { label: "Vendido", className: "bg-blue-100 text-blue-700" };
+  };
 
   return (
     <div className="space-y-6">
@@ -186,18 +183,6 @@ export default function TrucksPage() {
           />
           <select
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-            value={estado}
-            onChange={(e) => setEstado(e.target.value as Truck["estado"])}
-            aria-label="Estado del camión"
-            title="Estado del camión"
-          >
-            <option value="ACTIVO">ACTIVO</option>
-            <option value="INACTIVO">INACTIVO</option>
-            <option value="TALLER">TALLER</option>
-            <option value="VENDIDO">VENDIDO</option>
-          </select>
-          <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={modoOperacion}
             onChange={(e) => {
               const value = e.target.value as Truck["modoOperacion"];
@@ -219,7 +204,7 @@ export default function TrucksPage() {
             type="number"
             min={0}
             step="0.01"
-            disabled={modoOperacion === "DIRECTO"}
+            disabled={modoOperacion === "DIRECTO" && !editingId}
           />
           <div className="flex flex-wrap gap-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
             <button
@@ -250,79 +235,139 @@ export default function TrucksPage() {
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
-        <div className="mt-4 overflow-auto">
-          <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="text-xs text-zinc-500">
-              <tr>
-                <th className="py-2 pr-3">Placa</th>
-                <th className="py-2 pr-3">Marca</th>
-                <th className="py-2 pr-3">Modelo</th>
-                <th className="py-2 pr-3">Año</th>
-                <th className="py-2 pr-3">Tipo</th>
-                <th className="py-2 pr-3">Km</th>
-                <th className="py-2 pr-3">Estado</th>
-                <th className="py-2 pr-3">Modelo</th>
-                <th className="py-2 pr-3">Monto dueño</th>
-                <th className="py-2 pr-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {loading ? (
-                <tr>
-                  <td className="py-3 text-zinc-600" colSpan={10}>
-                    Cargando...
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td className="py-3 text-zinc-600" colSpan={10}>
-                    Sin registros
-                  </td>
-                </tr>
-              ) : (
-                items.map((t) => (
-                  <tr key={t.id}>
-                    <td className="py-3 pr-3 font-medium text-zinc-900">
-                      {t.placa}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{t.marca}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{t.modelo}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{t.anio}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{t.tipo}</td>
-                    <td className="py-3 pr-3 text-zinc-700">
-                      {t.kilometrajeActual}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{t.estado}</td>
-                    <td className="py-3 pr-3 text-zinc-700">
-                      {t.modoOperacion === "DIRECTO" ? "Dueño paga" : "Chofer paga"}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">
-                      {t.montoPorVueltaDueno ?? "—"}
-                    </td>
-                    <td className="py-3 pr-3">
-                      <div className="flex gap-2">
-                        <button
-                          className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
-                          type="button"
-                          onClick={() => startEdit(t)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
-                          type="button"
-                          onClick={() => onDelete(t.id)}
-                          disabled={deletingId === t.id}
-                        >
-                          {deletingId === t.id ? "Eliminando..." : "Eliminar"}
-                        </button>
+        <div className="mt-4 space-y-4 md:hidden">
+          {loading ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Cargando...
+            </div>
+          ) : items.length === 0 ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Sin registros
+            </div>
+          ) : (
+            items.map((t) => {
+              const status = estadoBadge(t.estado);
+              return (
+                <div
+                  key={t.id}
+                  className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-base font-semibold text-zinc-900">
+                        {t.placa}
                       </div>
+                      <div className="mt-1 text-sm text-zinc-600">
+                        {t.marca} {t.modelo}
+                      </div>
+                    </div>
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}
+                    >
+                      {status.label}
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-1 text-sm text-zinc-700">
+                    <div>
+                      Año:{" "}
+                      <span className="font-medium text-zinc-900">{t.anio}</span>
+                    </div>
+                    <div>
+                      Kilometraje actual:{" "}
+                      <span className="font-medium text-zinc-900">
+                        {t.kilometrajeActual}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                      type="button"
+                      aria-label="Editar camión"
+                      title="Editar"
+                      onClick={() => startEdit(t)}
+                    >
+                      <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+        <div className="mt-4 hidden md:block">
+          <div className="overflow-auto">
+            <table className="w-full min-w-[980px] text-left text-sm">
+              <thead className="text-xs text-zinc-500">
+                <tr>
+                  <th className="py-2 pr-3">Placa</th>
+                  <th className="py-2 pr-3">Marca</th>
+                  <th className="py-2 pr-3">Modelo</th>
+                  <th className="py-2 pr-3">Año</th>
+                  <th className="py-2 pr-3">Tipo</th>
+                  <th className="py-2 pr-3">Km</th>
+                  <th className="py-2 pr-3">Estado</th>
+                  <th className="py-2 pr-3">Modelo</th>
+                  <th className="py-2 pr-3">Monto dueño</th>
+                  <th className="py-2 pr-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {loading ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={10}>
+                      Cargando...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : items.length === 0 ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={10}>
+                      Sin registros
+                    </td>
+                  </tr>
+                ) : (
+                  items.map((t) => (
+                    <tr key={t.id}>
+                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                        {t.placa}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">{t.marca}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{t.modelo}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{t.anio}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{t.tipo}</td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {t.kilometrajeActual}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${estadoBadge(t.estado).className}`}
+                        >
+                          {estadoBadge(t.estado).label}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {t.modoOperacion === "DIRECTO" ? "Dueño paga" : "Chofer paga"}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {t.montoPorVueltaDueno ?? "—"}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <button
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                          type="button"
+                          aria-label="Editar camión"
+                          title="Editar"
+                          onClick={() => startEdit(t)}
+                        >
+                          <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

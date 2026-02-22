@@ -217,71 +217,137 @@ export default function DriversPage() {
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
-        <div className="mt-4 overflow-auto">
-          <table className="w-full min-w-[900px] text-left text-sm">
-            <thead className="text-xs text-zinc-500">
-              <tr>
-                <th className="py-2 pr-3">Nombre</th>
-                <th className="py-2 pr-3">DNI</th>
-                <th className="py-2 pr-3">Licencia</th>
-                <th className="py-2 pr-3">Vence</th>
-                <th className="py-2 pr-3">Teléfono</th>
-                <th className="py-2 pr-3">Camión</th>
-                <th className="py-2 pr-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {loading ? (
-                <tr>
-                  <td className="py-3 text-zinc-600" colSpan={7}>
-                    Cargando...
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td className="py-3 text-zinc-600" colSpan={7}>
-                    Sin registros
-                  </td>
-                </tr>
-              ) : (
-                items.map((d) => (
-                  <tr key={d.id}>
-                    <td className="py-3 pr-3 font-medium text-zinc-900">
-                      {d.nombre}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{d.dni}</td>
-                    <td className="py-3 pr-3 text-zinc-700">{d.licencia}</td>
-                    <td className="py-3 pr-3 text-zinc-700">
+        <div className="mt-4 space-y-4 md:hidden">
+          {loading ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Cargando...
+            </div>
+          ) : items.length === 0 ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Sin registros
+            </div>
+          ) : (
+            items.map((d) => (
+              <div
+                key={d.id}
+                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+              >
+                <div className="text-base font-semibold text-zinc-900">{d.nombre}</div>
+                <div className="mt-2 space-y-1 text-sm text-zinc-700">
+                  <div>
+                    DNI: <span className="font-medium text-zinc-900">{d.dni}</span>
+                  </div>
+                  <div>
+                    Licencia:{" "}
+                    <span className="font-medium text-zinc-900">{d.licencia}</span>
+                  </div>
+                  <div>
+                    Vence:{" "}
+                    <span className="font-medium text-zinc-900">
                       {new Date(d.fechaVencimiento).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 pr-3 text-zinc-700">{d.telefono ?? "—"}</td>
-                    <td className="py-3 pr-3 text-zinc-700">
+                    </span>
+                  </div>
+                  <div>
+                    Teléfono:{" "}
+                    <span className="font-medium text-zinc-900">
+                      {d.telefono ?? "—"}
+                    </span>
+                  </div>
+                  <div>
+                    Camión:{" "}
+                    <span className="font-medium text-zinc-900">
                       {d.truck?.placa ?? "—"}
-                    </td>
-                    <td className="py-3 pr-3">
-                      <div className="flex gap-2">
-                        <button
-                          className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
-                          type="button"
-                          onClick={() => startEdit(d)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
-                          type="button"
-                          onClick={() => onDelete(d.id)}
-                          disabled={deletingId === d.id}
-                        >
-                          {deletingId === d.id ? "Eliminando..." : "Eliminar"}
-                        </button>
-                      </div>
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    type="button"
+                    onClick={() => startEdit(d)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+                    type="button"
+                    onClick={() => onDelete(d.id)}
+                    disabled={deletingId === d.id}
+                  >
+                    {deletingId === d.id ? "Eliminando..." : "Eliminar"}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="mt-4 hidden md:block">
+          <div className="overflow-auto">
+            <table className="w-full min-w-[900px] text-left text-sm">
+              <thead className="text-xs text-zinc-500">
+                <tr>
+                  <th className="py-2 pr-3">Nombre</th>
+                  <th className="py-2 pr-3">DNI</th>
+                  <th className="py-2 pr-3">Licencia</th>
+                  <th className="py-2 pr-3">Vence</th>
+                  <th className="py-2 pr-3">Teléfono</th>
+                  <th className="py-2 pr-3">Camión</th>
+                  <th className="py-2 pr-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {loading ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={7}>
+                      Cargando...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : items.length === 0 ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={7}>
+                      Sin registros
+                    </td>
+                  </tr>
+                ) : (
+                  items.map((d) => (
+                    <tr key={d.id}>
+                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                        {d.nombre}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">{d.dni}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{d.licencia}</td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {new Date(d.fechaVencimiento).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">{d.telefono ?? "—"}</td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {d.truck?.placa ?? "—"}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <div className="flex gap-2">
+                          <button
+                            className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                            type="button"
+                            onClick={() => startEdit(d)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                            type="button"
+                            onClick={() => onDelete(d.id)}
+                            disabled={deletingId === d.id}
+                          >
+                            {deletingId === d.id ? "Eliminando..." : "Eliminar"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

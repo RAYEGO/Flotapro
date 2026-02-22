@@ -93,11 +93,11 @@ export default function DashboardPage() {
   const rentabilidadNum =
     ingresosNum && utilidadNum !== null ? (utilidadNum / ingresosNum) * 100 : null;
   const alertStatus = (restanteKm: number) => {
-    if (restanteKm <= 100) {
+    if (restanteKm <= 0) {
       return { label: "Urgente", className: "bg-danger/15 text-danger" };
     }
-    if (restanteKm <= 300) {
-      return { label: "Próximo mantenimiento", className: "bg-accent/20 text-accent" };
+    if (restanteKm <= 1000) {
+      return { label: "Próximo", className: "bg-accent/20 text-accent" };
     }
     return { label: "OK", className: "bg-secondary/15 text-secondary" };
   };
@@ -293,7 +293,7 @@ export default function DashboardPage() {
           <div>
             <h2 className="text-sm font-semibold text-dark">Alertas de mantenimiento</h2>
             <p className="mt-1 text-sm text-dark/70">
-              Planes activos a 500 km o menos del próximo mantenimiento.
+              Planes activos a 1000 km o menos del próximo mantenimiento.
             </p>
           </div>
           <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">
