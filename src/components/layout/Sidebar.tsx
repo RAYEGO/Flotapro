@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Map,
+  MapPin,
   Settings,
   Truck,
   UserCircle,
@@ -26,6 +27,7 @@ export default function Sidebar() {
     { href: "/dashboard/trucks", label: "Camiones", icon: Truck },
     { href: "/dashboard/drivers", label: "Choferes", icon: Users },
     { href: "/dashboard/freights", label: "Fletes", icon: Map },
+    { href: "/dashboard/operational-points", label: "Puntos operativos", icon: MapPin },
     { href: "/dashboard/fuels", label: "Combustible", icon: Fuel },
     { href: "/dashboard/maintenance", label: "Mantenimiento", icon: Wrench },
     { href: "/dashboard/settings", label: "Configuración", icon: Settings },
@@ -34,10 +36,12 @@ export default function Sidebar() {
     { href: "/dashboard", label: "Resumen", icon: LayoutDashboard },
     { href: "/dashboard/trucks", label: "Camiones", icon: Truck },
     { href: "/dashboard/freights", label: "Fletes", icon: Map },
+    { href: "/dashboard/operational-points", label: "Puntos", icon: MapPin },
     { href: "/dashboard/maintenance", label: "Mantenimiento", icon: Wrench },
   ];
   const secondaryMobileItems = [
     { href: "/dashboard/drivers", label: "Choferes", icon: Users },
+    { href: "/dashboard/operational-points", label: "Puntos", icon: MapPin },
     { href: "/dashboard/fuels", label: "Combustible", icon: Fuel },
     { href: "/dashboard/settings", label: "Configuración", icon: Settings },
   ];
