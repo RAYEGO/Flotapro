@@ -15,10 +15,10 @@ import { requireAdmin } from "@/lib/tenant";
 const updateFreightSchema = z.object({
   truckId: z.string().min(1).optional(),
   driverId: z.string().min(1).optional(),
+  customerId: z.string().min(1).optional(),
+  originPointId: z.string().min(1).optional(),
+  destinationPointId: z.string().min(1).optional(),
   fecha: z.string().datetime().optional(),
-  cliente: z.string().min(2).max(120).optional(),
-  origen: z.string().min(2).max(120).optional(),
-  destino: z.string().min(2).max(120).optional(),
   ingreso: z.coerce.number().nonnegative().optional(),
   peajes: z.coerce.number().nonnegative().optional(),
   viaticos: z.coerce.number().nonnegative().optional(),
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const freight = await prisma.freight.findFirst({
       where: { id: ctx.params.id, companyId: auth.session.companyId },
-      include: { truck: true, driver: true },
+      include: { truck: true, driver: true, customer: true, originPoint: true, destinationPoint: true },
     });
     if (!freight) return jsonNotFound();
     return jsonOk({
@@ -78,8 +78,15 @@ export async function PATCH(
 
     const nextTruckId = parsed.data.truckId ?? existing.truckId;
     const nextDriverId = parsed.data.driverId ?? existing.driverId;
+    const nextCustomerId = parsed.data.customerId ?? existing.customerId;
+    const nextOriginPointId = parsed.data.originPointId ?? existing.originPointId;
+    const nextDestinationPointId = parsed.data.destinationPointId ?? existing.destinationPointId;
 
-    const [truck, driver] = await Promise.all([
+    if (!nextCustomerId) return jsonBadRequest("Cliente requerido");
+    if (!nextOriginPointId) return jsonBadRequest("Punto de origen requerido");
+    if (!nextDestinationPointId) return jsonBadRequest("Punto de destino requerido");
+
+    const [truck, driver, customer, originPoint, destinationPoint] = await Promise.all([
       prisma.truck.findFirst({
         where: { id: nextTruckId, companyId },
         select: {
@@ -90,9 +97,30 @@ export async function PATCH(
         },
       }),
       prisma.driver.findFirst({ where: { id: nextDriverId, companyId }, select: { id: true } }),
+      prisma.client.findFirst({
+        where: { id: nextCustomerId, companyId },
+        select: { id: true, nombreComercial: true },
+      }),
+      prisma.operationalPoint.findFirst({
+        where: { id: nextOriginPointId, companyId },
+        select: { id: true, nombre: true, clienteId: true },
+      }),
+      prisma.operationalPoint.findFirst({
+        where: { id: nextDestinationPointId, companyId },
+        select: { id: true, nombre: true, clienteId: true },
+      }),
     ]);
     if (!truck) return jsonBadRequest("Camión inválido");
     if (!driver) return jsonBadRequest("Chofer inválido");
+    if (!customer) return jsonBadRequest("Cliente inválido");
+    if (!originPoint) return jsonBadRequest("Punto de origen inválido");
+    if (!destinationPoint) return jsonBadRequest("Punto de destino inválido");
+    if (originPoint.clienteId && originPoint.clienteId !== customer.id) {
+      return jsonBadRequest("Punto de origen no pertenece al cliente");
+    }
+    if (destinationPoint.clienteId && destinationPoint.clienteId !== customer.id) {
+      return jsonBadRequest("Punto de destino no pertenece al cliente");
+    }
 
     const tipoModelo = truck.modeloPago;
     const tipoCalculo = truck.tipoCalculo;
@@ -137,7 +165,13 @@ export async function PATCH(
         ...parsed.data,
         truckId: nextTruckId,
         driverId: nextDriverId,
+        customerId: customer.id,
+        originPointId: originPoint.id,
+        destinationPointId: destinationPoint.id,
         fecha: parsed.data.fecha ? new Date(parsed.data.fecha) : undefined,
+        cliente: customer.nombreComercial,
+        origen: originPoint.nombre,
+        destino: destinationPoint.nombre,
         ingreso,
         peajes,
         viaticos,

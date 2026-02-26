@@ -232,7 +232,6 @@ export default function TrucksPage() {
             title="Tipo de cálculo"
           >
             <option value="VIAJE">Por viaje</option>
-            <option value="IDA_VUELTA">Por ida y vuelta</option>
             <option value="MENSUAL">Mensual</option>
           </select>
           <input

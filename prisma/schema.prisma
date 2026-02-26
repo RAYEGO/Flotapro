@@ -13,11 +13,14 @@ model Company {
   updatedAt          DateTime            @updatedAt
   name               String
   ruc                String?             @db.VarChar(11)
+  clients            Client[]
   drivers            Driver[]
   freights           Freight[]
+  freightExpenses    FreightExpense[]
   fuels              Fuel[]
   maintenancePlans   MaintenancePlan[]
   maintenanceRecords MaintenanceRecord[]
+  operationalPoints  OperationalPoint[]
   trucks             Truck[]
   users              User[]
 }
@@ -85,12 +88,59 @@ model Driver {
   @@index([companyId, truckId])
 }
 
+model Client {
+  id             String       @id @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  companyId      String
+  nombreComercial String
+  razonSocial    String?
+  ruc            String?      @db.VarChar(11)
+  tipo           ClientType   @default(EMPRESA)
+  telefono       String
+  correo         String
+  estado         ClientStatus @default(ACTIVO)
+  company        Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  operationalPoints OperationalPoint[]
+  freights       Freight[]
+
+  @@index([companyId, estado])
+  @@index([companyId, tipo])
+}
+
+model OperationalPoint {
+  id            String                @id @default(cuid())
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  companyId     String
+  clienteId     String?
+  nombre        String
+  tipo          OperationalPointType  @default(OTRO)
+  direccion     String
+  ciudad        String
+  departamento  String
+  latitud       Decimal?              @db.Decimal(9, 6)
+  longitud      Decimal?              @db.Decimal(9, 6)
+  linkGoogleMaps String?
+  referencia    String?
+  company       Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  cliente       Client?               @relation(fields: [clienteId], references: [id], onDelete: SetNull)
+  freightsOrigen Freight[]            @relation("FreightOriginPoint")
+  freightsDestino Freight[]           @relation("FreightDestinationPoint")
+
+  @@index([companyId, tipo])
+  @@index([companyId, clienteId])
+}
+
 model Freight {
   id          String        @id @default(cuid())
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   companyId   String
   truckId     String
+  customerId  String?
+  originPointId String?
+  destinationPointId String?
   driverId    String
   fecha       DateTime
   cliente     String
@@ -114,10 +164,33 @@ model Freight {
   company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   driver      Driver        @relation(fields: [driverId], references: [id])
   truck       Truck         @relation(fields: [truckId], references: [id])
+  customer    Client?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  originPoint OperationalPoint? @relation("FreightOriginPoint", fields: [originPointId], references: [id], onDelete: SetNull)
+  destinationPoint OperationalPoint? @relation("FreightDestinationPoint", fields: [destinationPointId], references: [id], onDelete: SetNull)
+  expenses    FreightExpense[]
 
   @@index([companyId, fecha])
   @@index([companyId, truckId])
   @@index([companyId, driverId])
+  @@index([companyId, customerId])
+  @@index([companyId, originPointId])
+  @@index([companyId, destinationPointId])
+}
+
+model FreightExpense {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  companyId String
+  freightId String
+  fecha     DateTime
+  concepto  String
+  monto     Decimal  @db.Decimal(12, 2)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  freight   Freight  @relation(fields: [freightId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, fecha])
+  @@index([companyId, freightId])
 }
 
 model Fuel {
@@ -191,6 +264,26 @@ enum FreightStatus {
   PENDIENTE
   COMPLETADO
   ANULADO
+}
+
+enum ClientType {
+  EMPRESA
+  AGENCIA
+  EVENTUAL
+}
+
+enum ClientStatus {
+  ACTIVO
+  INACTIVO
+}
+
+enum OperationalPointType {
+  BALANZA
+  PLANTA
+  MINA
+  PUERTO
+  ALMACEN
+  OTRO
 }
 
 enum TruckOperationMode {

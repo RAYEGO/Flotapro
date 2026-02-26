@@ -10,6 +10,13 @@ type TruckOption = {
   montoBase: string;
 };
 type DriverOption = { id: string; nombre: string; dni: string };
+type ClientOption = { id: string; nombreComercial: string; estado: "ACTIVO" | "INACTIVO" };
+type OperationalPointOption = {
+  id: string;
+  nombre: string;
+  tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO";
+  clienteId: string | null;
+};
 
 type Freight = {
   id: string;
@@ -17,6 +24,9 @@ type Freight = {
   cliente: string;
   origen: string;
   destino: string;
+  customerId: string | null;
+  originPointId: string | null;
+  destinationPointId: string | null;
   ingreso: string;
   peajes: string;
   viaticos: string;
@@ -34,25 +44,52 @@ type Freight = {
   estado: "PENDIENTE" | "COMPLETADO" | "ANULADO";
   truck?: { id: string; placa: string } | null;
   driver?: { id: string; nombre: string; dni: string } | null;
+  customer?: { id: string; nombreComercial: string } | null;
+  originPoint?: { id: string; nombre: string } | null;
+  destinationPoint?: { id: string; nombre: string } | null;
   truckId: string;
   driverId: string;
 };
 
+type FreightExpense = {
+  id: string;
+  fecha: string;
+  concepto: string;
+  monto: string;
+  freightId: string;
+  freight?: {
+    id: string;
+    cliente: string;
+    origen: string;
+    destino: string;
+    customer?: { id: string; nombreComercial: string } | null;
+    originPoint?: { id: string; nombre: string } | null;
+    destinationPoint?: { id: string; nombre: string } | null;
+    truck?: { id: string; placa: string } | null;
+    driver?: { id: string; nombre: string; dni: string } | null;
+  } | null;
+};
+
 export default function FreightsPage() {
   const [items, setItems] = useState<Freight[]>([]);
+  const [expenses, setExpenses] = useState<FreightExpense[]>([]);
   const [trucks, setTrucks] = useState<TruckOption[]>([]);
   const [drivers, setDrivers] = useState<DriverOption[]>([]);
+  const [customers, setCustomers] = useState<ClientOption[]>([]);
+  const [points, setPoints] = useState<OperationalPointOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 
   const [truckId, setTruckId] = useState("");
   const [driverId, setDriverId] = useState("");
   const [fecha, setFecha] = useState("");
-  const [cliente, setCliente] = useState("");
-  const [origen, setOrigen] = useState("");
-  const [destino, setDestino] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [originPointId, setOriginPointId] = useState("");
+  const [destinationPointId, setDestinationPointId] = useState("");
   const [ingreso, setIngreso] = useState("");
   const [peajes, setPeajes] = useState("");
   const [viaticos, setViaticos] = useState("");
@@ -62,24 +99,62 @@ export default function FreightsPage() {
   const [montoPersonalizado, setMontoPersonalizado] = useState("");
   const [estado, setEstado] = useState<Freight["estado"]>("PENDIENTE");
   const [submitting, setSubmitting] = useState(false);
+  const [expenseFreightId, setExpenseFreightId] = useState("");
+  const [expenseFecha, setExpenseFecha] = useState("");
+  const [expenseConcepto, setExpenseConcepto] = useState("");
+  const [expenseMonto, setExpenseMonto] = useState("");
+  const [expenseSubmitting, setExpenseSubmitting] = useState(false);
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showPointModal, setShowPointModal] = useState(false);
+  const [clientNombreComercial, setClientNombreComercial] = useState("");
+  const [clientRazonSocial, setClientRazonSocial] = useState("");
+  const [clientRuc, setClientRuc] = useState("");
+  const [clientTipo, setClientTipo] = useState<"EMPRESA" | "AGENCIA" | "EVENTUAL">("EMPRESA");
+  const [clientEstado, setClientEstado] = useState<ClientOption["estado"]>("ACTIVO");
+  const [clientTelefono, setClientTelefono] = useState("");
+  const [clientCorreo, setClientCorreo] = useState("");
+  const [clientSubmitting, setClientSubmitting] = useState(false);
+  const [pointNombre, setPointNombre] = useState("");
+  const [pointTipo, setPointTipo] = useState<OperationalPointOption["tipo"]>("OTRO");
+  const [pointClienteId, setPointClienteId] = useState("");
+  const [pointDireccion, setPointDireccion] = useState("");
+  const [pointCiudad, setPointCiudad] = useState("");
+  const [pointDepartamento, setPointDepartamento] = useState("");
+  const [pointLatitud, setPointLatitud] = useState("");
+  const [pointLongitud, setPointLongitud] = useState("");
+  const [pointLink, setPointLink] = useState("");
+  const [pointReferencia, setPointReferencia] = useState("");
+  const [pointSubmitting, setPointSubmitting] = useState(false);
 
   async function load() {
     setLoading(true);
     setError(null);
     try {
-      const [freightsRes, trucksRes, driversRes] = await Promise.all([
-        fetch("/api/freights"),
-        fetch("/api/trucks"),
-        fetch("/api/drivers"),
-      ]);
+      const [freightsRes, trucksRes, driversRes, expensesRes, clientsRes, pointsRes] =
+        await Promise.all([
+          fetch("/api/freights"),
+          fetch("/api/trucks"),
+          fetch("/api/drivers"),
+          fetch("/api/freight-expenses"),
+          fetch("/api/clients"),
+          fetch("/api/operational-points"),
+        ]);
       const freightsData = (await freightsRes.json().catch(() => null)) as any;
       if (!freightsRes.ok) throw new Error(freightsData?.error ?? "No se pudo cargar");
       const trucksData = (await trucksRes.json().catch(() => null)) as any;
       if (!trucksRes.ok) throw new Error(trucksData?.error ?? "No se pudo cargar camiones");
       const driversData = (await driversRes.json().catch(() => null)) as any;
       if (!driversRes.ok) throw new Error(driversData?.error ?? "No se pudo cargar choferes");
+      const expensesData = (await expensesRes.json().catch(() => null)) as any;
+      if (!expensesRes.ok) throw new Error(expensesData?.error ?? "No se pudo cargar gastos");
+      const clientsData = (await clientsRes.json().catch(() => null)) as any;
+      if (!clientsRes.ok) throw new Error(clientsData?.error ?? "No se pudo cargar clientes");
+      const pointsData = (await pointsRes.json().catch(() => null)) as any;
+      if (!pointsRes.ok)
+        throw new Error(pointsData?.error ?? "No se pudo cargar puntos operativos");
 
       setItems(freightsData.freights as Freight[]);
+      setExpenses(expensesData.expenses as FreightExpense[]);
       setTrucks(
         (trucksData.trucks as any[]).map((t) => ({
           id: t.id,
@@ -96,11 +171,23 @@ export default function FreightsPage() {
           dni: d.dni,
         })),
       );
+      setCustomers(clientsData.clients as ClientOption[]);
+      setPoints(
+        (pointsData.points as any[]).map((p) => ({
+          id: p.id,
+          nombre: p.nombre,
+          tipo: p.tipo,
+          clienteId: p.clienteId ?? null,
+        })),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
       setItems([]);
+      setExpenses([]);
       setTrucks([]);
       setDrivers([]);
+      setCustomers([]);
+      setPoints([]);
     } finally {
       setLoading(false);
     }
@@ -128,9 +215,9 @@ export default function FreightsPage() {
     setTruckId("");
     setDriverId("");
     setFecha("");
-    setCliente("");
-    setOrigen("");
-    setDestino("");
+    setCustomerId("");
+    setOriginPointId("");
+    setDestinationPointId("");
     setIngreso("");
     setPeajes("");
     setViaticos("");
@@ -147,9 +234,9 @@ export default function FreightsPage() {
     setTruckId(freight.truckId);
     setDriverId(freight.driverId);
     setFecha(toDateTimeLocal(freight.fecha));
-    setCliente(freight.cliente);
-    setOrigen(freight.origen);
-    setDestino(freight.destino);
+    setCustomerId(freight.customerId ?? "");
+    setOriginPointId(freight.originPointId ?? "");
+    setDestinationPointId(freight.destinationPointId ?? "");
     setIngreso(String(freight.ingreso));
     setPeajes(String(freight.peajes));
     setViaticos(String(freight.viaticos));
@@ -170,6 +257,18 @@ export default function FreightsPage() {
         setError("Monto personalizado requerido");
         return;
       }
+      if (!customerId) {
+        setError("Selecciona un cliente");
+        return;
+      }
+      if (!originPointId) {
+        setError("Selecciona el punto de origen");
+        return;
+      }
+      if (!destinationPointId) {
+        setError("Selecciona el punto de destino");
+        return;
+      }
 
       const res = await fetch(editingId ? `/api/freights/${editingId}` : "/api/freights", {
         method: editingId ? "PATCH" : "POST",
@@ -177,10 +276,10 @@ export default function FreightsPage() {
         body: JSON.stringify({
           truckId,
           driverId,
+          customerId,
+          originPointId,
+          destinationPointId,
           fecha: new Date(fecha).toISOString(),
-          cliente,
-          origen,
-          destino,
           usarMontoPersonalizado,
           montoPersonalizado:
             usarMontoPersonalizado && montoPersonalizado !== ""
@@ -220,6 +319,160 @@ export default function FreightsPage() {
     }
   }
 
+  const resetClientForm = () => {
+    setClientNombreComercial("");
+    setClientRazonSocial("");
+    setClientRuc("");
+    setClientTipo("EMPRESA");
+    setClientEstado("ACTIVO");
+    setClientTelefono("");
+    setClientCorreo("");
+  };
+
+  const resetPointForm = () => {
+    setPointNombre("");
+    setPointTipo("OTRO");
+    setPointClienteId("");
+    setPointDireccion("");
+    setPointCiudad("");
+    setPointDepartamento("");
+    setPointLatitud("");
+    setPointLongitud("");
+    setPointLink("");
+    setPointReferencia("");
+  };
+
+  async function onCreateClient(e: FormEvent) {
+    e.preventDefault();
+    setClientSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nombreComercial: clientNombreComercial,
+          razonSocial: clientRazonSocial,
+          ruc: clientRuc,
+          tipo: clientTipo,
+          telefono: clientTelefono,
+          correo: clientCorreo,
+          estado: clientEstado,
+        }),
+      });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo crear cliente");
+      await load();
+      setCustomerId(data.client?.id ?? "");
+      setShowClientModal(false);
+      resetClientForm();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setClientSubmitting(false);
+    }
+  }
+
+  async function onCreatePoint(e: FormEvent) {
+    e.preventDefault();
+    setPointSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/operational-points", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nombre: pointNombre,
+          tipo: pointTipo,
+          clienteId: pointClienteId === "" ? undefined : pointClienteId,
+          direccion: pointDireccion,
+          ciudad: pointCiudad,
+          departamento: pointDepartamento,
+          latitud: pointLatitud === "" ? undefined : Number(pointLatitud),
+          longitud: pointLongitud === "" ? undefined : Number(pointLongitud),
+          linkGoogleMaps: pointLink,
+          referencia: pointReferencia,
+        }),
+      });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo crear punto");
+      await load();
+      if (!originPointId) {
+        setOriginPointId(data.point?.id ?? "");
+      } else if (!destinationPointId) {
+        setDestinationPointId(data.point?.id ?? "");
+      }
+      setShowPointModal(false);
+      resetPointForm();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setPointSubmitting(false);
+    }
+  }
+
+  const resetExpenseForm = () => {
+    setExpenseFreightId("");
+    setExpenseFecha("");
+    setExpenseConcepto("");
+    setExpenseMonto("");
+    setEditingExpenseId(null);
+  };
+
+  const startEditExpense = (expense: FreightExpense) => {
+    setEditingExpenseId(expense.id);
+    setExpenseFreightId(expense.freightId);
+    setExpenseFecha(toDateTimeLocal(expense.fecha));
+    setExpenseConcepto(expense.concepto);
+    setExpenseMonto(String(expense.monto));
+  };
+
+  async function onCreateExpense(e: FormEvent) {
+    e.preventDefault();
+    setExpenseSubmitting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        editingExpenseId ? `/api/freight-expenses/${editingExpenseId}` : "/api/freight-expenses",
+        {
+          method: editingExpenseId ? "PATCH" : "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            freightId: expenseFreightId,
+            fecha: new Date(expenseFecha).toISOString(),
+            concepto: expenseConcepto,
+            monto: Number(expenseMonto),
+          }),
+        },
+      );
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo guardar gasto");
+      resetExpenseForm();
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setExpenseSubmitting(false);
+    }
+  }
+
+  async function onDeleteExpense(id: string) {
+    if (!confirm("¿Eliminar gasto?")) return;
+    setDeletingExpenseId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/freight-expenses/${id}`, { method: "DELETE" });
+      const data = (await res.json().catch(() => null)) as any;
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo eliminar gasto");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setDeletingExpenseId(null);
+    }
+  }
+
   const selectedTruck = trucks.find((t) => t.id === truckId);
   const tipoCalculoLabel =
     selectedTruck?.tipoCalculo === "IDA_VUELTA"
@@ -227,6 +480,19 @@ export default function FreightsPage() {
       : selectedTruck?.tipoCalculo === "MENSUAL"
         ? "Mensual"
         : "Viaje";
+  const getCustomerName = (freight: Freight) =>
+    freight.customer?.nombreComercial ?? freight.cliente ?? "—";
+  const getOriginName = (freight: Freight) => freight.originPoint?.nombre ?? freight.origen ?? "—";
+  const getDestinationName = (freight: Freight) =>
+    freight.destinationPoint?.nombre ?? freight.destino ?? "—";
+  const getRoute = (freight: Freight) => `${getOriginName(freight)} → ${getDestinationName(freight)}`;
+  const getExpenseCustomerName = (freight: FreightExpense["freight"]) =>
+    freight?.customer?.nombreComercial ?? freight?.cliente ?? "—";
+  const getExpenseRoute = (freight: FreightExpense["freight"]) => {
+    const origen = freight?.originPoint?.nombre ?? freight?.origen ?? "—";
+    const destino = freight?.destinationPoint?.nombre ?? freight?.destino ?? "—";
+    return `${origen} → ${destino}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -341,27 +607,97 @@ export default function FreightsPage() {
             step="0.01"
           />
 
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
-            placeholder="Cliente"
-            value={cliente}
-            onChange={(e) => setCliente(e.target.value)}
-            required
-          />
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
-            placeholder="Origen"
-            value={origen}
-            onChange={(e) => setOrigen(e.target.value)}
-            required
-          />
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
-            placeholder="Destino"
-            value={destino}
-            onChange={(e) => setDestino(e.target.value)}
-            required
-          />
+          <div className="flex items-center gap-2 md:col-span-2">
+            <select
+              className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              value={customerId}
+              onChange={(e) => {
+                setCustomerId(e.target.value);
+                if (e.target.value === "") {
+                  setOriginPointId("");
+                  setDestinationPointId("");
+                }
+              }}
+              required
+            >
+              <option value="">Cliente</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombreComercial}
+                </option>
+              ))}
+            </select>
+            <button
+              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+              type="button"
+              onClick={() => {
+                resetClientForm();
+                setShowClientModal(true);
+              }}
+            >
+              Nuevo
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              value={originPointId}
+              onChange={(e) => setOriginPointId(e.target.value)}
+              required
+            >
+              <option value="">Punto origen</option>
+              {(customerId
+                ? points.filter((p) => !p.clienteId || p.clienteId === customerId)
+                : points
+              ).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
+            <button
+              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+              type="button"
+              onClick={() => {
+                resetPointForm();
+                setPointClienteId(customerId);
+                setShowPointModal(true);
+              }}
+            >
+              Nuevo
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              value={destinationPointId}
+              onChange={(e) => setDestinationPointId(e.target.value)}
+              required
+            >
+              <option value="">Punto destino</option>
+              {(customerId
+                ? points.filter((p) => !p.clienteId || p.clienteId === customerId)
+                : points
+              ).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
+            <button
+              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+              type="button"
+              onClick={() => {
+                resetPointForm();
+                setPointClienteId(customerId);
+                setShowPointModal(true);
+              }}
+            >
+              Nuevo
+            </button>
+          </div>
 
           <input
             className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
@@ -429,6 +765,218 @@ export default function FreightsPage() {
       </div>
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+        <h2 className="text-sm font-semibold text-zinc-900">Gastos por flete</h2>
+
+        <form
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          onSubmit={onCreateExpense}
+        >
+          <select
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            value={expenseFreightId}
+            onChange={(e) => setExpenseFreightId(e.target.value)}
+            required
+          >
+            <option value="">Flete</option>
+            {items.map((f) => (
+              <option key={f.id} value={f.id}>
+                {(f.truck?.placa ?? "—") + " - " + getCustomerName(f)}
+              </option>
+            ))}
+          </select>
+
+          <input
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            type="datetime-local"
+            value={expenseFecha}
+            onChange={(e) => setExpenseFecha(e.target.value)}
+            required
+            aria-label="Fecha del gasto"
+            title="Fecha del gasto"
+          />
+
+          <input
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            placeholder="Concepto"
+            value={expenseConcepto}
+            onChange={(e) => setExpenseConcepto(e.target.value)}
+            required
+          />
+
+          <input
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            placeholder="Monto"
+            value={expenseMonto}
+            onChange={(e) => setExpenseMonto(e.target.value)}
+            type="number"
+            min={0}
+            step="0.01"
+            required
+          />
+
+          <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
+            <button
+              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+              type="submit"
+              disabled={expenseSubmitting}
+            >
+              {expenseSubmitting
+                ? "Guardando..."
+                : editingExpenseId
+                  ? "Guardar cambios"
+                  : "Agregar gasto"}
+            </button>
+            {editingExpenseId ? (
+              <button
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+                type="button"
+                onClick={resetExpenseForm}
+              >
+                Cancelar
+              </button>
+            ) : null}
+          </div>
+        </form>
+
+        <div className="mt-4 space-y-4 md:hidden">
+          {loading ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Cargando...
+            </div>
+          ) : expenses.length === 0 ? (
+            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
+              Sin gastos
+            </div>
+          ) : (
+            expenses.map((e) => (
+              <div
+                key={e.id}
+                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-base font-semibold text-zinc-900">
+                      {e.freight?.truck?.placa ?? "—"}
+                    </div>
+                    <div className="mt-1 text-sm text-zinc-600">
+                      {new Date(e.fecha).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-sm font-semibold text-zinc-900">{e.monto}</div>
+                </div>
+                <div className="mt-3 space-y-1 text-sm text-zinc-700">
+                  <div>
+                    Cliente:{" "}
+                    <span className="font-medium text-zinc-900">
+                      {getExpenseCustomerName(e.freight)}
+                    </span>
+                  </div>
+                  <div>
+                    Ruta:{" "}
+                    <span className="font-medium text-zinc-900">
+                      {getExpenseRoute(e.freight)}
+                    </span>
+                  </div>
+                  <div>
+                    Concepto:{" "}
+                    <span className="font-medium text-zinc-900">{e.concepto}</span>
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    type="button"
+                    onClick={() => startEditExpense(e)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+                    type="button"
+                    onClick={() => onDeleteExpense(e.id)}
+                    disabled={deletingExpenseId === e.id}
+                  >
+                    {deletingExpenseId === e.id ? "Eliminando..." : "Eliminar"}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="mt-4 hidden md:block">
+          <div className="overflow-auto">
+            <table className="w-full min-w-[980px] text-left text-sm">
+              <thead className="text-xs text-zinc-500">
+                <tr>
+                  <th className="py-2 pr-3">Fecha</th>
+                  <th className="py-2 pr-3">Camión</th>
+                  <th className="py-2 pr-3">Cliente</th>
+                  <th className="py-2 pr-3">Ruta</th>
+                  <th className="py-2 pr-3">Concepto</th>
+                  <th className="py-2 pr-3">Monto</th>
+                  <th className="py-2 pr-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {loading ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={7}>
+                      Cargando...
+                    </td>
+                  </tr>
+                ) : expenses.length === 0 ? (
+                  <tr>
+                    <td className="py-3 text-zinc-600" colSpan={7}>
+                      Sin gastos
+                    </td>
+                  </tr>
+                ) : (
+                  expenses.map((e) => (
+                    <tr key={e.id}>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {new Date(e.fecha).toLocaleString()}
+                      </td>
+                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                        {e.freight?.truck?.placa ?? "—"}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {getExpenseCustomerName(e.freight)}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">
+                        {getExpenseRoute(e.freight)}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700">{e.concepto}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{e.monto}</td>
+                      <td className="py-3 pr-3">
+                        <div className="flex gap-2">
+                          <button
+                            className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                            type="button"
+                            onClick={() => startEditExpense(e)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                            type="button"
+                            onClick={() => onDeleteExpense(e.id)}
+                            disabled={deletingExpenseId === e.id}
+                          >
+                            {deletingExpenseId === e.id ? "Eliminando..." : "Eliminar"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
@@ -470,12 +1018,12 @@ export default function FreightsPage() {
                   </div>
                   <div>
                     Cliente:{" "}
-                    <span className="font-medium text-zinc-900">{f.cliente}</span>
+                    <span className="font-medium text-zinc-900">{getCustomerName(f)}</span>
                   </div>
                   <div>
                     Ruta:{" "}
                     <span className="font-medium text-zinc-900">
-                      {f.origen} → {f.destino}
+                      {getRoute(f)}
                     </span>
                   </div>
                   <div>
@@ -592,9 +1140,9 @@ export default function FreightsPage() {
                       <td className="py-3 pr-3 text-zinc-700">
                         {f.driver ? `${f.driver.nombre} (${f.driver.dni})` : "—"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.cliente}</td>
+                      <td className="py-3 pr-3 text-zinc-700">{getCustomerName(f)}</td>
                       <td className="py-3 pr-3 text-zinc-700">
-                        {f.origen} → {f.destino}
+                        {getRoute(f)}
                       </td>
                       <td className="py-3 pr-3 text-zinc-700">
                         {f.tipoModelo === "DUENO_PAGA" ? "Dueño paga" : "Chofer paga"}
@@ -660,6 +1208,211 @@ export default function FreightsPage() {
           </div>
         </div>
       </div>
+      {showClientModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-base font-semibold text-zinc-900">Nuevo cliente</h3>
+              <button
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50"
+                type="button"
+                onClick={() => setShowClientModal(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+            <form
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2"
+              onSubmit={onCreateClient}
+            >
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Nombre comercial"
+                value={clientNombreComercial}
+                onChange={(e) => setClientNombreComercial(e.target.value)}
+                required
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Razón social"
+                value={clientRazonSocial}
+                onChange={(e) => setClientRazonSocial(e.target.value)}
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="RUC"
+                value={clientRuc}
+                onChange={(e) => setClientRuc(e.target.value)}
+              />
+              <select
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                value={clientTipo}
+                onChange={(e) => setClientTipo(e.target.value as typeof clientTipo)}
+              >
+                <option value="EMPRESA">Empresa</option>
+                <option value="AGENCIA">Agencia</option>
+                <option value="EVENTUAL">Eventual</option>
+              </select>
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Teléfono"
+                value={clientTelefono}
+                onChange={(e) => setClientTelefono(e.target.value)}
+                required
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Correo"
+                value={clientCorreo}
+                onChange={(e) => setClientCorreo(e.target.value)}
+                type="email"
+                required
+              />
+              <select
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                value={clientEstado}
+                onChange={(e) => setClientEstado(e.target.value as ClientOption["estado"])}
+              >
+                <option value="ACTIVO">Activo</option>
+                <option value="INACTIVO">Inactivo</option>
+              </select>
+              <div className="flex flex-wrap gap-2 md:col-span-2">
+                <button
+                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+                  type="submit"
+                  disabled={clientSubmitting}
+                >
+                  {clientSubmitting ? "Guardando..." : "Guardar cliente"}
+                </button>
+                <button
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+                  type="button"
+                  onClick={() => setShowClientModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+      {showPointModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-lg">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-base font-semibold text-zinc-900">Nuevo punto operativo</h3>
+              <button
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50"
+                type="button"
+                onClick={() => setShowPointModal(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+            <form
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"
+              onSubmit={onCreatePoint}
+            >
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Nombre"
+                value={pointNombre}
+                onChange={(e) => setPointNombre(e.target.value)}
+                required
+              />
+              <select
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                value={pointTipo}
+                onChange={(e) => setPointTipo(e.target.value as OperationalPointOption["tipo"])}
+              >
+                <option value="BALANZA">Balanza</option>
+                <option value="PLANTA">Planta</option>
+                <option value="MINA">Mina</option>
+                <option value="PUERTO">Puerto</option>
+                <option value="ALMACEN">Almacén</option>
+                <option value="OTRO">Otro</option>
+              </select>
+              <select
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                value={pointClienteId}
+                onChange={(e) => setPointClienteId(e.target.value)}
+              >
+                <option value="">Sin cliente</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombreComercial}
+                  </option>
+                ))}
+              </select>
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base lg:col-span-2"
+                placeholder="Dirección"
+                value={pointDireccion}
+                onChange={(e) => setPointDireccion(e.target.value)}
+                required
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Ciudad"
+                value={pointCiudad}
+                onChange={(e) => setPointCiudad(e.target.value)}
+                required
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Departamento"
+                value={pointDepartamento}
+                onChange={(e) => setPointDepartamento(e.target.value)}
+                required
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Latitud"
+                value={pointLatitud}
+                onChange={(e) => setPointLatitud(e.target.value)}
+                type="number"
+                step="0.000001"
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                placeholder="Longitud"
+                value={pointLongitud}
+                onChange={(e) => setPointLongitud(e.target.value)}
+                type="number"
+                step="0.000001"
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                placeholder="Link Google Maps"
+                value={pointLink}
+                onChange={(e) => setPointLink(e.target.value)}
+              />
+              <input
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                placeholder="Referencia"
+                value={pointReferencia}
+                onChange={(e) => setPointReferencia(e.target.value)}
+              />
+              <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3">
+                <button
+                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+                  type="submit"
+                  disabled={pointSubmitting}
+                >
+                  {pointSubmitting ? "Guardando..." : "Guardar punto"}
+                </button>
+                <button
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+                  type="button"
+                  onClick={() => setShowPointModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -15,10 +15,10 @@ import { requireAdmin } from "@/lib/tenant";
 const createFreightSchema = z.object({
   truckId: z.string().min(1),
   driverId: z.string().min(1),
+  customerId: z.string().min(1),
+  originPointId: z.string().min(1),
+  destinationPointId: z.string().min(1),
   fecha: z.string().datetime(),
-  cliente: z.string().min(2).max(120),
-  origen: z.string().min(2).max(120),
-  destino: z.string().min(2).max(120),
   ingreso: z.coerce.number().nonnegative().optional().default(0),
   peajes: z.coerce.number().nonnegative().optional().default(0),
   viaticos: z.coerce.number().nonnegative().optional().default(0),
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   try {
     const freights = await prisma.freight.findMany({
       where: { companyId: auth.session.companyId },
-      include: { truck: true, driver: true },
+      include: { truck: true, driver: true, customer: true, originPoint: true, destinationPoint: true },
       orderBy: { fecha: "desc" },
     });
 
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     const companyId = auth.session.companyId;
 
-    const [truck, driver] = await Promise.all([
+    const [truck, driver, customer, originPoint, destinationPoint] = await Promise.all([
       prisma.truck.findFirst({
         where: { id: parsed.data.truckId, companyId },
         select: {
@@ -84,10 +84,31 @@ export async function POST(req: NextRequest) {
         where: { id: parsed.data.driverId, companyId },
         select: { id: true },
       }),
+      prisma.client.findFirst({
+        where: { id: parsed.data.customerId, companyId },
+        select: { id: true, nombreComercial: true },
+      }),
+      prisma.operationalPoint.findFirst({
+        where: { id: parsed.data.originPointId, companyId },
+        select: { id: true, nombre: true, clienteId: true },
+      }),
+      prisma.operationalPoint.findFirst({
+        where: { id: parsed.data.destinationPointId, companyId },
+        select: { id: true, nombre: true, clienteId: true },
+      }),
     ]);
 
     if (!truck) return jsonBadRequest("Camión inválido");
     if (!driver) return jsonBadRequest("Chofer inválido");
+    if (!customer) return jsonBadRequest("Cliente inválido");
+    if (!originPoint) return jsonBadRequest("Punto de origen inválido");
+    if (!destinationPoint) return jsonBadRequest("Punto de destino inválido");
+    if (originPoint.clienteId && originPoint.clienteId !== customer.id) {
+      return jsonBadRequest("Punto de origen no pertenece al cliente");
+    }
+    if (destinationPoint.clienteId && destinationPoint.clienteId !== customer.id) {
+      return jsonBadRequest("Punto de destino no pertenece al cliente");
+    }
 
     if (parsed.data.usarMontoPersonalizado && parsed.data.montoPersonalizado === undefined) {
       return jsonBadRequest("Monto personalizado requerido");
@@ -121,10 +142,13 @@ export async function POST(req: NextRequest) {
         companyId,
         truckId: parsed.data.truckId,
         driverId: parsed.data.driverId,
+        customerId: customer.id,
+        originPointId: originPoint.id,
+        destinationPointId: destinationPoint.id,
         fecha: new Date(parsed.data.fecha),
-        cliente: parsed.data.cliente,
-        origen: parsed.data.origen,
-        destino: parsed.data.destino,
+        cliente: customer.nombreComercial,
+        origen: originPoint.nombre,
+        destino: destinationPoint.nombre,
         ingreso,
         peajes,
         viaticos,
