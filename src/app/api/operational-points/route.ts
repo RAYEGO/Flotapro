@@ -19,8 +19,8 @@ const createPointSchema = z.object({
   ciudad: z.string().min(2).max(120),
   departamento: z.string().min(2).max(120),
   distrito: z.string().min(2).max(120).optional().or(z.literal("")),
-  latitud: z.coerce.number().min(-90).max(90).optional(),
-  longitud: z.coerce.number().min(-180).max(180).optional(),
+  latitud: z.coerce.number().finite().min(-90).max(90).optional(),
+  longitud: z.coerce.number().finite().min(-180).max(180).optional(),
   linkGoogleMaps: z.string().min(3).max(300).optional().or(z.literal("")),
   referencia: z.string().min(2).max(160).optional().or(z.literal("")),
 });

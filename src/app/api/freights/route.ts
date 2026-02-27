@@ -19,12 +19,12 @@ const createFreightSchema = z.object({
   originPointId: z.string().min(1),
   destinationPointId: z.string().min(1),
   fecha: z.string().datetime(),
-  ingreso: z.coerce.number().nonnegative().optional().default(0),
-  peajes: z.coerce.number().nonnegative().optional().default(0),
-  viaticos: z.coerce.number().nonnegative().optional().default(0),
-  otrosGastos: z.coerce.number().nonnegative().optional().default(0),
+  ingreso: z.coerce.number().finite().nonnegative().optional().default(0),
+  peajes: z.coerce.number().finite().nonnegative().optional().default(0),
+  viaticos: z.coerce.number().finite().nonnegative().optional().default(0),
+  otrosGastos: z.coerce.number().finite().nonnegative().optional().default(0),
   usarMontoPersonalizado: z.boolean().optional().default(false),
-  montoPersonalizado: z.coerce.number().nonnegative().optional(),
+  montoPersonalizado: z.coerce.number().finite().nonnegative().optional(),
   estado: z.enum(["PENDIENTE", "COMPLETADO", "ANULADO"]).optional(),
 });
 
