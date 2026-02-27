@@ -35,7 +35,13 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   try {
     const freight = await prisma.freight.findFirst({
       where: { id: ctx.params.id, companyId: auth.session.companyId },
-      include: { truck: true, driver: true, customer: true, originPoint: true, destinationPoint: true },
+      include: {
+        truck: true,
+        driver: true,
+        customer: true,
+        originPoint: { select: { id: true, nombre: true, clienteId: true } },
+        destinationPoint: { select: { id: true, nombre: true, clienteId: true } },
+      },
     });
     if (!freight) return jsonNotFound();
     return jsonOk({
@@ -126,8 +132,8 @@ export async function PATCH(
       return jsonBadRequest("Punto de destino no pertenece al cliente");
     }
 
-    const tipoModelo = truck.modeloPago;
-    const tipoCalculo = truck.tipoCalculo;
+    const tipoModelo = truck.modeloPago ?? "DUENO_PAGA";
+    const tipoCalculo = truck.tipoCalculo ?? "VIAJE";
     const montoBaseValue = truck.montoBase ?? 0;
     const montoBase = decimal(String(montoBaseValue), 2);
     const montoCalculado =

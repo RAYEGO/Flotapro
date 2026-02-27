@@ -24,6 +24,33 @@ const formatCoord = (value: unknown) => {
   return null;
 };
 
+const getUbigeoSupport = async () => {
+  const [tableRows, columnRows] = await Promise.all([
+    prisma.$queryRaw<{ table_name: string }[]>`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+        AND table_name IN ('Region', 'Province', 'District')
+    `,
+    prisma.$queryRaw<{ column_name: string }[]>`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'OperationalPoint'
+        AND column_name IN ('distrito', 'regionId', 'provinceId', 'districtId')
+    `,
+  ]);
+
+  const columnSet = new Set(columnRows.map((row) => row.column_name));
+  return {
+    hasUbigeoTables: tableRows.length === 3,
+    hasDistritoColumn: columnSet.has("distrito"),
+    hasRegionIdColumn: columnSet.has("regionId"),
+    hasProvinceIdColumn: columnSet.has("provinceId"),
+    hasDistrictIdColumn: columnSet.has("districtId"),
+  };
+};
+
 const updatePointSchema = z.object({
   nombre: z.string().min(2).max(120).optional(),
   tipo: z.enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO"]).optional(),
@@ -46,20 +73,46 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
   if (!auth.ok) return auth.response;
 
   try {
+    const support = await getUbigeoSupport();
+    const select = {
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      companyId: true,
+      clienteId: true,
+      nombre: true,
+      tipo: true,
+      direccion: true,
+      ciudad: true,
+      departamento: true,
+      latitud: true,
+      longitud: true,
+      linkGoogleMaps: true,
+      referencia: true,
+      cliente: true,
+      ...(support.hasDistritoColumn ? { distrito: true } : {}),
+      ...(support.hasRegionIdColumn ? { regionId: true } : {}),
+      ...(support.hasProvinceIdColumn ? { provinceId: true } : {}),
+      ...(support.hasDistrictIdColumn ? { districtId: true } : {}),
+    };
     const point = await prisma.operationalPoint.findFirst({
       where: { id: ctx.params.id, companyId: auth.session.companyId },
-      include: { cliente: true },
+      select,
     });
     if (!point) return jsonNotFound();
     return jsonOk({
       point: {
         ...point,
+        distrito: support.hasDistritoColumn ? point.distrito ?? null : null,
+        regionId: support.hasRegionIdColumn ? point.regionId ?? null : null,
+        provinceId: support.hasProvinceIdColumn ? point.provinceId ?? null : null,
+        districtId: support.hasDistrictIdColumn ? point.districtId ?? null : null,
         latitud: formatCoord(point.latitud),
         longitud: formatCoord(point.longitud),
       },
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }
 
@@ -75,6 +128,7 @@ export async function PATCH(
     if (!parsed.success) return jsonBadRequest("Datos inválidos");
 
     const companyId = auth.session.companyId;
+    const support = await getUbigeoSupport();
     const existing = await prisma.operationalPoint.findFirst({
       where: { id: ctx.params.id, companyId },
     });
@@ -95,9 +149,10 @@ export async function PATCH(
     let district: { id: number; nombre: string; provinceId: number } | null = null;
 
     const hasUbigeoChange =
-      parsed.data.regionId !== undefined ||
-      parsed.data.provinceId !== undefined ||
-      parsed.data.districtId !== undefined;
+      support.hasUbigeoTables &&
+      (parsed.data.regionId !== undefined ||
+        parsed.data.provinceId !== undefined ||
+        parsed.data.districtId !== undefined);
 
     const candidateRegionId = parsed.data.regionId ?? existing.regionId ?? undefined;
     const candidateProvinceId = parsed.data.provinceId ?? existing.provinceId ?? undefined;
@@ -147,24 +202,32 @@ export async function PATCH(
       if (!distrito) return jsonBadRequest("Selecciona el distrito");
     }
 
+    const data = {
+      clienteId: nextClienteId,
+      nombre: parsed.data.nombre,
+      tipo: parsed.data.tipo,
+      direccion: parsed.data.direccion,
+      departamento,
+      ciudad,
+      latitud: parsed.data.latitud === undefined ? undefined : decimal(parsed.data.latitud, 6),
+      longitud: parsed.data.longitud === undefined ? undefined : decimal(parsed.data.longitud, 6),
+      linkGoogleMaps: parsed.data.linkGoogleMaps === "" ? null : parsed.data.linkGoogleMaps,
+      referencia: parsed.data.referencia === "" ? null : parsed.data.referencia,
+      ...(support.hasDistritoColumn ? { distrito } : {}),
+      ...(support.hasRegionIdColumn
+        ? { regionId: region?.id ?? (hasUbigeoChange ? null : existing.regionId) }
+        : {}),
+      ...(support.hasProvinceIdColumn
+        ? { provinceId: province?.id ?? (hasUbigeoChange ? null : existing.provinceId) }
+        : {}),
+      ...(support.hasDistrictIdColumn
+        ? { districtId: district?.id ?? (hasUbigeoChange ? null : existing.districtId) }
+        : {}),
+    };
+
     const point = await prisma.operationalPoint.update({
       where: { id: existing.id },
-      data: {
-        ...parsed.data,
-        clienteId: nextClienteId,
-        departamento,
-        ciudad,
-        distrito,
-        regionId: region?.id ?? (hasUbigeoChange ? null : existing.regionId),
-        provinceId: province?.id ?? (hasUbigeoChange ? null : existing.provinceId),
-        districtId: district?.id ?? (hasUbigeoChange ? null : existing.districtId),
-        latitud: parsed.data.latitud === undefined ? undefined : decimal(parsed.data.latitud, 6),
-        longitud:
-          parsed.data.longitud === undefined ? undefined : decimal(parsed.data.longitud, 6),
-        linkGoogleMaps:
-          parsed.data.linkGoogleMaps === "" ? null : parsed.data.linkGoogleMaps,
-        referencia: parsed.data.referencia === "" ? null : parsed.data.referencia,
-      },
+      data,
     });
 
     return jsonOk({
@@ -174,8 +237,8 @@ export async function PATCH(
         longitud: formatCoord(point.longitud),
       },
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }
 
