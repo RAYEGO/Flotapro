@@ -248,14 +248,14 @@ export default function OperationalPointsPage() {
           onSubmit={onCreate}
         >
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
           />
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={tipo}
             onChange={(e) => setTipo(e.target.value as Point["tipo"])}
           >
@@ -270,7 +270,7 @@ export default function OperationalPointsPage() {
             <option value="OTRO">Otro</option>
           </select>
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
           >
@@ -282,14 +282,14 @@ export default function OperationalPointsPage() {
             ))}
           </select>
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
             placeholder="Dirección"
             value={direccion}
             onChange={(e) => setDireccion(e.target.value)}
             required
           />
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={regionId}
             onChange={(e) => {
               const nextId = e.target.value;
@@ -314,7 +314,7 @@ export default function OperationalPointsPage() {
             ))}
           </select>
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={provinciaId}
             onChange={(e) => {
               const nextId = e.target.value;
@@ -335,7 +335,7 @@ export default function OperationalPointsPage() {
             ))}
           </select>
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={distritoId}
             onChange={(e) => {
               const nextId = e.target.value;
@@ -354,7 +354,7 @@ export default function OperationalPointsPage() {
             ))}
           </select>
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Latitud"
             value={latitud}
             onChange={(e) => setLatitud(e.target.value)}
@@ -362,7 +362,7 @@ export default function OperationalPointsPage() {
             step="0.000001"
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Longitud"
             value={longitud}
             onChange={(e) => setLongitud(e.target.value)}
@@ -370,13 +370,13 @@ export default function OperationalPointsPage() {
             step="0.000001"
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
             placeholder="Link Google Maps"
             value={linkGoogleMaps}
             onChange={(e) => setLinkGoogleMaps(e.target.value)}
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
             placeholder="Referencia"
             value={referencia}
             onChange={(e) => setReferencia(e.target.value)}

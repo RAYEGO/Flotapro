@@ -157,7 +157,7 @@ export default function FuelsPage() {
           onSubmit={onCreate}
         >
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             required
@@ -170,7 +170,7 @@ export default function FuelsPage() {
             ))}
           </select>
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             required
@@ -183,7 +183,7 @@ export default function FuelsPage() {
             ))}
           </select>
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             type="datetime-local"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
@@ -193,7 +193,7 @@ export default function FuelsPage() {
           />
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Kilometraje (km)"
             value={kilometraje}
             onChange={(e) => setKilometraje(e.target.value)}
@@ -202,7 +202,7 @@ export default function FuelsPage() {
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Galones (ej. 30.5)"
             value={galones}
             onChange={(e) => setGalones(e.target.value)}
@@ -212,7 +212,7 @@ export default function FuelsPage() {
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Precio/galón (ej. 18.90)"
             value={precioPorGalon}
             onChange={(e) => setPrecioPorGalon(e.target.value)}

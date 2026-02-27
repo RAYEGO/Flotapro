@@ -130,7 +130,7 @@ export default function Sidebar() {
         </nav>
       </aside>
 
-      <aside className="hidden rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ring-1 ring-white/5 md:block md:w-[72px] min-[1366px]:w-[220px] min-[1366px]:p-5 min-[1920px]:w-[260px] min-[1920px]:p-6">
+      <aside className="hidden rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ring-1 ring-white/5 md:block md:w-[72px] md:max-h-[calc(100vh-3rem)] md:overflow-y-auto md:overscroll-contain md:sticky md:top-6 md:self-start min-[1366px]:w-[220px] min-[1366px]:p-5 min-[1920px]:w-[260px] min-[1920px]:p-6">
         <Link href="/dashboard" className="flex items-center justify-center py-4">
           <span className="relative hidden h-14 w-48 min-[1366px]:block min-[1920px]:h-16 min-[1920px]:w-56">
             <Image

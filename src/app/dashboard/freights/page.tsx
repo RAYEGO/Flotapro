@@ -558,7 +558,7 @@ export default function FreightsPage() {
           onSubmit={onCreate}
         >
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={truckId}
             onChange={(e) => {
               const nextId = e.target.value;
@@ -577,7 +577,7 @@ export default function FreightsPage() {
           </select>
 
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             required
@@ -591,7 +591,7 @@ export default function FreightsPage() {
           </select>
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             type="datetime-local"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
@@ -601,7 +601,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Pago chofer/dueño"
             value={montoAutomatico}
             readOnly
@@ -610,7 +610,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Tipo de cálculo"
             value={tipoCalculoLabel}
             readOnly
@@ -619,7 +619,7 @@ export default function FreightsPage() {
           />
 
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={estado}
             onChange={(e) => setEstado(e.target.value as Freight["estado"])}
             aria-label="Estado del flete"
@@ -630,7 +630,7 @@ export default function FreightsPage() {
             <option value="ANULADO">ANULADO</option>
           </select>
 
-          <label className="flex h-10 items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700 md:px-4 md:py-3 md:text-base">
+          <label className="flex h-10 items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700 md:px-4 md:py-2 md:text-base">
             <input
               type="checkbox"
               checked={usarMontoPersonalizado}
@@ -650,7 +650,7 @@ export default function FreightsPage() {
           </label>
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base disabled:bg-zinc-50"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base disabled:bg-zinc-50"
             placeholder="Pago personalizado chofer/dueño"
             value={montoPersonalizado}
             onChange={(e) => setMontoPersonalizado(e.target.value)}
@@ -662,7 +662,7 @@ export default function FreightsPage() {
 
           <div className="flex items-center gap-2 md:col-span-2">
             <select
-              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
               value={customerId}
               onChange={(e) => {
                 setCustomerId(e.target.value);
@@ -694,7 +694,7 @@ export default function FreightsPage() {
 
           <div className="flex items-center gap-2">
             <select
-              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
               value={originPointId}
               onChange={(e) => setOriginPointId(e.target.value)}
               required
@@ -724,7 +724,7 @@ export default function FreightsPage() {
 
           <div className="flex items-center gap-2">
             <select
-              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
               value={destinationPointId}
               onChange={(e) => setDestinationPointId(e.target.value)}
               required
@@ -753,7 +753,7 @@ export default function FreightsPage() {
           </div>
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-2 md:text-base"
             placeholder="Monto flete"
             value={ingreso}
             onChange={(e) => setIngreso(e.target.value)}
@@ -801,7 +801,7 @@ export default function FreightsPage() {
             Puede colocar gastos como viáticos, peajes y otros gastos.
           </p>
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={expenseFreightId}
             onChange={(e) => setExpenseFreightId(e.target.value)}
             required
@@ -815,7 +815,7 @@ export default function FreightsPage() {
           </select>
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             type="datetime-local"
             value={expenseFecha}
             onChange={(e) => setExpenseFecha(e.target.value)}
@@ -825,7 +825,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Concepto"
             value={expenseConcepto}
             onChange={(e) => setExpenseConcepto(e.target.value)}
@@ -833,7 +833,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Monto"
             value={expenseMonto}
             onChange={(e) => setExpenseMonto(e.target.value)}
@@ -1255,26 +1255,26 @@ export default function FreightsPage() {
               onSubmit={onCreateClient}
             >
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Nombre comercial"
                 value={clientNombreComercial}
                 onChange={(e) => setClientNombreComercial(e.target.value)}
                 required
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Razón social"
                 value={clientRazonSocial}
                 onChange={(e) => setClientRazonSocial(e.target.value)}
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="RUC"
                 value={clientRuc}
                 onChange={(e) => setClientRuc(e.target.value)}
               />
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={clientTipo}
                 onChange={(e) => setClientTipo(e.target.value as typeof clientTipo)}
               >
@@ -1283,14 +1283,14 @@ export default function FreightsPage() {
                 <option value="EVENTUAL">Eventual</option>
               </select>
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Teléfono"
                 value={clientTelefono}
                 onChange={(e) => setClientTelefono(e.target.value)}
                 required
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Correo"
                 value={clientCorreo}
                 onChange={(e) => setClientCorreo(e.target.value)}
@@ -1298,7 +1298,7 @@ export default function FreightsPage() {
                 required
               />
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
                 value={clientEstado}
                 onChange={(e) => setClientEstado(e.target.value as ClientOption["estado"])}
               >
@@ -1343,14 +1343,14 @@ export default function FreightsPage() {
               onSubmit={onCreatePoint}
             >
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Nombre"
                 value={pointNombre}
                 onChange={(e) => setPointNombre(e.target.value)}
                 required
               />
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={pointTipo}
                 onChange={(e) => setPointTipo(e.target.value as OperationalPointOption["tipo"])}
               >
@@ -1362,7 +1362,7 @@ export default function FreightsPage() {
                 <option value="OTRO">Otro</option>
               </select>
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={pointClienteId}
                 onChange={(e) => setPointClienteId(e.target.value)}
               >
@@ -1374,14 +1374,14 @@ export default function FreightsPage() {
                 ))}
               </select>
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base min-[1600px]:col-span-2"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base min-[1600px]:col-span-2"
                 placeholder="Dirección"
                 value={pointDireccion}
                 onChange={(e) => setPointDireccion(e.target.value)}
                 required
               />
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={pointRegionId}
                 onChange={(e) => {
                   const nextId = e.target.value;
@@ -1406,7 +1406,7 @@ export default function FreightsPage() {
                 ))}
               </select>
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={pointProvinciaId}
                 onChange={(e) => {
                   const nextId = e.target.value;
@@ -1427,7 +1427,7 @@ export default function FreightsPage() {
                 ))}
               </select>
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={pointDistritoId}
                 onChange={(e) => {
                   const nextId = e.target.value;
@@ -1446,13 +1446,13 @@ export default function FreightsPage() {
                 ))}
               </select>
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
                 placeholder="Link Google Maps"
                 value={pointLink}
                 onChange={(e) => setPointLink(e.target.value)}
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
                 placeholder="Referencia"
                 value={pointReferencia}
                 onChange={(e) => setPointReferencia(e.target.value)}

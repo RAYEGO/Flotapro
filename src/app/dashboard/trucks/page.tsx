@@ -168,28 +168,28 @@ export default function TrucksPage() {
           onSubmit={onCreate}
         >
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Placa"
             value={placa}
             onChange={(e) => setPlaca(e.target.value)}
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Marca"
             value={marca}
             onChange={(e) => setMarca(e.target.value)}
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Modelo"
             value={modelo}
             onChange={(e) => setModelo(e.target.value)}
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Año"
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
@@ -199,14 +199,14 @@ export default function TrucksPage() {
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Tipo"
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
             required
           />
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
             placeholder="Km actual"
             value={kilometrajeActual}
             onChange={(e) => setKilometrajeActual(e.target.value)}
@@ -215,7 +215,7 @@ export default function TrucksPage() {
             required
           />
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={modeloPago}
             onChange={(e) => setModeloPago(e.target.value as Truck["modeloPago"])}
             aria-label="Modelo de pago"
@@ -225,7 +225,7 @@ export default function TrucksPage() {
             <option value="CHOFER_PAGA">Chofer paga al dueño</option>
           </select>
           <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
             value={tipoCalculo}
             onChange={(e) => setTipoCalculo(e.target.value as Truck["tipoCalculo"])}
             aria-label="Tipo de cálculo"
@@ -235,7 +235,7 @@ export default function TrucksPage() {
             <option value="MENSUAL">Mensual</option>
           </select>
           <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-2 md:text-base"
             placeholder="Monto"
             value={montoBase}
             onChange={(e) => setMontoBase(e.target.value)}

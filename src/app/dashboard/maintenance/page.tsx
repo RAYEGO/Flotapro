@@ -309,7 +309,7 @@ export default function MaintenancePage() {
               onSubmit={createPlan}
             >
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={planTruckId}
                 onChange={(e) => setPlanTruckId(e.target.value)}
                 required
@@ -322,14 +322,14 @@ export default function MaintenancePage() {
                 ))}
               </select>
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Tipo (ej. Cambio de aceite)"
                 value={planTipo}
                 onChange={(e) => setPlanTipo(e.target.value)}
                 required
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Cada km (frecuencia)"
                 value={cadaKm}
                 onChange={(e) => setCadaKm(Number(e.target.value))}
@@ -338,7 +338,7 @@ export default function MaintenancePage() {
                 required
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Último servicio (km)"
                 value={ultimoServicioKm}
                 onChange={(e) => setUltimoServicioKm(e.target.value)}
@@ -535,7 +535,7 @@ export default function MaintenancePage() {
               onSubmit={createRecord}
             >
               <select
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 value={recordTruckId}
                 onChange={(e) => setRecordTruckId(e.target.value)}
                 required
@@ -548,7 +548,7 @@ export default function MaintenancePage() {
                 ))}
               </select>
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
                 type="datetime-local"
                 value={recordFecha}
                 onChange={(e) => setRecordFecha(e.target.value)}
@@ -557,14 +557,14 @@ export default function MaintenancePage() {
                 title="Fecha y hora del servicio"
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Tipo"
                 value={recordTipo}
                 onChange={(e) => setRecordTipo(e.target.value)}
                 required
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Kilometraje (km)"
                 value={recordKm}
                 onChange={(e) => setRecordKm(e.target.value)}
@@ -573,7 +573,7 @@ export default function MaintenancePage() {
                 required
               />
               <input
-                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
                 placeholder="Costo (monto)"
                 value={recordCosto}
                 onChange={(e) => setRecordCosto(e.target.value)}
