@@ -11,6 +11,19 @@ import {
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/tenant";
 
+const formatCoord = (value: unknown) => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") return Number.isFinite(value) ? value.toFixed(6) : null;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed.toFixed(6) : null;
+  }
+  if (typeof value === "object" && "toFixed" in (value as object)) {
+    return (value as { toFixed: (digits: number) => string }).toFixed(6);
+  }
+  return null;
+};
+
 const updatePointSchema = z.object({
   nombre: z.string().min(2).max(120).optional(),
   tipo: z.enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO"]).optional(),
@@ -38,8 +51,8 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
     return jsonOk({
       point: {
         ...point,
-        latitud: point.latitud === null ? null : point.latitud.toFixed(6),
-        longitud: point.longitud === null ? null : point.longitud.toFixed(6),
+        latitud: formatCoord(point.latitud),
+        longitud: formatCoord(point.longitud),
       },
     });
   } catch {
@@ -92,8 +105,8 @@ export async function PATCH(
     return jsonOk({
       point: {
         ...point,
-        latitud: point.latitud === null ? null : point.latitud.toFixed(6),
-        longitud: point.longitud === null ? null : point.longitud.toFixed(6),
+        latitud: formatCoord(point.latitud),
+        longitud: formatCoord(point.longitud),
       },
     });
   } catch {

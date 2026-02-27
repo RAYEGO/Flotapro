@@ -12,6 +12,7 @@ import {
   LogOut,
   Map,
   MapPin,
+  Plus,
   Settings,
   Truck,
   UserCircle,
@@ -54,7 +55,8 @@ export default function Sidebar() {
   const primaryMobileItems = [
     { href: "/dashboard", label: "Resumen", icon: LayoutDashboard },
     { href: "/dashboard/trucks", label: "Camiones", icon: Truck },
-    { href: "/dashboard/freights", label: "Fletes", icon: Map },
+    { href: "/dashboard/freights", label: "Flete", icon: Map },
+    { href: "/dashboard/operational-points", label: "Puntos", icon: MapPin },
     { href: "/dashboard/maintenance", label: "Mantenimiento", icon: Wrench },
   ];
   const secondaryMobileItems = [
@@ -155,11 +157,31 @@ export default function Sidebar() {
           </div>
         )}
         <nav className="fixed bottom-0 left-0 right-0 z-40">
-          <div className="rounded-t-[24px] bg-[#0D1B2C] px-2 py-2 shadow-[0_16px_36px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
-            <div className="flex items-center justify-between gap-2 px-1">
+          <div className="rounded-t-[24px] bg-[#0D1B2C] px-2 pb-2 pt-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
+            <div className="flex items-end justify-between gap-2 px-1">
               {primaryMobileItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
+                if (item.href === "/dashboard/freights") {
+                  return (
+                    <Link
+                      key={item.href}
+                      className="flex min-w-[72px] flex-1 flex-col items-center justify-end pb-1 text-[11px] font-medium text-[#DCEBFF]"
+                      href="/dashboard/freights?quick=1"
+                    >
+                      <span
+                        className={`flex h-14 w-14 -translate-y-5 items-center justify-center rounded-full text-white shadow-[0_10px_20px_rgba(0,0,0,0.35)] transition-transform ${
+                          active
+                            ? "bg-[#2C7FD1] ring-2 ring-[#8DBBFF]/60"
+                            : "bg-[#256EB7]"
+                        }`}
+                      >
+                        <Plus className="h-6 w-6" strokeWidth={2} />
+                      </span>
+                      <span className="-mt-3 lowercase">flete</span>
+                    </Link>
+                  );
+                }
                 return (
                   <Link
                     key={item.href}

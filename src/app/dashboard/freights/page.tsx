@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 type TruckOption = {
@@ -135,6 +136,9 @@ export default function FreightsPage() {
   const [ubigeoDepartamentos, setUbigeoDepartamentos] = useState<UbigeoItem[]>([]);
   const [ubigeoProvincias, setUbigeoProvincias] = useState<UbigeoItem[]>([]);
   const [ubigeoDistritos, setUbigeoDistritos] = useState<UbigeoItem[]>([]);
+  const [showQuickFreightModal, setShowQuickFreightModal] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   async function load() {
     setLoading(true);
@@ -206,6 +210,12 @@ export default function FreightsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get("quick") === "1") {
+      setShowQuickFreightModal(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let active = true;
@@ -547,34 +557,55 @@ export default function FreightsPage() {
     ? ubigeoDistritos.filter((d) => d.id_padre_ubigeo === pointProvinciaId)
     : [];
 
-  return (
-    <div className="space-y-6 max-[1366px]:space-y-4">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
-        <h1 className="text-lg font-semibold text-zinc-900">Fletes</h1>
-        <p className="mt-1 text-sm text-zinc-600">Control de viajes e ingresos.</p>
-
-        <form
-          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
-          onSubmit={onCreate}
-        >
-          <select
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-            value={truckId}
-            onChange={(e) => {
-              const nextId = e.target.value;
-              setTruckId(nextId);
-              const selected = trucks.find((t) => t.id === nextId);
-              setMontoAutomatico(calcularMontoAutomatico(selected));
-            }}
-            required
+  const renderFreightFormCard = (options?: {
+    title?: string;
+    subtitle?: string;
+    className?: string;
+    onClose?: () => void;
+  }) => (
+    <div
+      className={`rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4 ${options?.className ?? ""}`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-zinc-900">{options?.title ?? "Fletes"}</h1>
+          <p className="mt-1 text-sm text-zinc-600">
+            {options?.subtitle ?? "Control de viajes e ingresos."}
+          </p>
+        </div>
+        {options?.onClose ? (
+          <button
+            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50"
+            type="button"
+            onClick={options.onClose}
           >
-            <option value="">Camión</option>
-            {trucks.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.placa}
-              </option>
-            ))}
-          </select>
+            Cerrar
+          </button>
+        ) : null}
+      </div>
+
+      <form
+        className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
+        onSubmit={onCreate}
+      >
+        <select
+          className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
+          value={truckId}
+          onChange={(e) => {
+            const nextId = e.target.value;
+            setTruckId(nextId);
+            const selected = trucks.find((t) => t.id === nextId);
+            setMontoAutomatico(calcularMontoAutomatico(selected));
+          }}
+          required
+        >
+          <option value="">Camión</option>
+          {trucks.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.placa}
+            </option>
+          ))}
+        </select>
 
           <select
             className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
@@ -763,32 +794,42 @@ export default function FreightsPage() {
             required
           />
 
-          <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
+        <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
+          <button
+            className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Guardando..." : editingId ? "Guardar cambios" : "Agregar flete"}
+          </button>
+          {editingId ? (
             <button
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
-              type="submit"
-              disabled={submitting}
+              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+              type="button"
+              onClick={resetForm}
             >
-              {submitting ? "Guardando..." : editingId ? "Guardar cambios" : "Agregar flete"}
+              Cancelar
             </button>
-            {editingId ? (
-              <button
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 md:px-4 md:py-3 md:text-base"
-                type="button"
-                onClick={resetForm}
-              >
-                Cancelar
-              </button>
-            ) : null}
-          </div>
-        </form>
+          ) : null}
+        </div>
+      </form>
 
-        {error ? (
-          <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
-      </div>
+      {error ? (
+        <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const closeQuickModal = () => {
+    setShowQuickFreightModal(false);
+    router.replace("/dashboard/freights");
+  };
+
+  return (
+    <div className="space-y-6 max-[1366px]:space-y-4">
+      {showQuickFreightModal ? null : renderFreightFormCard()}
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Gastos por flete</h2>
@@ -1475,6 +1516,16 @@ export default function FreightsPage() {
               </div>
             </form>
           </div>
+        </div>
+      ) : null}
+      {showQuickFreightModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          {renderFreightFormCard({
+            title: "Nuevo flete",
+            subtitle: "Registro rápido para operaciones en curso.",
+            className: "w-full max-w-4xl",
+            onClose: closeQuickModal,
+          })}
         </div>
       ) : null}
     </div>
