@@ -22,21 +22,21 @@ UPDATE "Truck"
 SET
   "montoBase" = COALESCE("montoPorVueltaDueno", 0),
   "tipoCalculo" = CASE
-    WHEN "tipoPago" = 'MENSUAL' THEN 'MENSUAL'
-    ELSE 'VIAJE'
+    WHEN "tipoPago" = 'MENSUAL' THEN 'MENSUAL'::"FreightCalcType"
+    ELSE 'VIAJE'::"FreightCalcType"
   END,
   "modeloPago" = CASE
-    WHEN "modoOperacion" = 'ALQUILER' THEN 'CHOFER_PAGA'
-    ELSE 'DUENO_PAGA'
+    WHEN "modoOperacion" = 'ALQUILER' THEN 'CHOFER_PAGA'::"FreightModelType"
+    ELSE 'DUENO_PAGA'::"FreightModelType"
   END;
 
 UPDATE "Freight"
 SET
-  "tipoCalculo" = 'VIAJE',
+  "tipoCalculo" = 'VIAJE'::"FreightCalcType",
   "montoBase" = "montoAcordado",
   "montoCalculado" = "montoAcordado",
   "montoFinal" = "montoAcordado",
   "direccionPago" = CASE
-    WHEN "tipoModelo" = 'CHOFER_PAGA' THEN 'POR_COBRAR'
-    ELSE 'POR_PAGAR'
+    WHEN "tipoModelo" = 'CHOFER_PAGA' THEN 'POR_COBRAR'::"PaymentDirection"
+    ELSE 'POR_PAGAR'::"PaymentDirection"
   END;
