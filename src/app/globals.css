@@ -35,6 +35,26 @@ body {
   font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+.dashboard-shell {
+  --sidebar-width: 72px;
+}
+
+@media (min-width: 1366px) {
+  .dashboard-shell {
+    --sidebar-width: 220px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .dashboard-shell {
+    --sidebar-width: 260px;
+  }
+}
+
+.dashboard-shell[data-sidebar-collapsed="true"] {
+  --sidebar-width: 72px;
+}
+
 input,
 select,
 textarea {

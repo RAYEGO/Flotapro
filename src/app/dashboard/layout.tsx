@@ -24,7 +24,7 @@ export default async function DashboardLayout({
         }}
       />
       <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-[#2C7FD1]/12 blur-[140px]" />
-      <div className="relative mx-auto grid max-w-[1760px] grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[72px_1fr] min-[1366px]:grid-cols-[220px_1fr] min-[1920px]:grid-cols-[260px_1fr] max-[1366px]:gap-4 max-[1366px]:px-4 max-[1366px]:py-4">
+      <div className="relative mx-auto grid max-w-[1760px] grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[var(--sidebar-width)_1fr] max-[1366px]:gap-4 max-[1366px]:px-4 max-[1366px]:py-4">
         <Sidebar />
 
         <main className="min-w-0 pb-28 md:pb-0">{children}</main>
