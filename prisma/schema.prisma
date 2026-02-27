@@ -108,6 +108,38 @@ model Client {
   @@index([companyId, tipo])
 }
 
+model Region {
+  id                Int                @id
+  nombre            String
+  provinces         Province[]
+  operationalPoints OperationalPoint[]
+
+  @@index([nombre])
+}
+
+model Province {
+  id                Int                @id
+  nombre            String
+  regionId          Int
+  region            Region             @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  districts         District[]
+  operationalPoints OperationalPoint[]
+
+  @@index([regionId])
+  @@index([nombre])
+}
+
+model District {
+  id                Int                @id
+  nombre            String
+  provinceId        Int
+  province          Province           @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  operationalPoints OperationalPoint[]
+
+  @@index([provinceId])
+  @@index([nombre])
+}
+
 model OperationalPoint {
   id            String                @id @default(cuid())
   createdAt     DateTime              @default(now())
@@ -120,17 +152,26 @@ model OperationalPoint {
   ciudad        String
   departamento  String
   distrito      String?
+  regionId      Int?
+  provinceId    Int?
+  districtId    Int?
   latitud       Decimal?              @db.Decimal(9, 6)
   longitud      Decimal?              @db.Decimal(9, 6)
   linkGoogleMaps String?
   referencia    String?
   company       Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
   cliente       Client?               @relation(fields: [clienteId], references: [id], onDelete: SetNull)
+  region        Region?               @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  province      Province?             @relation(fields: [provinceId], references: [id], onDelete: SetNull)
+  district      District?             @relation(fields: [districtId], references: [id], onDelete: SetNull)
   freightsOrigen Freight[]            @relation("FreightOriginPoint")
   freightsDestino Freight[]           @relation("FreightDestinationPoint")
 
   @@index([companyId, tipo])
   @@index([companyId, clienteId])
+  @@index([regionId])
+  @@index([provinceId])
+  @@index([districtId])
 }
 
 model Freight {

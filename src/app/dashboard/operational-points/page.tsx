@@ -13,17 +13,18 @@ type Point = {
   ciudad: string;
   departamento: string;
   distrito: string | null;
+  regionId: number | null;
+  provinceId: number | null;
+  districtId: number | null;
   latitud: string | null;
   longitud: string | null;
   linkGoogleMaps: string | null;
   referencia: string | null;
   cliente?: { id: string; nombreComercial: string } | null;
 };
-type UbigeoItem = {
-  id_ubigeo: string;
-  nombre_ubigeo: string;
-  id_padre_ubigeo: string;
-};
+type RegionOption = { id: number; nombre: string };
+type ProvinceOption = { id: number; nombre: string; regionId: number };
+type DistrictOption = { id: number; nombre: string; provinceId: number };
 
 export default function OperationalPointsPage() {
   const [items, setItems] = useState<Point[]>([]);
@@ -37,20 +38,25 @@ export default function OperationalPointsPage() {
   const [tipo, setTipo] = useState<Point["tipo"]>("OTRO");
   const [clienteId, setClienteId] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [ciudad, setCiudad] = useState("");
-  const [departamento, setDepartamento] = useState("");
-  const [distrito, setDistrito] = useState("");
-  const [regionId, setRegionId] = useState("");
-  const [provinciaId, setProvinciaId] = useState("");
-  const [distritoId, setDistritoId] = useState("");
+  const [regionId, setRegionId] = useState<number | "">("");
+  const [provinciaId, setProvinciaId] = useState<number | "">("");
+  const [distritoId, setDistritoId] = useState<number | "">("");
   const [latitud, setLatitud] = useState("");
   const [longitud, setLongitud] = useState("");
   const [linkGoogleMaps, setLinkGoogleMaps] = useState("");
   const [referencia, setReferencia] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [ubigeoDepartamentos, setUbigeoDepartamentos] = useState<UbigeoItem[]>([]);
-  const [ubigeoProvincias, setUbigeoProvincias] = useState<UbigeoItem[]>([]);
-  const [ubigeoDistritos, setUbigeoDistritos] = useState<UbigeoItem[]>([]);
+  const [regions, setRegions] = useState<RegionOption[]>([]);
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
+  const [districts, setDistricts] = useState<DistrictOption[]>([]);
+  const [regionsLoading, setRegionsLoading] = useState(false);
+  const [provincesLoading, setProvincesLoading] = useState(false);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
+  const [pendingLocation, setPendingLocation] = useState<{
+    departamento?: string;
+    ciudad?: string;
+    distrito?: string;
+  } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -81,48 +87,93 @@ export default function OperationalPointsPage() {
 
   useEffect(() => {
     let active = true;
-    const loadUbigeo = async () => {
-      if (ubigeoDepartamentos.length) return;
+    const loadRegions = async () => {
+      setRegionsLoading(true);
       try {
-        const [departamentosRes, provinciasRes, distritosRes] = await Promise.all([
-          fetch(
-            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/departamentos.json",
-          ),
-          fetch(
-            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/provincias.json",
-          ),
-          fetch(
-            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/distritos.json",
-          ),
-        ]);
-        const [departamentos, provincias, distritos] = await Promise.all([
-          departamentosRes.json(),
-          provinciasRes.json(),
-          distritosRes.json(),
-        ]);
+        const res = await fetch("/api/regions");
+        const data = (await res.json().catch(() => null)) as any;
+        if (!res.ok) throw new Error(data?.error ?? "No se pudo cargar regiones");
         if (!active) return;
-        setUbigeoDepartamentos(departamentos as UbigeoItem[]);
-        setUbigeoProvincias(provincias as UbigeoItem[]);
-        setUbigeoDistritos(distritos as UbigeoItem[]);
+        setRegions((data?.regions ?? []) as RegionOption[]);
       } catch (e) {
         if (!active) return;
         setError(e instanceof Error ? e.message : "Error");
+        setRegions([]);
+      } finally {
+        if (!active) return;
+        setRegionsLoading(false);
       }
     };
-    loadUbigeo();
+    loadRegions();
     return () => {
       active = false;
     };
-  }, [ubigeoDepartamentos.length]);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadProvinces = async () => {
+      if (regionId === "") {
+        setProvinces([]);
+        setDistricts([]);
+        return;
+      }
+      setProvincesLoading(true);
+      try {
+        const res = await fetch(`/api/provinces?regionId=${regionId}`);
+        const data = (await res.json().catch(() => null)) as any;
+        if (!res.ok) throw new Error(data?.error ?? "No se pudo cargar provincias");
+        if (!active) return;
+        setProvinces((data?.provinces ?? []) as ProvinceOption[]);
+      } catch (e) {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Error");
+        setProvinces([]);
+      } finally {
+        if (!active) return;
+        setProvincesLoading(false);
+      }
+    };
+    loadProvinces();
+    return () => {
+      active = false;
+    };
+  }, [regionId]);
+
+  useEffect(() => {
+    let active = true;
+    const loadDistricts = async () => {
+      if (provinciaId === "") {
+        setDistricts([]);
+        return;
+      }
+      setDistrictsLoading(true);
+      try {
+        const res = await fetch(`/api/districts?provinceId=${provinciaId}`);
+        const data = (await res.json().catch(() => null)) as any;
+        if (!res.ok) throw new Error(data?.error ?? "No se pudo cargar distritos");
+        if (!active) return;
+        setDistricts((data?.districts ?? []) as DistrictOption[]);
+      } catch (e) {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Error");
+        setDistricts([]);
+      } finally {
+        if (!active) return;
+        setDistrictsLoading(false);
+      }
+    };
+    loadDistricts();
+    return () => {
+      active = false;
+    };
+  }, [provinciaId]);
 
   const resetForm = () => {
     setNombre("");
     setTipo("OTRO");
     setClienteId("");
     setDireccion("");
-    setCiudad("");
-    setDepartamento("");
-    setDistrito("");
     setRegionId("");
     setProvinciaId("");
     setDistritoId("");
@@ -139,31 +190,44 @@ export default function OperationalPointsPage() {
     setTipo(point.tipo);
     setClienteId(point.clienteId ?? "");
     setDireccion(point.direccion);
-    setCiudad(point.ciudad);
-    setDepartamento(point.departamento);
-    setDistrito(point.distrito ?? "");
-    const departamentoItem = ubigeoDepartamentos.find(
-      (d) => d.nombre_ubigeo === point.departamento,
-    );
-    const nextRegionId = departamentoItem?.id_ubigeo ?? "";
-    const provinciaItem = ubigeoProvincias.find(
-      (p) =>
-        p.nombre_ubigeo === point.ciudad && (!nextRegionId || p.id_padre_ubigeo === nextRegionId),
-    );
-    const nextProvinciaId = provinciaItem?.id_ubigeo ?? "";
-    const distritoItem = ubigeoDistritos.find(
-      (d) =>
-        d.nombre_ubigeo === (point.distrito ?? "") &&
-        (!nextProvinciaId || d.id_padre_ubigeo === nextProvinciaId),
-    );
+    const regionFallback = regions.find((r) => r.nombre === point.departamento)?.id ?? "";
+    const nextRegionId = point.regionId ?? regionFallback;
     setRegionId(nextRegionId);
-    setProvinciaId(nextProvinciaId);
-    setDistritoId(distritoItem?.id_ubigeo ?? "");
+    setProvinciaId(point.provinceId ?? "");
+    setDistritoId(point.districtId ?? "");
+    const shouldResolve =
+      !point.regionId || !point.provinceId || !point.districtId;
+    setPendingLocation(
+      shouldResolve
+        ? {
+            departamento: point.departamento,
+            ciudad: point.ciudad,
+            distrito: point.distrito ?? "",
+          }
+        : null,
+    );
     setLatitud(point.latitud ?? "");
     setLongitud(point.longitud ?? "");
     setLinkGoogleMaps(point.linkGoogleMaps ?? "");
     setReferencia(point.referencia ?? "");
   };
+
+  useEffect(() => {
+    if (!pendingLocation || provinciaId !== "" || provinces.length === 0) return;
+    const match = provinces.find((p) => p.nombre === pendingLocation.ciudad);
+    if (match) {
+      setProvinciaId(match.id);
+    }
+  }, [pendingLocation, provinces, provinciaId]);
+
+  useEffect(() => {
+    if (!pendingLocation || distritoId !== "" || districts.length === 0) return;
+    const match = districts.find((d) => d.nombre === pendingLocation.distrito);
+    if (match) {
+      setDistritoId(match.id);
+      setPendingLocation(null);
+    }
+  }, [pendingLocation, districts, distritoId]);
 
   const buildMapLink = (point: Point) => {
     const link = point.linkGoogleMaps?.trim();
@@ -185,9 +249,6 @@ export default function OperationalPointsPage() {
     try {
       const nombreValue = nombre.trim();
       const direccionValue = direccion.trim();
-      const departamentoValue = departamento.trim();
-      const ciudadValue = ciudad.trim();
-      const distritoValue = distrito.trim();
       const linkValue = linkGoogleMaps.trim();
       const referenciaValue = referencia.trim();
       const latNumber = latitud === "" ? null : Number(latitud);
@@ -200,15 +261,15 @@ export default function OperationalPointsPage() {
         setError("Dirección requerida");
         return;
       }
-      if (!regionId || !departamentoValue) {
+      if (regionId === "") {
         setError("Selecciona la región");
         return;
       }
-      if (!provinciaId || !ciudadValue) {
+      if (provinciaId === "") {
         setError("Selecciona la provincia");
         return;
       }
-      if (!distritoId || !distritoValue) {
+      if (distritoId === "") {
         setError("Selecciona el distrito");
         return;
       }
@@ -239,9 +300,9 @@ export default function OperationalPointsPage() {
             tipo,
             clienteId: editingId ? (clienteId === "" ? "" : clienteId) : clienteId || undefined,
             direccion: direccionValue,
-            ciudad: ciudadValue,
-            departamento: departamentoValue,
-            distrito: distritoValue,
+            regionId,
+            provinceId: provinciaId,
+            districtId: distritoId,
             latitud: latNumber === null ? undefined : latNumber,
             longitud: lngNumber === null ? undefined : lngNumber,
             linkGoogleMaps: linkValue,
@@ -275,13 +336,6 @@ export default function OperationalPointsPage() {
       setDeletingId(null);
     }
   }
-
-  const provinciasDisponibles = regionId
-    ? ubigeoProvincias.filter((p) => p.id_padre_ubigeo === regionId)
-    : [];
-  const distritosDisponibles = provinciaId
-    ? ubigeoDistritos.filter((d) => d.id_padre_ubigeo === provinciaId)
-    : [];
 
   return (
     <div className="space-y-6 max-[1366px]:space-y-4">
@@ -336,66 +390,70 @@ export default function OperationalPointsPage() {
           />
           <select
             className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-            value={regionId}
+            value={regionId === "" ? "" : String(regionId)}
             onChange={(e) => {
-              const nextId = e.target.value;
+              const nextValue = e.target.value;
+              const nextId = nextValue === "" ? "" : Number(nextValue);
+              if (nextValue !== "" && Number.isNaN(nextId)) return;
               setRegionId(nextId);
-              const selected = ubigeoDepartamentos.find((d) => d.id_ubigeo === nextId);
-              setDepartamento(selected?.nombre_ubigeo ?? "");
               setProvinciaId("");
-              setCiudad("");
               setDistritoId("");
-              setDistrito("");
+              setPendingLocation(null);
             }}
             required
-            disabled={ubigeoDepartamentos.length === 0}
+            disabled={regionsLoading}
           >
             <option value="">
-              {ubigeoDepartamentos.length === 0 ? "Cargando regiones..." : "Región"}
+              {regionsLoading ? "Cargando regiones..." : "Región"}
             </option>
-            {ubigeoDepartamentos.map((d) => (
-              <option key={d.id_ubigeo} value={d.id_ubigeo}>
-                {d.nombre_ubigeo}
+            {regions.map((region) => (
+              <option key={region.id} value={region.id}>
+                {region.nombre}
               </option>
             ))}
           </select>
           <select
             className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-            value={provinciaId}
+            value={provinciaId === "" ? "" : String(provinciaId)}
             onChange={(e) => {
-              const nextId = e.target.value;
+              const nextValue = e.target.value;
+              const nextId = nextValue === "" ? "" : Number(nextValue);
+              if (nextValue !== "" && Number.isNaN(nextId)) return;
               setProvinciaId(nextId);
-              const selected = provinciasDisponibles.find((p) => p.id_ubigeo === nextId);
-              setCiudad(selected?.nombre_ubigeo ?? "");
               setDistritoId("");
-              setDistrito("");
+              setPendingLocation(null);
             }}
             required
-            disabled={!regionId}
+            disabled={regionId === "" || provincesLoading}
           >
-            <option value="">Provincia</option>
-            {provinciasDisponibles.map((p) => (
-              <option key={p.id_ubigeo} value={p.id_ubigeo}>
-                {p.nombre_ubigeo}
+            <option value="">
+              {provincesLoading ? "Cargando provincias..." : "Provincia"}
+            </option>
+            {provinces.map((province) => (
+              <option key={province.id} value={province.id}>
+                {province.nombre}
               </option>
             ))}
           </select>
           <select
             className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-            value={distritoId}
+            value={distritoId === "" ? "" : String(distritoId)}
             onChange={(e) => {
-              const nextId = e.target.value;
+              const nextValue = e.target.value;
+              const nextId = nextValue === "" ? "" : Number(nextValue);
+              if (nextValue !== "" && Number.isNaN(nextId)) return;
               setDistritoId(nextId);
-              const selected = distritosDisponibles.find((d) => d.id_ubigeo === nextId);
-              setDistrito(selected?.nombre_ubigeo ?? "");
+              setPendingLocation(null);
             }}
             required
-            disabled={!provinciaId}
+            disabled={provinciaId === "" || districtsLoading}
           >
-            <option value="">Distrito</option>
-            {distritosDisponibles.map((d) => (
-              <option key={d.id_ubigeo} value={d.id_ubigeo}>
-                {d.nombre_ubigeo}
+            <option value="">
+              {districtsLoading ? "Cargando distritos..." : "Distrito"}
+            </option>
+            {districts.map((district) => (
+              <option key={district.id} value={district.id}>
+                {district.nombre}
               </option>
             ))}
           </select>

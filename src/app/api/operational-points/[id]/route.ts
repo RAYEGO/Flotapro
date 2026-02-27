@@ -29,6 +29,9 @@ const updatePointSchema = z.object({
   tipo: z.enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO"]).optional(),
   clienteId: z.string().min(1).optional().or(z.literal("")),
   direccion: z.string().min(2).max(160).optional(),
+  regionId: z.coerce.number().int().positive().optional(),
+  provinceId: z.coerce.number().int().positive().optional(),
+  districtId: z.coerce.number().int().positive().optional(),
   ciudad: z.string().min(2).max(120).optional(),
   departamento: z.string().min(2).max(120).optional(),
   distrito: z.string().min(2).max(120).optional().or(z.literal("")),
@@ -87,12 +90,74 @@ export async function PATCH(
       if (!client) return jsonBadRequest("Cliente inválido");
     }
 
+    let region: { id: number; nombre: string } | null = null;
+    let province: { id: number; nombre: string; regionId: number } | null = null;
+    let district: { id: number; nombre: string; provinceId: number } | null = null;
+
+    const hasUbigeoChange =
+      parsed.data.regionId !== undefined ||
+      parsed.data.provinceId !== undefined ||
+      parsed.data.districtId !== undefined;
+
+    const candidateRegionId = parsed.data.regionId ?? existing.regionId ?? undefined;
+    const candidateProvinceId = parsed.data.provinceId ?? existing.provinceId ?? undefined;
+    const candidateDistrictId = parsed.data.districtId ?? existing.districtId ?? undefined;
+
+    if (hasUbigeoChange) {
+      if (candidateDistrictId !== undefined) {
+        district = await prisma.district.findFirst({
+          where: {
+            id: candidateDistrictId,
+            ...(candidateProvinceId ? { provinceId: candidateProvinceId } : {}),
+          },
+        });
+        if (!district) return jsonBadRequest("Distrito inválido");
+      }
+      if (candidateProvinceId !== undefined) {
+        province = await prisma.province.findFirst({
+          where: {
+            id: candidateProvinceId,
+            ...(candidateRegionId ? { regionId: candidateRegionId } : {}),
+          },
+        });
+        if (!province) return jsonBadRequest("Provincia inválida");
+      }
+      if (!province && district) {
+        province = await prisma.province.findFirst({ where: { id: district.provinceId } });
+      }
+      if (candidateRegionId !== undefined) {
+        region = await prisma.region.findFirst({ where: { id: candidateRegionId } });
+        if (!region) return jsonBadRequest("Región inválida");
+      }
+      if (!region && province) {
+        region = await prisma.region.findFirst({ where: { id: province.regionId } });
+      }
+    }
+
+    const departamento =
+      region?.nombre ?? parsed.data.departamento?.trim() ?? existing.departamento;
+    const ciudad = province?.nombre ?? parsed.data.ciudad?.trim() ?? existing.ciudad;
+    const distrito =
+      district?.nombre ??
+      (parsed.data.distrito === "" ? null : parsed.data.distrito?.trim() ?? existing.distrito);
+
+    if (hasUbigeoChange) {
+      if (!departamento) return jsonBadRequest("Selecciona la región");
+      if (!ciudad) return jsonBadRequest("Selecciona la provincia");
+      if (!distrito) return jsonBadRequest("Selecciona el distrito");
+    }
+
     const point = await prisma.operationalPoint.update({
       where: { id: existing.id },
       data: {
         ...parsed.data,
         clienteId: nextClienteId,
-        distrito: parsed.data.distrito === "" ? null : parsed.data.distrito,
+        departamento,
+        ciudad,
+        distrito,
+        regionId: region?.id ?? (hasUbigeoChange ? null : existing.regionId),
+        provinceId: province?.id ?? (hasUbigeoChange ? null : existing.provinceId),
+        districtId: district?.id ?? (hasUbigeoChange ? null : existing.districtId),
         latitud: parsed.data.latitud === undefined ? undefined : decimal(parsed.data.latitud, 6),
         longitud:
           parsed.data.longitud === undefined ? undefined : decimal(parsed.data.longitud, 6),

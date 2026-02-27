@@ -18,11 +18,9 @@ type OperationalPointOption = {
   tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO";
   clienteId: string | null;
 };
-type UbigeoItem = {
-  id_ubigeo: string;
-  nombre_ubigeo: string;
-  id_padre_ubigeo: string;
-};
+type RegionOption = { id: number; nombre: string };
+type ProvinceOption = { id: number; nombre: string; regionId: number };
+type DistrictOption = { id: number; nombre: string; provinceId: number };
 
 type Freight = {
   id: string;
@@ -124,18 +122,18 @@ export default function FreightsPage() {
   const [pointTipo, setPointTipo] = useState<OperationalPointOption["tipo"]>("OTRO");
   const [pointClienteId, setPointClienteId] = useState("");
   const [pointDireccion, setPointDireccion] = useState("");
-  const [pointCiudad, setPointCiudad] = useState("");
-  const [pointDepartamento, setPointDepartamento] = useState("");
-  const [pointDistrito, setPointDistrito] = useState("");
-  const [pointRegionId, setPointRegionId] = useState("");
-  const [pointProvinciaId, setPointProvinciaId] = useState("");
-  const [pointDistritoId, setPointDistritoId] = useState("");
+  const [pointRegionId, setPointRegionId] = useState<number | "">("");
+  const [pointProvinciaId, setPointProvinciaId] = useState<number | "">("");
+  const [pointDistritoId, setPointDistritoId] = useState<number | "">("");
   const [pointLink, setPointLink] = useState("");
   const [pointReferencia, setPointReferencia] = useState("");
   const [pointSubmitting, setPointSubmitting] = useState(false);
-  const [ubigeoDepartamentos, setUbigeoDepartamentos] = useState<UbigeoItem[]>([]);
-  const [ubigeoProvincias, setUbigeoProvincias] = useState<UbigeoItem[]>([]);
-  const [ubigeoDistritos, setUbigeoDistritos] = useState<UbigeoItem[]>([]);
+  const [regions, setRegions] = useState<RegionOption[]>([]);
+  const [provinces, setProvinces] = useState<ProvinceOption[]>([]);
+  const [districts, setDistricts] = useState<DistrictOption[]>([]);
+  const [regionsLoading, setRegionsLoading] = useState(false);
+  const [provincesLoading, setProvincesLoading] = useState(false);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
   const [showQuickFreightModal, setShowQuickFreightModal] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -219,39 +217,87 @@ export default function FreightsPage() {
 
   useEffect(() => {
     let active = true;
-    const loadUbigeo = async () => {
-      if (ubigeoDepartamentos.length) return;
+    const loadRegions = async () => {
+      setRegionsLoading(true);
       try {
-        const [departamentosRes, provinciasRes, distritosRes] = await Promise.all([
-          fetch(
-            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/departamentos.json",
-          ),
-          fetch(
-            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/provincias.json",
-          ),
-          fetch(
-            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/distritos.json",
-          ),
-        ]);
-        const [departamentos, provincias, distritos] = await Promise.all([
-          departamentosRes.json(),
-          provinciasRes.json(),
-          distritosRes.json(),
-        ]);
+        const res = await fetch("/api/regions");
+        const data = (await res.json().catch(() => null)) as any;
+        if (!res.ok) throw new Error(data?.error ?? "No se pudo cargar regiones");
         if (!active) return;
-        setUbigeoDepartamentos(departamentos as UbigeoItem[]);
-        setUbigeoProvincias(provincias as UbigeoItem[]);
-        setUbigeoDistritos(distritos as UbigeoItem[]);
+        setRegions((data?.regions ?? []) as RegionOption[]);
       } catch (e) {
         if (!active) return;
         setError(e instanceof Error ? e.message : "Error");
+        setRegions([]);
+      } finally {
+        if (!active) return;
+        setRegionsLoading(false);
       }
     };
-    loadUbigeo();
+    loadRegions();
     return () => {
       active = false;
     };
-  }, [ubigeoDepartamentos.length]);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadProvinces = async () => {
+      if (pointRegionId === "") {
+        setProvinces([]);
+        setDistricts([]);
+        return;
+      }
+      setProvincesLoading(true);
+      try {
+        const res = await fetch(`/api/provinces?regionId=${pointRegionId}`);
+        const data = (await res.json().catch(() => null)) as any;
+        if (!res.ok) throw new Error(data?.error ?? "No se pudo cargar provincias");
+        if (!active) return;
+        setProvinces((data?.provinces ?? []) as ProvinceOption[]);
+      } catch (e) {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Error");
+        setProvinces([]);
+      } finally {
+        if (!active) return;
+        setProvincesLoading(false);
+      }
+    };
+    loadProvinces();
+    return () => {
+      active = false;
+    };
+  }, [pointRegionId]);
+
+  useEffect(() => {
+    let active = true;
+    const loadDistricts = async () => {
+      if (pointProvinciaId === "") {
+        setDistricts([]);
+        return;
+      }
+      setDistrictsLoading(true);
+      try {
+        const res = await fetch(`/api/districts?provinceId=${pointProvinciaId}`);
+        const data = (await res.json().catch(() => null)) as any;
+        if (!res.ok) throw new Error(data?.error ?? "No se pudo cargar distritos");
+        if (!active) return;
+        setDistricts((data?.districts ?? []) as DistrictOption[]);
+      } catch (e) {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Error");
+        setDistricts([]);
+      } finally {
+        if (!active) return;
+        setDistrictsLoading(false);
+      }
+    };
+    loadDistricts();
+    return () => {
+      active = false;
+    };
+  }, [pointProvinciaId]);
 
   const toDateTimeLocal = (value: string) => {
     const date = new Date(value);
@@ -390,9 +436,6 @@ export default function FreightsPage() {
     setPointTipo("OTRO");
     setPointClienteId("");
     setPointDireccion("");
-    setPointCiudad("");
-    setPointDepartamento("");
-    setPointDistrito("");
     setPointRegionId("");
     setPointProvinciaId("");
     setPointDistritoId("");
@@ -436,6 +479,18 @@ export default function FreightsPage() {
     setPointSubmitting(true);
     setError(null);
     try {
+      if (pointRegionId === "") {
+        setError("Selecciona la región");
+        return;
+      }
+      if (pointProvinciaId === "") {
+        setError("Selecciona la provincia");
+        return;
+      }
+      if (pointDistritoId === "") {
+        setError("Selecciona el distrito");
+        return;
+      }
       const res = await fetch("/api/operational-points", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -444,9 +499,9 @@ export default function FreightsPage() {
           tipo: pointTipo,
           clienteId: pointClienteId === "" ? undefined : pointClienteId,
           direccion: pointDireccion,
-          ciudad: pointCiudad,
-          departamento: pointDepartamento,
-          distrito: pointDistrito,
+          regionId: pointRegionId,
+          provinceId: pointProvinciaId,
+          districtId: pointDistritoId,
           linkGoogleMaps: pointLink,
           referencia: pointReferencia,
         }),
@@ -550,13 +605,6 @@ export default function FreightsPage() {
     const destino = freight?.destinationPoint?.nombre ?? freight?.destino ?? "—";
     return `${origen} → ${destino}`;
   };
-  const provinciasDisponibles = pointRegionId
-    ? ubigeoProvincias.filter((p) => p.id_padre_ubigeo === pointRegionId)
-    : [];
-  const distritosDisponibles = pointProvinciaId
-    ? ubigeoDistritos.filter((d) => d.id_padre_ubigeo === pointProvinciaId)
-    : [];
-
   const renderFreightFormCard = (options?: {
     title?: string;
     subtitle?: string;
@@ -1423,66 +1471,61 @@ export default function FreightsPage() {
               />
               <select
                 className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-                value={pointRegionId}
+                value={pointRegionId === "" ? "" : String(pointRegionId)}
                 onChange={(e) => {
-                  const nextId = e.target.value;
+                  const nextId = e.target.value === "" ? "" : Number(e.target.value);
                   setPointRegionId(nextId);
-                  const selected = ubigeoDepartamentos.find((d) => d.id_ubigeo === nextId);
-                  setPointDepartamento(selected?.nombre_ubigeo ?? "");
                   setPointProvinciaId("");
-                  setPointCiudad("");
                   setPointDistritoId("");
-                  setPointDistrito("");
                 }}
                 required
-                disabled={ubigeoDepartamentos.length === 0}
+                disabled={regionsLoading}
               >
                 <option value="">
-                  {ubigeoDepartamentos.length === 0 ? "Cargando regiones..." : "Región"}
+                  {regionsLoading ? "Cargando regiones..." : "Región"}
                 </option>
-                {ubigeoDepartamentos.map((d) => (
-                  <option key={d.id_ubigeo} value={d.id_ubigeo}>
-                    {d.nombre_ubigeo}
+                {regions.map((region) => (
+                  <option key={region.id} value={String(region.id)}>
+                    {region.nombre}
                   </option>
                 ))}
               </select>
               <select
                 className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-                value={pointProvinciaId}
+                value={pointProvinciaId === "" ? "" : String(pointProvinciaId)}
                 onChange={(e) => {
-                  const nextId = e.target.value;
+                  const nextId = e.target.value === "" ? "" : Number(e.target.value);
                   setPointProvinciaId(nextId);
-                  const selected = provinciasDisponibles.find((p) => p.id_ubigeo === nextId);
-                  setPointCiudad(selected?.nombre_ubigeo ?? "");
                   setPointDistritoId("");
-                  setPointDistrito("");
                 }}
                 required
-                disabled={!pointRegionId}
+                disabled={pointRegionId === "" || provincesLoading}
               >
-                <option value="">Provincia</option>
-                {provinciasDisponibles.map((p) => (
-                  <option key={p.id_ubigeo} value={p.id_ubigeo}>
-                    {p.nombre_ubigeo}
+                <option value="">
+                  {provincesLoading ? "Cargando provincias..." : "Provincia"}
+                </option>
+                {provinces.map((province) => (
+                  <option key={province.id} value={String(province.id)}>
+                    {province.nombre}
                   </option>
                 ))}
               </select>
               <select
                 className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-2 md:text-base"
-                value={pointDistritoId}
+                value={pointDistritoId === "" ? "" : String(pointDistritoId)}
                 onChange={(e) => {
-                  const nextId = e.target.value;
+                  const nextId = e.target.value === "" ? "" : Number(e.target.value);
                   setPointDistritoId(nextId);
-                  const selected = distritosDisponibles.find((d) => d.id_ubigeo === nextId);
-                  setPointDistrito(selected?.nombre_ubigeo ?? "");
                 }}
                 required
-                disabled={!pointProvinciaId}
+                disabled={pointProvinciaId === "" || districtsLoading}
               >
-                <option value="">Distrito</option>
-                {distritosDisponibles.map((d) => (
-                  <option key={d.id_ubigeo} value={d.id_ubigeo}>
-                    {d.nombre_ubigeo}
+                <option value="">
+                  {districtsLoading ? "Cargando distritos..." : "Distrito"}
+                </option>
+                {districts.map((district) => (
+                  <option key={district.id} value={String(district.id)}>
+                    {district.nombre}
                   </option>
                 ))}
               </select>

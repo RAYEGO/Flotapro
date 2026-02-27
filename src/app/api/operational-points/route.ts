@@ -29,8 +29,11 @@ const createPointSchema = z.object({
   tipo: z.enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO"]).optional(),
   clienteId: z.string().min(1).optional(),
   direccion: z.string().min(2).max(160),
-  ciudad: z.string().min(2).max(120),
-  departamento: z.string().min(2).max(120),
+  regionId: z.coerce.number().int().positive().optional(),
+  provinceId: z.coerce.number().int().positive().optional(),
+  districtId: z.coerce.number().int().positive().optional(),
+  ciudad: z.string().min(2).max(120).optional(),
+  departamento: z.string().min(2).max(120).optional(),
   distrito: z.string().min(2).max(120).optional().or(z.literal("")),
   latitud: z.coerce.number().finite().min(-90).max(90).optional(),
   longitud: z.coerce.number().finite().min(-180).max(180).optional(),
@@ -78,6 +81,54 @@ export async function POST(req: NextRequest) {
       if (!client) return jsonBadRequest("Cliente inválido");
     }
 
+    let region =
+      parsed.data.regionId === undefined
+        ? null
+        : await prisma.region.findFirst({ where: { id: parsed.data.regionId } });
+    if (parsed.data.regionId !== undefined && !region) {
+      return jsonBadRequest("Región inválida");
+    }
+    let province =
+      parsed.data.provinceId === undefined
+        ? null
+        : await prisma.province.findFirst({
+            where: {
+              id: parsed.data.provinceId,
+              ...(parsed.data.regionId ? { regionId: parsed.data.regionId } : {}),
+            },
+          });
+    if (parsed.data.provinceId !== undefined && !province) {
+      return jsonBadRequest("Provincia inválida");
+    }
+    let district =
+      parsed.data.districtId === undefined
+        ? null
+        : await prisma.district.findFirst({
+            where: {
+              id: parsed.data.districtId,
+              ...(parsed.data.provinceId ? { provinceId: parsed.data.provinceId } : {}),
+            },
+          });
+    if (parsed.data.districtId !== undefined && !district) {
+      return jsonBadRequest("Distrito inválido");
+    }
+    if (district && !province) {
+      province = await prisma.province.findFirst({ where: { id: district.provinceId } });
+    }
+    if (province && !region) {
+      region = await prisma.region.findFirst({ where: { id: province.regionId } });
+    }
+
+    const departamento = region?.nombre ?? parsed.data.departamento?.trim();
+    const ciudad = province?.nombre ?? parsed.data.ciudad?.trim();
+    const distrito =
+      district?.nombre ??
+      (parsed.data.distrito === "" ? null : parsed.data.distrito?.trim() ?? null);
+
+    if (!departamento) return jsonBadRequest("Selecciona la región");
+    if (!ciudad) return jsonBadRequest("Selecciona la provincia");
+    if (!distrito) return jsonBadRequest("Selecciona el distrito");
+
     const point = await prisma.operationalPoint.create({
       data: {
         companyId,
@@ -85,9 +136,12 @@ export async function POST(req: NextRequest) {
         nombre: parsed.data.nombre,
         tipo: parsed.data.tipo,
         direccion: parsed.data.direccion,
-        ciudad: parsed.data.ciudad,
-        departamento: parsed.data.departamento,
-        distrito: parsed.data.distrito === "" ? null : parsed.data.distrito ?? null,
+        ciudad,
+        departamento,
+        distrito,
+        regionId: region?.id ?? null,
+        provinceId: province?.id ?? null,
+        districtId: district?.id ?? null,
         latitud:
           parsed.data.latitud === undefined ? null : decimal(parsed.data.latitud, 6),
         longitud:
