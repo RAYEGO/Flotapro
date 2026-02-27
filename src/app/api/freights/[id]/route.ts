@@ -124,7 +124,8 @@ export async function PATCH(
 
     const tipoModelo = truck.modeloPago;
     const tipoCalculo = truck.tipoCalculo;
-    const montoBase = decimal(String(truck.montoBase), 2);
+    const montoBaseValue = truck.montoBase ?? 0;
+    const montoBase = decimal(String(montoBaseValue), 2);
     const montoCalculado =
       tipoCalculo === "IDA_VUELTA" ? decimal(montoBase.mul(2).toFixed(2), 2) : montoBase;
 

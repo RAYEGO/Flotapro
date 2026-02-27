@@ -28,7 +28,8 @@ export function jsonServerError(message?: string) {
   return Response.json({ error: message ?? "Error interno" }, { status: 500 });
 }
 
-export function serializeMoney(value: Prisma.Decimal) {
+export function serializeMoney(value: Prisma.Decimal | null | undefined) {
+  if (value === null || value === undefined) return "0.00";
   return value.toFixed(2);
 }
 

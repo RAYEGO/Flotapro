@@ -183,23 +183,69 @@ export default function OperationalPointsPage() {
     setSubmitting(true);
     setError(null);
     try {
+      const nombreValue = nombre.trim();
+      const direccionValue = direccion.trim();
+      const departamentoValue = departamento.trim();
+      const ciudadValue = ciudad.trim();
+      const distritoValue = distrito.trim();
+      const linkValue = linkGoogleMaps.trim();
+      const referenciaValue = referencia.trim();
+      const latNumber = latitud === "" ? null : Number(latitud);
+      const lngNumber = longitud === "" ? null : Number(longitud);
+      if (!nombreValue) {
+        setError("Nombre requerido");
+        return;
+      }
+      if (!direccionValue) {
+        setError("Dirección requerida");
+        return;
+      }
+      if (!regionId || !departamentoValue) {
+        setError("Selecciona la región");
+        return;
+      }
+      if (!provinciaId || !ciudadValue) {
+        setError("Selecciona la provincia");
+        return;
+      }
+      if (!distritoId || !distritoValue) {
+        setError("Selecciona el distrito");
+        return;
+      }
+      if (latNumber !== null && !Number.isFinite(latNumber)) {
+        setError("Latitud inválida");
+        return;
+      }
+      if (lngNumber !== null && !Number.isFinite(lngNumber)) {
+        setError("Longitud inválida");
+        return;
+      }
+      if (latNumber !== null && (latNumber < -90 || latNumber > 90)) {
+        setError("Latitud fuera de rango");
+        return;
+      }
+      if (lngNumber !== null && (lngNumber < -180 || lngNumber > 180)) {
+        setError("Longitud fuera de rango");
+        return;
+      }
+
       const res = await fetch(
         editingId ? `/api/operational-points/${editingId}` : "/api/operational-points",
         {
           method: editingId ? "PATCH" : "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            nombre,
+            nombre: nombreValue,
             tipo,
             clienteId: editingId ? (clienteId === "" ? "" : clienteId) : clienteId || undefined,
-            direccion,
-            ciudad,
-            departamento,
-            distrito,
-            latitud: latitud === "" ? undefined : Number(latitud),
-            longitud: longitud === "" ? undefined : Number(longitud),
-            linkGoogleMaps,
-            referencia,
+            direccion: direccionValue,
+            ciudad: ciudadValue,
+            departamento: departamentoValue,
+            distrito: distritoValue,
+            latitud: latNumber === null ? undefined : latNumber,
+            longitud: lngNumber === null ? undefined : lngNumber,
+            linkGoogleMaps: linkValue,
+            referencia: referenciaValue,
           }),
         },
       );
