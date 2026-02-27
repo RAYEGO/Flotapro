@@ -119,6 +119,7 @@ model OperationalPoint {
   direccion     String
   ciudad        String
   departamento  String
+  distrito      String?
   latitud       Decimal?              @db.Decimal(9, 6)
   longitud      Decimal?              @db.Decimal(9, 6)
   linkGoogleMaps String?

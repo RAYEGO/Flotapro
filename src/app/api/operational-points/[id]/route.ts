@@ -18,6 +18,7 @@ const updatePointSchema = z.object({
   direccion: z.string().min(2).max(160).optional(),
   ciudad: z.string().min(2).max(120).optional(),
   departamento: z.string().min(2).max(120).optional(),
+  distrito: z.string().min(2).max(120).optional().or(z.literal("")),
   latitud: z.coerce.number().min(-90).max(90).optional(),
   longitud: z.coerce.number().min(-180).max(180).optional(),
   linkGoogleMaps: z.string().min(3).max(300).optional().or(z.literal("")),
@@ -78,6 +79,7 @@ export async function PATCH(
       data: {
         ...parsed.data,
         clienteId: nextClienteId,
+        distrito: parsed.data.distrito === "" ? null : parsed.data.distrito,
         latitud: parsed.data.latitud === undefined ? undefined : decimal(parsed.data.latitud, 6),
         longitud:
           parsed.data.longitud === undefined ? undefined : decimal(parsed.data.longitud, 6),

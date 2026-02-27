@@ -147,14 +147,17 @@ export default function FuelsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+    <div className="space-y-6 max-[1366px]:space-y-4">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Combustible</h1>
         <p className="mt-1 text-sm text-zinc-600">Registro de consumos.</p>
 
-        <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3" onSubmit={onCreate}>
+        <form
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 max-[1366px]:gap-2"
+          onSubmit={onCreate}
+        >
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             required
@@ -167,7 +170,7 @@ export default function FuelsPage() {
             ))}
           </select>
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             required
@@ -180,7 +183,7 @@ export default function FuelsPage() {
             ))}
           </select>
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             type="datetime-local"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
@@ -190,7 +193,7 @@ export default function FuelsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Kilometraje (km)"
             value={kilometraje}
             onChange={(e) => setKilometraje(e.target.value)}
@@ -199,7 +202,7 @@ export default function FuelsPage() {
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Galones (ej. 30.5)"
             value={galones}
             onChange={(e) => setGalones(e.target.value)}
@@ -209,7 +212,7 @@ export default function FuelsPage() {
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Precio/galón (ej. 18.90)"
             value={precioPorGalon}
             onChange={(e) => setPrecioPorGalon(e.target.value)}
@@ -219,7 +222,7 @@ export default function FuelsPage() {
             required
           />
 
-          <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3">
+          <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3">
             <button
               className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
@@ -246,7 +249,7 @@ export default function FuelsPage() {
         ) : null}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
@@ -317,15 +320,15 @@ export default function FuelsPage() {
         </div>
         <div className="mt-4 hidden md:block">
           <div className="overflow-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
               <thead className="text-xs text-zinc-500">
                 <tr>
                   <th className="py-2 pr-3">Fecha</th>
                   <th className="py-2 pr-3">Camión</th>
-                  <th className="py-2 pr-3">Chofer</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Chofer</th>
                   <th className="py-2 pr-3">Km</th>
-                  <th className="py-2 pr-3">Galones</th>
-                  <th className="py-2 pr-3">Precio/galón</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Galones</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Precio/galón</th>
                   <th className="py-2 pr-3">Total</th>
                   <th className="py-2 pr-3">Acciones</th>
                 </tr>
@@ -333,33 +336,37 @@ export default function FuelsPage() {
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={8}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={8}>
                       Cargando...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={8}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={8}>
                       Sin registros
                     </td>
                   </tr>
                 ) : (
                   items.map((f) => (
                     <tr key={f.id}>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {new Date(f.fecha).toLocaleString()}
                       </td>
-                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                      <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                         {f.truck?.placa ?? "—"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {f.driver ? `${f.driver.nombre} (${f.driver.dni})` : "—"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.kilometraje}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.galones}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.precioPorGalon}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.total}</td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{f.kilometraje}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                        {f.galones}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                        {f.precioPorGalon}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{f.total}</td>
+                      <td className="py-3 pr-3 max-[1366px]:py-2">
                         <div className="flex gap-2">
                           <button
                             className="text-xs font-medium text-zinc-700 hover:text-zinc-900"

@@ -36,7 +36,6 @@ export default function Sidebar() {
     { href: "/dashboard", label: "Resumen", icon: LayoutDashboard },
     { href: "/dashboard/trucks", label: "Camiones", icon: Truck },
     { href: "/dashboard/freights", label: "Fletes", icon: Map },
-    { href: "/dashboard/operational-points", label: "Puntos", icon: MapPin },
     { href: "/dashboard/maintenance", label: "Mantenimiento", icon: Wrench },
   ];
   const secondaryMobileItems = [
@@ -131,9 +130,9 @@ export default function Sidebar() {
         </nav>
       </aside>
 
-      <aside className="hidden rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ring-1 ring-white/5 md:block">
+      <aside className="hidden rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)] ring-1 ring-white/5 md:block md:w-[72px] min-[1366px]:w-[220px] min-[1366px]:p-5 min-[1920px]:w-[260px] min-[1920px]:p-6">
         <Link href="/dashboard" className="flex items-center justify-center py-4">
-          <span className="relative hidden h-16 w-56 md:block">
+          <span className="relative hidden h-14 w-48 min-[1366px]:block min-[1920px]:h-16 min-[1920px]:w-56">
             <Image
               src="/logo-flotapro.svg"
               alt="FlotaPro"
@@ -152,7 +151,7 @@ export default function Sidebar() {
             return (
               <Link
                 key={item.href}
-                className={`group flex items-center justify-center gap-3 rounded-2xl border-l-2 px-3 py-2 pl-2 text-[15px] transition-colors duration-200 md:justify-start ${
+                className={`group flex items-center justify-center gap-3 rounded-2xl border-l-2 px-3 py-2 text-[15px] transition-colors duration-200 min-[1366px]:justify-start min-[1366px]:pl-2 ${
                   active
                     ? "border-[#7FB5FF] bg-[#111F35] text-[#8DBBFF] font-semibold"
                     : "border-transparent text-[#9FB2C5] hover:bg-[#111F35]"
@@ -163,7 +162,7 @@ export default function Sidebar() {
                   className={`h-5 w-5 ${active ? "text-[#7FB5FF]" : "text-[#93A8BB]"}`}
                   strokeWidth={1.5}
                 />
-                <span className="hidden md:inline">{item.label}</span>
+                <span className="hidden min-[1366px]:inline">{item.label}</span>
               </Link>
             );
           })}
@@ -172,11 +171,11 @@ export default function Sidebar() {
         <div className="mt-6 border-t border-white/10 pt-4">
           <form action="/api/auth/logout" method="post">
             <button
-              className="group flex w-full items-center justify-center gap-3 rounded-2xl border-l-2 border-transparent px-3 py-2 pl-2 text-sm text-[#9FB2C5] transition-colors duration-200 hover:bg-[#111F35] md:justify-start"
+              className="group flex w-full items-center justify-center gap-3 rounded-2xl border-l-2 border-transparent px-3 py-2 text-sm text-[#9FB2C5] transition-colors duration-200 hover:bg-[#111F35] min-[1366px]:justify-start min-[1366px]:pl-2"
               type="submit"
             >
               <LogOut className="h-5 w-5 text-[#93A8BB]" strokeWidth={1.5} />
-              <span className="hidden md:inline">Salir</span>
+              <span className="hidden min-[1366px]:inline">Salir</span>
             </button>
           </form>
         </div>

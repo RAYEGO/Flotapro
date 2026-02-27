@@ -46,3 +46,18 @@ input::placeholder,
 textarea::placeholder {
   color: #94a3b8;
 }
+
+@media (max-width: 1366px) {
+  .dashboard-shell input,
+  .dashboard-shell select,
+  .dashboard-shell textarea {
+    height: 40px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .dashboard-shell textarea {
+    height: auto;
+    min-height: 90px;
+  }
+}

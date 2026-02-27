@@ -158,38 +158,38 @@ export default function TrucksPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+    <div className="space-y-6 max-[1366px]:space-y-4">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Camiones</h1>
         <p className="mt-1 text-sm text-zinc-600">Registro de unidades.</p>
 
         <form
-          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
           onSubmit={onCreate}
         >
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Placa"
             value={placa}
             onChange={(e) => setPlaca(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Marca"
             value={marca}
             onChange={(e) => setMarca(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Modelo"
             value={modelo}
             onChange={(e) => setModelo(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Año"
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
@@ -199,14 +199,14 @@ export default function TrucksPage() {
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Tipo"
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Km actual"
             value={kilometrajeActual}
             onChange={(e) => setKilometrajeActual(e.target.value)}
@@ -215,7 +215,7 @@ export default function TrucksPage() {
             required
           />
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={modeloPago}
             onChange={(e) => setModeloPago(e.target.value as Truck["modeloPago"])}
             aria-label="Modelo de pago"
@@ -225,7 +225,7 @@ export default function TrucksPage() {
             <option value="CHOFER_PAGA">Chofer paga al dueño</option>
           </select>
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={tipoCalculo}
             onChange={(e) => setTipoCalculo(e.target.value as Truck["tipoCalculo"])}
             aria-label="Tipo de cálculo"
@@ -235,7 +235,7 @@ export default function TrucksPage() {
             <option value="MENSUAL">Mensual</option>
           </select>
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Monto"
             value={montoBase}
             onChange={(e) => setMontoBase(e.target.value)}
@@ -243,7 +243,7 @@ export default function TrucksPage() {
             min={0}
             step="0.01"
           />
-          <div className="flex flex-wrap gap-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
+          <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
             <button
               className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
@@ -270,7 +270,7 @@ export default function TrucksPage() {
         ) : null}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
@@ -342,7 +342,7 @@ export default function TrucksPage() {
                         Estado
                       </label>
                       <select
-                        className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+                        className="mt-1 h-10 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-400 disabled:bg-zinc-50"
                         value={t.estado}
                         onChange={(e) => updateEstado(t.id, e.target.value as Truck["estado"])}
                         disabled={updatingId === t.id}
@@ -374,62 +374,64 @@ export default function TrucksPage() {
         </div>
         <div className="mt-4 hidden md:block">
           <div className="overflow-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
               <thead className="text-xs text-zinc-500">
                 <tr>
                   <th className="py-2 pr-3">Placa</th>
                   <th className="py-2 pr-3">Marca</th>
                   <th className="py-2 pr-3">Modelo</th>
                   <th className="py-2 pr-3">Año</th>
-                  <th className="py-2 pr-3">Tipo</th>
-                  <th className="py-2 pr-3">Km</th>
-                  <th className="py-2 pr-3">Modelo pago</th>
-                  <th className="py-2 pr-3">Tipo cálculo</th>
-                  <th className="py-2 pr-3">Monto base</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Tipo</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Km</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Modelo pago</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Tipo cálculo</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Monto base</th>
                   <th className="py-2 pr-3">Acciones</th>
-                  <th className="py-2 pr-3">Estado</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Estado</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={11}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={11}>
                       Cargando...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={11}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={11}>
                       Sin registros
                     </td>
                   </tr>
                 ) : (
                   items.map((t) => (
                     <tr key={t.id}>
-                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                      <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                         {t.placa}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{t.marca}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{t.modelo}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{t.anio}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{t.tipo}</td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{t.marca}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{t.modelo}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{t.anio}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                        {t.tipo}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {t.kilometrajeActual}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {t.modeloPago === "CHOFER_PAGA" ? "Chofer paga" : "Dueño paga"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {t.tipoCalculo === "IDA_VUELTA"
                           ? "Ida y vuelta"
                           : t.tipoCalculo === "MENSUAL"
                             ? "Mensual"
                             : "Viaje"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {t.montoBase ?? "—"}
                       </td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 max-[1366px]:py-2">
                         <button
                           className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
                           type="button"
@@ -440,9 +442,9 @@ export default function TrucksPage() {
                           <Pencil className="h-4 w-4" strokeWidth={1.75} />
                         </button>
                       </td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 max-[1366px]:hidden max-[1366px]:py-2">
                         <select
-                          className="h-9 rounded-lg border border-zinc-200 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-400 disabled:bg-zinc-50"
+                          className="h-10 rounded-lg border border-zinc-200 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-400 disabled:bg-zinc-50"
                           value={t.estado}
                           onChange={(e) =>
                             updateEstado(t.id, e.target.value as Truck["estado"])

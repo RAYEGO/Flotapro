@@ -130,21 +130,24 @@ export default function DriversPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+    <div className="space-y-6 max-[1366px]:space-y-4">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Choferes</h1>
         <p className="mt-1 text-sm text-zinc-600">Registro de conductores.</p>
 
-        <form className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4" onSubmit={onCreate}>
+        <form
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
+          onSubmit={onCreate}
+        >
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="DNI"
             value={dni}
             onChange={(e) => setDni(e.target.value)}
@@ -152,14 +155,14 @@ export default function DriversPage() {
             inputMode="numeric"
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Licencia"
             value={licencia}
             onChange={(e) => setLicencia(e.target.value)}
             required
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={fechaVencimiento}
             onChange={(e) => setFechaVencimiento(e.target.value)}
             type="date"
@@ -168,13 +171,13 @@ export default function DriversPage() {
             title="Vencimiento de licencia"
           />
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Teléfono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
           />
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             aria-label="Camión asignado"
@@ -188,7 +191,7 @@ export default function DriversPage() {
             ))}
           </select>
 
-          <div className="flex flex-wrap gap-2 md:col-span-3 lg:col-span-4">
+          <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
             <button
               className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
@@ -215,7 +218,7 @@ export default function DriversPage() {
         ) : null}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
@@ -283,14 +286,14 @@ export default function DriversPage() {
         </div>
         <div className="mt-4 hidden md:block">
           <div className="overflow-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
+            <table className="w-full min-w-[900px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
               <thead className="text-xs text-zinc-500">
                 <tr>
                   <th className="py-2 pr-3">Nombre</th>
                   <th className="py-2 pr-3">DNI</th>
-                  <th className="py-2 pr-3">Licencia</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Licencia</th>
                   <th className="py-2 pr-3">Vence</th>
-                  <th className="py-2 pr-3">Teléfono</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Teléfono</th>
                   <th className="py-2 pr-3">Camión</th>
                   <th className="py-2 pr-3">Acciones</th>
                 </tr>
@@ -298,32 +301,36 @@ export default function DriversPage() {
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={7}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={7}>
                       Cargando...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={7}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={7}>
                       Sin registros
                     </td>
                   </tr>
                 ) : (
                   items.map((d) => (
                     <tr key={d.id}>
-                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                      <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                         {d.nombre}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{d.dni}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{d.licencia}</td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{d.dni}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                        {d.licencia}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {new Date(d.fechaVencimiento).toLocaleDateString()}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{d.telefono ?? "—"}</td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                        {d.telefono ?? "—"}
+                      </td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {d.truck?.placa ?? "—"}
                       </td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 max-[1366px]:py-2">
                         <div className="flex gap-2">
                           <button
                             className="text-xs font-medium text-zinc-700 hover:text-zinc-900"

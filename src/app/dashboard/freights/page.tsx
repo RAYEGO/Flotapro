@@ -17,6 +17,11 @@ type OperationalPointOption = {
   tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO";
   clienteId: string | null;
 };
+type UbigeoItem = {
+  id_ubigeo: string;
+  nombre_ubigeo: string;
+  id_padre_ubigeo: string;
+};
 
 type Freight = {
   id: string;
@@ -120,11 +125,16 @@ export default function FreightsPage() {
   const [pointDireccion, setPointDireccion] = useState("");
   const [pointCiudad, setPointCiudad] = useState("");
   const [pointDepartamento, setPointDepartamento] = useState("");
-  const [pointLatitud, setPointLatitud] = useState("");
-  const [pointLongitud, setPointLongitud] = useState("");
+  const [pointDistrito, setPointDistrito] = useState("");
+  const [pointRegionId, setPointRegionId] = useState("");
+  const [pointProvinciaId, setPointProvinciaId] = useState("");
+  const [pointDistritoId, setPointDistritoId] = useState("");
   const [pointLink, setPointLink] = useState("");
   const [pointReferencia, setPointReferencia] = useState("");
   const [pointSubmitting, setPointSubmitting] = useState(false);
+  const [ubigeoDepartamentos, setUbigeoDepartamentos] = useState<UbigeoItem[]>([]);
+  const [ubigeoProvincias, setUbigeoProvincias] = useState<UbigeoItem[]>([]);
+  const [ubigeoDistritos, setUbigeoDistritos] = useState<UbigeoItem[]>([]);
 
   async function load() {
     setLoading(true);
@@ -196,6 +206,42 @@ export default function FreightsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadUbigeo = async () => {
+      if (ubigeoDepartamentos.length) return;
+      try {
+        const [departamentosRes, provinciasRes, distritosRes] = await Promise.all([
+          fetch(
+            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/departamentos.json",
+          ),
+          fetch(
+            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/provincias.json",
+          ),
+          fetch(
+            "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/distritos.json",
+          ),
+        ]);
+        const [departamentos, provincias, distritos] = await Promise.all([
+          departamentosRes.json(),
+          provinciasRes.json(),
+          distritosRes.json(),
+        ]);
+        if (!active) return;
+        setUbigeoDepartamentos(departamentos as UbigeoItem[]);
+        setUbigeoProvincias(provincias as UbigeoItem[]);
+        setUbigeoDistritos(distritos as UbigeoItem[]);
+      } catch (e) {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Error");
+      }
+    };
+    loadUbigeo();
+    return () => {
+      active = false;
+    };
+  }, [ubigeoDepartamentos.length]);
 
   const toDateTimeLocal = (value: string) => {
     const date = new Date(value);
@@ -336,8 +382,10 @@ export default function FreightsPage() {
     setPointDireccion("");
     setPointCiudad("");
     setPointDepartamento("");
-    setPointLatitud("");
-    setPointLongitud("");
+    setPointDistrito("");
+    setPointRegionId("");
+    setPointProvinciaId("");
+    setPointDistritoId("");
     setPointLink("");
     setPointReferencia("");
   };
@@ -388,8 +436,7 @@ export default function FreightsPage() {
           direccion: pointDireccion,
           ciudad: pointCiudad,
           departamento: pointDepartamento,
-          latitud: pointLatitud === "" ? undefined : Number(pointLatitud),
-          longitud: pointLongitud === "" ? undefined : Number(pointLongitud),
+          distrito: pointDistrito,
           linkGoogleMaps: pointLink,
           referencia: pointReferencia,
         }),
@@ -493,19 +540,25 @@ export default function FreightsPage() {
     const destino = freight?.destinationPoint?.nombre ?? freight?.destino ?? "—";
     return `${origen} → ${destino}`;
   };
+  const provinciasDisponibles = pointRegionId
+    ? ubigeoProvincias.filter((p) => p.id_padre_ubigeo === pointRegionId)
+    : [];
+  const distritosDisponibles = pointProvinciaId
+    ? ubigeoDistritos.filter((d) => d.id_padre_ubigeo === pointProvinciaId)
+    : [];
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+    <div className="space-y-6 max-[1366px]:space-y-4">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Fletes</h1>
         <p className="mt-1 text-sm text-zinc-600">Control de viajes e ingresos.</p>
 
         <form
-          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
           onSubmit={onCreate}
         >
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={truckId}
             onChange={(e) => {
               const nextId = e.target.value;
@@ -524,7 +577,7 @@ export default function FreightsPage() {
           </select>
 
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             required
@@ -538,7 +591,7 @@ export default function FreightsPage() {
           </select>
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             type="datetime-local"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
@@ -548,7 +601,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Pago chofer/dueño"
             value={montoAutomatico}
             readOnly
@@ -557,7 +610,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Tipo de cálculo"
             value={tipoCalculoLabel}
             readOnly
@@ -566,7 +619,7 @@ export default function FreightsPage() {
           />
 
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={estado}
             onChange={(e) => setEstado(e.target.value as Freight["estado"])}
             aria-label="Estado del flete"
@@ -577,7 +630,7 @@ export default function FreightsPage() {
             <option value="ANULADO">ANULADO</option>
           </select>
 
-          <label className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700 md:px-4 md:py-3 md:text-base">
+          <label className="flex h-10 items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700 md:px-4 md:py-3 md:text-base">
             <input
               type="checkbox"
               checked={usarMontoPersonalizado}
@@ -597,7 +650,7 @@ export default function FreightsPage() {
           </label>
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base disabled:bg-zinc-50"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base disabled:bg-zinc-50"
             placeholder="Pago personalizado chofer/dueño"
             value={montoPersonalizado}
             onChange={(e) => setMontoPersonalizado(e.target.value)}
@@ -609,7 +662,7 @@ export default function FreightsPage() {
 
           <div className="flex items-center gap-2 md:col-span-2">
             <select
-              className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
               value={customerId}
               onChange={(e) => {
                 setCustomerId(e.target.value);
@@ -641,7 +694,7 @@ export default function FreightsPage() {
 
           <div className="flex items-center gap-2">
             <select
-              className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
               value={originPointId}
               onChange={(e) => setOriginPointId(e.target.value)}
               required
@@ -671,7 +724,7 @@ export default function FreightsPage() {
 
           <div className="flex items-center gap-2">
             <select
-              className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+              className="h-10 flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
               value={destinationPointId}
               onChange={(e) => setDestinationPointId(e.target.value)}
               required
@@ -700,7 +753,7 @@ export default function FreightsPage() {
           </div>
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
             placeholder="Monto flete"
             value={ingreso}
             onChange={(e) => setIngreso(e.target.value)}
@@ -709,35 +762,8 @@ export default function FreightsPage() {
             step="0.01"
             required
           />
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
-            placeholder="Peajes (monto)"
-            value={peajes}
-            onChange={(e) => setPeajes(e.target.value)}
-            type="number"
-            min={0}
-            step="0.01"
-          />
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
-            placeholder="Viáticos (monto)"
-            value={viaticos}
-            onChange={(e) => setViaticos(e.target.value)}
-            type="number"
-            min={0}
-            step="0.01"
-          />
-          <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 disabled:bg-zinc-50 md:px-4 md:py-3 md:text-base"
-            placeholder="Otros gastos (monto)"
-            value={otrosGastos}
-            onChange={(e) => setOtrosGastos(e.target.value)}
-            type="number"
-            min={0}
-            step="0.01"
-          />
 
-          <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
+          <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
             <button
               className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
@@ -764,15 +790,18 @@ export default function FreightsPage() {
         ) : null}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Gastos por flete</h2>
 
         <form
-          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
           onSubmit={onCreateExpense}
         >
+          <p className="text-sm text-zinc-600 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
+            Puede colocar gastos como viáticos, peajes y otros gastos.
+          </p>
           <select
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             value={expenseFreightId}
             onChange={(e) => setExpenseFreightId(e.target.value)}
             required
@@ -786,7 +815,7 @@ export default function FreightsPage() {
           </select>
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
             type="datetime-local"
             value={expenseFecha}
             onChange={(e) => setExpenseFecha(e.target.value)}
@@ -796,7 +825,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Concepto"
             value={expenseConcepto}
             onChange={(e) => setExpenseConcepto(e.target.value)}
@@ -804,7 +833,7 @@ export default function FreightsPage() {
           />
 
           <input
-            className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
             placeholder="Monto"
             value={expenseMonto}
             onChange={(e) => setExpenseMonto(e.target.value)}
@@ -814,7 +843,7 @@ export default function FreightsPage() {
             required
           />
 
-          <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
+          <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
             <button
               className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
@@ -906,13 +935,13 @@ export default function FreightsPage() {
 
         <div className="mt-4 hidden md:block">
           <div className="overflow-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
               <thead className="text-xs text-zinc-500">
                 <tr>
                   <th className="py-2 pr-3">Fecha</th>
                   <th className="py-2 pr-3">Camión</th>
                   <th className="py-2 pr-3">Cliente</th>
-                  <th className="py-2 pr-3">Ruta</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Ruta</th>
                   <th className="py-2 pr-3">Concepto</th>
                   <th className="py-2 pr-3">Monto</th>
                   <th className="py-2 pr-3">Acciones</th>
@@ -921,34 +950,34 @@ export default function FreightsPage() {
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={7}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={7}>
                       Cargando...
                     </td>
                   </tr>
                 ) : expenses.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={7}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={7}>
                       Sin gastos
                     </td>
                   </tr>
                 ) : (
                   expenses.map((e) => (
                     <tr key={e.id}>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {new Date(e.fecha).toLocaleString()}
                       </td>
-                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                      <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                         {e.freight?.truck?.placa ?? "—"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {getExpenseCustomerName(e.freight)}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {getExpenseRoute(e.freight)}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{e.concepto}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{e.monto}</td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{e.concepto}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{e.monto}</td>
+                      <td className="py-3 pr-3 max-[1366px]:py-2">
                         <div className="flex gap-2">
                           <button
                             className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
@@ -976,7 +1005,7 @@ export default function FreightsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
@@ -1096,66 +1125,66 @@ export default function FreightsPage() {
         </div>
         <div className="mt-4 hidden md:block">
           <div className="overflow-auto">
-            <table className="w-full min-w-[1180px] text-left text-sm">
+            <table className="w-full min-w-[1180px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
               <thead className="text-xs text-zinc-500">
                 <tr>
                   <th className="py-2 pr-3">Fecha</th>
                   <th className="py-2 pr-3">Camión</th>
-                  <th className="py-2 pr-3">Chofer</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Chofer</th>
                   <th className="py-2 pr-3">Cliente</th>
                   <th className="py-2 pr-3">Ruta</th>
-                  <th className="py-2 pr-3">Modelo</th>
-                  <th className="py-2 pr-3">Tipo cálculo</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Modelo</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Tipo cálculo</th>
                   <th className="py-2 pr-3">Monto flete</th>
-                  <th className="py-2 pr-3">Pago chofer/dueño</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Pago chofer/dueño</th>
                   <th className="py-2 pr-3">Monto final</th>
-                  <th className="py-2 pr-3">Dirección</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Dirección</th>
                   <th className="py-2 pr-3">Ganancia</th>
-                  <th className="py-2 pr-3">Estado</th>
+                  <th className="py-2 pr-3 max-[1366px]:hidden">Estado</th>
                   <th className="py-2 pr-3">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={14}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={14}>
                       Cargando...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td className="py-3 text-zinc-600" colSpan={14}>
+                    <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={14}>
                       Sin registros
                     </td>
                   </tr>
                 ) : (
                   items.map((f) => (
                     <tr key={f.id}>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {new Date(f.fecha).toLocaleString()}
                       </td>
-                      <td className="py-3 pr-3 font-medium text-zinc-900">
+                      <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                         {f.truck?.placa ?? "—"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {f.driver ? `${f.driver.nombre} (${f.driver.dni})` : "—"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{getCustomerName(f)}</td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{getCustomerName(f)}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                         {getRoute(f)}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {f.tipoModelo === "DUENO_PAGA" ? "Dueño paga" : "Chofer paga"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {f.tipoCalculo === "IDA_VUELTA"
                           ? "Ida y vuelta"
                           : f.tipoCalculo === "MENSUAL"
                             ? "Mensual"
                             : "Viaje"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.ingreso}</td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{f.ingreso}</td>
+                      <td className="py-3 pr-3 max-[1366px]:hidden max-[1366px]:py-2">
                         <span
                           className={
                             f.usarMontoPersonalizado
@@ -1166,7 +1195,7 @@ export default function FreightsPage() {
                           {f.montoCalculado}
                         </span>
                       </td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 max-[1366px]:py-2">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-emerald-700">{f.montoFinal}</span>
                           {f.usarMontoPersonalizado ? (
@@ -1176,12 +1205,12 @@ export default function FreightsPage() {
                           ) : null}
                         </div>
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
                         {f.direccionPago === "POR_COBRAR" ? "Por cobrar" : "Por pagar"}
                       </td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.ganancia}</td>
-                      <td className="py-3 pr-3 text-zinc-700">{f.estado}</td>
-                      <td className="py-3 pr-3">
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{f.ganancia}</td>
+                      <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">{f.estado}</td>
+                      <td className="py-3 pr-3 max-[1366px]:py-2">
                         <div className="flex gap-2">
                           <button
                             className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
@@ -1210,7 +1239,7 @@ export default function FreightsPage() {
       </div>
       {showClientModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg">
+          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg max-[1366px]:p-4">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-base font-semibold text-zinc-900">Nuevo cliente</h3>
               <button
@@ -1222,30 +1251,30 @@ export default function FreightsPage() {
               </button>
             </div>
             <form
-              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2"
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 max-[1366px]:gap-2"
               onSubmit={onCreateClient}
             >
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Nombre comercial"
                 value={clientNombreComercial}
                 onChange={(e) => setClientNombreComercial(e.target.value)}
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Razón social"
                 value={clientRazonSocial}
                 onChange={(e) => setClientRazonSocial(e.target.value)}
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="RUC"
                 value={clientRuc}
                 onChange={(e) => setClientRuc(e.target.value)}
               />
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={clientTipo}
                 onChange={(e) => setClientTipo(e.target.value as typeof clientTipo)}
               >
@@ -1254,14 +1283,14 @@ export default function FreightsPage() {
                 <option value="EVENTUAL">Eventual</option>
               </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Teléfono"
                 value={clientTelefono}
                 onChange={(e) => setClientTelefono(e.target.value)}
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Correo"
                 value={clientCorreo}
                 onChange={(e) => setClientCorreo(e.target.value)}
@@ -1269,7 +1298,7 @@ export default function FreightsPage() {
                 required
               />
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
                 value={clientEstado}
                 onChange={(e) => setClientEstado(e.target.value as ClientOption["estado"])}
               >
@@ -1298,7 +1327,7 @@ export default function FreightsPage() {
       ) : null}
       {showPointModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-lg">
+          <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-lg max-[1366px]:p-4">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-base font-semibold text-zinc-900">Nuevo punto operativo</h3>
               <button
@@ -1310,18 +1339,18 @@ export default function FreightsPage() {
               </button>
             </div>
             <form
-              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 max-[1366px]:gap-2"
               onSubmit={onCreatePoint}
             >
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Nombre"
                 value={pointNombre}
                 onChange={(e) => setPointNombre(e.target.value)}
                 required
               />
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={pointTipo}
                 onChange={(e) => setPointTipo(e.target.value as OperationalPointOption["tipo"])}
               >
@@ -1333,7 +1362,7 @@ export default function FreightsPage() {
                 <option value="OTRO">Otro</option>
               </select>
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={pointClienteId}
                 onChange={(e) => setPointClienteId(e.target.value)}
               >
@@ -1345,50 +1374,85 @@ export default function FreightsPage() {
                 ))}
               </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base lg:col-span-2"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base min-[1600px]:col-span-2"
                 placeholder="Dirección"
                 value={pointDireccion}
                 onChange={(e) => setPointDireccion(e.target.value)}
                 required
               />
-              <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-                placeholder="Ciudad"
-                value={pointCiudad}
-                onChange={(e) => setPointCiudad(e.target.value)}
+              <select
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                value={pointRegionId}
+                onChange={(e) => {
+                  const nextId = e.target.value;
+                  setPointRegionId(nextId);
+                  const selected = ubigeoDepartamentos.find((d) => d.id_ubigeo === nextId);
+                  setPointDepartamento(selected?.nombre_ubigeo ?? "");
+                  setPointProvinciaId("");
+                  setPointCiudad("");
+                  setPointDistritoId("");
+                  setPointDistrito("");
+                }}
                 required
-              />
-              <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-                placeholder="Departamento"
-                value={pointDepartamento}
-                onChange={(e) => setPointDepartamento(e.target.value)}
+                disabled={ubigeoDepartamentos.length === 0}
+              >
+                <option value="">
+                  {ubigeoDepartamentos.length === 0 ? "Cargando regiones..." : "Región"}
+                </option>
+                {ubigeoDepartamentos.map((d) => (
+                  <option key={d.id_ubigeo} value={d.id_ubigeo}>
+                    {d.nombre_ubigeo}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                value={pointProvinciaId}
+                onChange={(e) => {
+                  const nextId = e.target.value;
+                  setPointProvinciaId(nextId);
+                  const selected = provinciasDisponibles.find((p) => p.id_ubigeo === nextId);
+                  setPointCiudad(selected?.nombre_ubigeo ?? "");
+                  setPointDistritoId("");
+                  setPointDistrito("");
+                }}
                 required
-              />
+                disabled={!pointRegionId}
+              >
+                <option value="">Provincia</option>
+                {provinciasDisponibles.map((p) => (
+                  <option key={p.id_ubigeo} value={p.id_ubigeo}>
+                    {p.nombre_ubigeo}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                value={pointDistritoId}
+                onChange={(e) => {
+                  const nextId = e.target.value;
+                  setPointDistritoId(nextId);
+                  const selected = distritosDisponibles.find((d) => d.id_ubigeo === nextId);
+                  setPointDistrito(selected?.nombre_ubigeo ?? "");
+                }}
+                required
+                disabled={!pointProvinciaId}
+              >
+                <option value="">Distrito</option>
+                {distritosDisponibles.map((d) => (
+                  <option key={d.id_ubigeo} value={d.id_ubigeo}>
+                    {d.nombre_ubigeo}
+                  </option>
+                ))}
+              </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-                placeholder="Latitud"
-                value={pointLatitud}
-                onChange={(e) => setPointLatitud(e.target.value)}
-                type="number"
-                step="0.000001"
-              />
-              <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
-                placeholder="Longitud"
-                value={pointLongitud}
-                onChange={(e) => setPointLongitud(e.target.value)}
-                type="number"
-                step="0.000001"
-              />
-              <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
                 placeholder="Link Google Maps"
                 value={pointLink}
                 onChange={(e) => setPointLink(e.target.value)}
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:col-span-2 md:px-4 md:py-3 md:text-base"
                 placeholder="Referencia"
                 value={pointReferencia}
                 onChange={(e) => setPointReferencia(e.target.value)}

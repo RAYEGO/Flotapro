@@ -261,8 +261,8 @@ export default function MaintenancePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+    <div className="space-y-6 max-[1366px]:space-y-4">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Mantenimiento</h1>
         <p className="mt-1 text-sm text-zinc-600">
           Planes por kilometraje y registro de servicios.
@@ -302,14 +302,14 @@ export default function MaintenancePage() {
 
       {tab === "plans" ? (
         <>
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Nuevo plan</h2>
             <form
-              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4"
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
               onSubmit={createPlan}
             >
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={planTruckId}
                 onChange={(e) => setPlanTruckId(e.target.value)}
                 required
@@ -322,14 +322,14 @@ export default function MaintenancePage() {
                 ))}
               </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Tipo (ej. Cambio de aceite)"
                 value={planTipo}
                 onChange={(e) => setPlanTipo(e.target.value)}
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Cada km (frecuencia)"
                 value={cadaKm}
                 onChange={(e) => setCadaKm(Number(e.target.value))}
@@ -338,7 +338,7 @@ export default function MaintenancePage() {
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Último servicio (km)"
                 value={ultimoServicioKm}
                 onChange={(e) => setUltimoServicioKm(e.target.value)}
@@ -346,7 +346,7 @@ export default function MaintenancePage() {
                 min={0}
                 required
               />
-              <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-4">
+              <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
                 <button
                   className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
@@ -367,7 +367,7 @@ export default function MaintenancePage() {
             </form>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
             <div className="mt-4 space-y-4 md:hidden">
               {loading ? (
@@ -444,12 +444,12 @@ export default function MaintenancePage() {
             </div>
             <div className="mt-4 hidden md:block">
               <div className="overflow-auto">
-                <table className="w-full min-w-[980px] text-left text-sm">
+                <table className="w-full min-w-[980px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
                   <thead className="text-xs text-zinc-500">
                     <tr>
                       <th className="py-2 pr-3">Camión</th>
-                      <th className="py-2 pr-3">Tipo de servicio</th>
-                      <th className="py-2 pr-3">Km actual</th>
+                      <th className="py-2 pr-3 max-[1366px]:hidden">Tipo de servicio</th>
+                      <th className="py-2 pr-3 max-[1366px]:hidden">Km actual</th>
                       <th className="py-2 pr-3">Próximo mantenimiento</th>
                       <th className="py-2 pr-3">Km restantes</th>
                       <th className="py-2 pr-3">Estado</th>
@@ -459,13 +459,13 @@ export default function MaintenancePage() {
                   <tbody className="divide-y divide-zinc-100">
                     {loading ? (
                       <tr>
-                        <td className="py-3 text-zinc-600" colSpan={7}>
+                        <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={7}>
                           Cargando...
                         </td>
                       </tr>
                     ) : plans.length === 0 ? (
                       <tr>
-                        <td className="py-3 text-zinc-600" colSpan={7}>
+                        <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={7}>
                           Sin registros
                         </td>
                       </tr>
@@ -479,21 +479,23 @@ export default function MaintenancePage() {
                             const status = getStatus(restanteKm);
                             return (
                               <>
-                          <td className="py-3 pr-3 font-medium text-zinc-900">
+                          <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                             {p.truck?.placa ?? "—"}
                           </td>
-                          <td className="py-3 pr-3 text-zinc-700">{p.tipo}</td>
-                          <td className="py-3 pr-3 text-zinc-700">{kmActual ?? "—"}</td>
-                          <td className="py-3 pr-3 text-zinc-700">{proximoKm}</td>
-                          <td className="py-3 pr-3 text-zinc-700">
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">{p.tipo}</td>
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                            {kmActual ?? "—"}
+                          </td>
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{proximoKm}</td>
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                             {restanteKm === null ? "—" : restanteKm}
                           </td>
-                          <td className="py-3 pr-3">
+                          <td className="py-3 pr-3 max-[1366px]:py-2">
                             <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}>
                               {status.label}
                             </span>
                           </td>
-                          <td className="py-3 pr-3">
+                          <td className="py-3 pr-3 max-[1366px]:py-2">
                             <div className="flex gap-2">
                               <button
                                 className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
@@ -526,14 +528,14 @@ export default function MaintenancePage() {
         </>
       ) : (
         <>
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Nuevo registro</h2>
             <form
-              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
               onSubmit={createRecord}
             >
               <select
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 value={recordTruckId}
                 onChange={(e) => setRecordTruckId(e.target.value)}
                 required
@@ -546,7 +548,7 @@ export default function MaintenancePage() {
                 ))}
               </select>
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 md:px-4 md:py-3 md:text-base"
                 type="datetime-local"
                 value={recordFecha}
                 onChange={(e) => setRecordFecha(e.target.value)}
@@ -555,14 +557,14 @@ export default function MaintenancePage() {
                 title="Fecha y hora del servicio"
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Tipo"
                 value={recordTipo}
                 onChange={(e) => setRecordTipo(e.target.value)}
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Kilometraje (km)"
                 value={recordKm}
                 onChange={(e) => setRecordKm(e.target.value)}
@@ -571,7 +573,7 @@ export default function MaintenancePage() {
                 required
               />
               <input
-                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
+                className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-3 md:text-base"
                 placeholder="Costo (monto)"
                 value={recordCosto}
                 onChange={(e) => setRecordCosto(e.target.value)}
@@ -580,7 +582,7 @@ export default function MaintenancePage() {
                 step="0.01"
                 required
               />
-              <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3 xl:col-span-4">
+              <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
                 <button
                   className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
@@ -601,7 +603,7 @@ export default function MaintenancePage() {
             </form>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
             <div className="mt-4 space-y-4 md:hidden">
               {loading ? (
@@ -661,12 +663,12 @@ export default function MaintenancePage() {
             </div>
             <div className="mt-4 hidden md:block">
               <div className="overflow-auto">
-                <table className="w-full min-w-[980px] text-left text-sm">
+                <table className="w-full min-w-[980px] text-left text-sm max-[1366px]:min-w-0 max-[1366px]:text-xs">
                   <thead className="text-xs text-zinc-500">
                     <tr>
                       <th className="py-2 pr-3">Fecha</th>
                       <th className="py-2 pr-3">Camión</th>
-                      <th className="py-2 pr-3">Tipo</th>
+                      <th className="py-2 pr-3 max-[1366px]:hidden">Tipo</th>
                       <th className="py-2 pr-3">Km</th>
                       <th className="py-2 pr-3">Costo</th>
                       <th className="py-2 pr-3">Acciones</th>
@@ -675,29 +677,31 @@ export default function MaintenancePage() {
                   <tbody className="divide-y divide-zinc-100">
                     {loading ? (
                       <tr>
-                        <td className="py-3 text-zinc-600" colSpan={6}>
+                        <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={6}>
                           Cargando...
                         </td>
                       </tr>
                     ) : records.length === 0 ? (
                       <tr>
-                        <td className="py-3 text-zinc-600" colSpan={6}>
+                        <td className="py-3 text-zinc-600 max-[1366px]:py-2" colSpan={6}>
                           Sin registros
                         </td>
                       </tr>
                     ) : (
                       records.map((r) => (
                         <tr key={r.id}>
-                          <td className="py-3 pr-3 text-zinc-700">
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">
                             {new Date(r.fecha).toLocaleString()}
                           </td>
-                          <td className="py-3 pr-3 font-medium text-zinc-900">
+                          <td className="py-3 pr-3 font-medium text-zinc-900 max-[1366px]:py-2">
                             {r.truck?.placa ?? "—"}
                           </td>
-                          <td className="py-3 pr-3 text-zinc-700">{r.tipo}</td>
-                          <td className="py-3 pr-3 text-zinc-700">{r.kilometraje}</td>
-                          <td className="py-3 pr-3 text-zinc-700">{r.costo}</td>
-                          <td className="py-3 pr-3">
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:hidden max-[1366px]:py-2">
+                            {r.tipo}
+                          </td>
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{r.kilometraje}</td>
+                          <td className="py-3 pr-3 text-zinc-700 max-[1366px]:py-2">{r.costo}</td>
+                          <td className="py-3 pr-3 max-[1366px]:py-2">
                             <div className="flex gap-2">
                               <button
                                 className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
