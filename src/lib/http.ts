@@ -28,6 +28,37 @@ export function jsonServerError(message?: string) {
   return Response.json({ error: message ?? "Error interno" }, { status: 500 });
 }
 
+export function jsonPrismaError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
+      return jsonBadRequest("Registro duplicado");
+    }
+    if (error.code === "P2003") {
+      return jsonBadRequest("Referencia inválida");
+    }
+    if (error.code === "P2011") {
+      return jsonBadRequest("Campo requerido");
+    }
+    if (error.code === "P2025") {
+      return jsonNotFound();
+    }
+    if (error.code === "P2000") {
+      return jsonBadRequest("Valor demasiado largo");
+    }
+    return jsonServerError(error.message);
+  }
+  if (error instanceof Prisma.PrismaClientValidationError) {
+    return jsonBadRequest("Datos inválidos");
+  }
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return jsonServerError("Error de conexión a la base de datos");
+  }
+  if (error instanceof Prisma.PrismaClientRustPanicError) {
+    return jsonServerError("Error interno de Prisma");
+  }
+  return jsonServerError(error instanceof Error ? error.message : undefined);
+}
+
 export function serializeMoney(value: Prisma.Decimal | null | undefined) {
   if (value === null || value === undefined) return "0.00";
   return value.toFixed(2);

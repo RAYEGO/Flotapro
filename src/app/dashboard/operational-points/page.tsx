@@ -7,7 +7,8 @@ type ClientOption = { id: string; nombreComercial: string };
 type Point = {
   id: string;
   nombre: string;
-  tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO";
+  tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO" | "AGENCIA" | "PROCESADOR";
+  activo: boolean;
   clienteId: string | null;
   direccion: string;
   ciudad: string;
@@ -37,6 +38,7 @@ export default function OperationalPointsPage() {
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState<Point["tipo"]>("OTRO");
   const [clienteId, setClienteId] = useState("");
+  const [activo, setActivo] = useState(true);
   const [direccion, setDireccion] = useState("");
   const [regionId, setRegionId] = useState<number | "">("");
   const [provinciaId, setProvinciaId] = useState<number | "">("");
@@ -173,6 +175,7 @@ export default function OperationalPointsPage() {
     setNombre("");
     setTipo("OTRO");
     setClienteId("");
+    setActivo(true);
     setDireccion("");
     setRegionId("");
     setProvinciaId("");
@@ -189,6 +192,7 @@ export default function OperationalPointsPage() {
     setNombre(point.nombre);
     setTipo(point.tipo);
     setClienteId(point.clienteId ?? "");
+    setActivo(point.activo);
     setDireccion(point.direccion);
     const regionFallback = regions.find((r) => r.nombre === point.departamento)?.id ?? "";
     const nextRegionId = point.regionId ?? regionFallback;
@@ -211,6 +215,14 @@ export default function OperationalPointsPage() {
     setLinkGoogleMaps(point.linkGoogleMaps ?? "");
     setReferencia(point.referencia ?? "");
   };
+
+  useEffect(() => {
+    if (!pendingLocation || regionId !== "" || regions.length === 0) return;
+    const match = regions.find((r) => r.nombre === pendingLocation.departamento);
+    if (match) {
+      setRegionId(match.id);
+    }
+  }, [pendingLocation, regions, regionId]);
 
   useEffect(() => {
     if (!pendingLocation || provinciaId !== "" || provinces.length === 0) return;
@@ -299,6 +311,7 @@ export default function OperationalPointsPage() {
             nombre: nombreValue,
             tipo,
             clienteId: editingId ? (clienteId === "" ? "" : clienteId) : clienteId || undefined,
+            activo,
             direccion: direccionValue,
             regionId,
             provinceId: provinciaId,
@@ -359,14 +372,13 @@ export default function OperationalPointsPage() {
             value={tipo}
             onChange={(e) => setTipo(e.target.value as Point["tipo"])}
           >
-            <option value="BALANZA">Agencia</option>
+            <option value="AGENCIA">Agencia</option>
             <option value="BALANZA">Balanza</option>
+            <option value="PROCESADOR">Procesador</option>
             <option value="PLANTA">Planta Procesadora</option>
             <option value="MINA">Mina</option>
             <option value="PUERTO">Puerto</option>
             <option value="ALMACEN">Almacén</option>
-            <option value="ALMACEN">Mercado</option>
-            <option value="ALMACEN">Cliente final</option>
             <option value="OTRO">Otro</option>
           </select>
           <select
@@ -381,6 +393,15 @@ export default function OperationalPointsPage() {
               </option>
             ))}
           </select>
+          <label className="flex items-center gap-2 text-sm text-zinc-700">
+            <input
+              type="checkbox"
+              checked={activo}
+              onChange={(e) => setActivo(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 text-zinc-900"
+            />
+            Activo
+          </label>
           <input
             className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
             placeholder="Dirección"

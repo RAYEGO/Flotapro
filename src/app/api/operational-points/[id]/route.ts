@@ -6,7 +6,7 @@ import {
   jsonBadRequest,
   jsonNotFound,
   jsonOk,
-  jsonServerError,
+  jsonPrismaError,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/tenant";
@@ -53,8 +53,11 @@ const getUbigeoSupport = async () => {
 
 const updatePointSchema = z.object({
   nombre: z.string().min(2).max(120).optional(),
-  tipo: z.enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO"]).optional(),
+  tipo: z
+    .enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO", "AGENCIA", "PROCESADOR"])
+    .optional(),
   clienteId: z.string().min(1).optional().or(z.literal("")),
+  activo: z.boolean().optional(),
   direccion: z.string().min(2).max(160).optional(),
   regionId: z.coerce.number().int().positive().optional(),
   provinceId: z.coerce.number().int().positive().optional(),
@@ -79,6 +82,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
       createdAt: true,
       updatedAt: true,
       companyId: true,
+      activo: true,
       clienteId: true,
       nombre: true,
       tipo: true,
@@ -112,7 +116,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
       },
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }
 
@@ -206,6 +210,7 @@ export async function PATCH(
       clienteId: nextClienteId,
       nombre: parsed.data.nombre,
       tipo: parsed.data.tipo,
+      ...(parsed.data.activo !== undefined ? { activo: parsed.data.activo } : {}),
       direccion: parsed.data.direccion,
       departamento,
       ciudad,
@@ -233,12 +238,13 @@ export async function PATCH(
     return jsonOk({
       point: {
         ...point,
+        activo: point.activo,
         latitud: formatCoord(point.latitud),
         longitud: formatCoord(point.longitud),
       },
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }
 
@@ -258,7 +264,7 @@ export async function DELETE(
 
     await prisma.operationalPoint.delete({ where: { id: existing.id } });
     return jsonOk({ ok: true });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonPrismaError(error);
   }
 }

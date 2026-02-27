@@ -6,7 +6,7 @@ import {
   jsonBadRequest,
   jsonCreated,
   jsonOk,
-  jsonServerError,
+  jsonPrismaError,
   serializeMoney,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
@@ -16,7 +16,7 @@ const createExpenseSchema = z.object({
   freightId: z.string().min(1),
   fecha: z.string().datetime(),
   concepto: z.string().min(2).max(120),
-  monto: z.coerce.number().nonnegative(),
+  monto: z.coerce.number().finite().nonnegative(),
 });
 
 export async function GET(req: NextRequest) {
@@ -43,8 +43,8 @@ export async function GET(req: NextRequest) {
     return jsonOk({
       expenses: expenses.map((e) => ({ ...e, monto: serializeMoney(e.monto) })),
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonPrismaError(error);
   }
 }
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     return jsonCreated({
       expense: { ...expense, monto: serializeMoney(expense.monto) },
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonPrismaError(error);
   }
 }

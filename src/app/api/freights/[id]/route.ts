@@ -6,7 +6,7 @@ import {
   jsonBadRequest,
   jsonNotFound,
   jsonOk,
-  jsonServerError,
+  jsonPrismaError,
   serializeMoney,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
@@ -19,12 +19,12 @@ const updateFreightSchema = z.object({
   originPointId: z.string().min(1).optional(),
   destinationPointId: z.string().min(1).optional(),
   fecha: z.string().datetime().optional(),
-  ingreso: z.coerce.number().nonnegative().optional(),
-  peajes: z.coerce.number().nonnegative().optional(),
-  viaticos: z.coerce.number().nonnegative().optional(),
-  otrosGastos: z.coerce.number().nonnegative().optional(),
+  ingreso: z.coerce.number().finite().nonnegative().optional(),
+  peajes: z.coerce.number().finite().nonnegative().optional(),
+  viaticos: z.coerce.number().finite().nonnegative().optional(),
+  otrosGastos: z.coerce.number().finite().nonnegative().optional(),
   usarMontoPersonalizado: z.boolean().optional(),
-  montoPersonalizado: z.coerce.number().nonnegative().optional(),
+  montoPersonalizado: z.coerce.number().finite().nonnegative().optional(),
   estado: z.enum(["PENDIENTE", "COMPLETADO", "ANULADO"]).optional(),
 });
 
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
       },
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }
 
@@ -180,9 +180,6 @@ export async function PATCH(
         originPointId: originPoint.id,
         destinationPointId: destinationPoint.id,
         fecha: parsed.data.fecha ? new Date(parsed.data.fecha) : undefined,
-        cliente: customer.nombreComercial,
-        origen: originPoint.nombre,
-        destino: destinationPoint.nombre,
         ingreso,
         peajes,
         viaticos,
@@ -217,7 +214,7 @@ export async function PATCH(
       },
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }
 
@@ -238,6 +235,6 @@ export async function DELETE(
     await prisma.freight.delete({ where: { id: existing.id } });
     return jsonOk({ ok: true });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }

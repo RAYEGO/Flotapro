@@ -6,7 +6,7 @@ import {
   jsonBadRequest,
   jsonCreated,
   jsonOk,
-  jsonServerError,
+  jsonPrismaError,
   serializeMoney,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }
 
@@ -155,9 +155,6 @@ export async function POST(req: NextRequest) {
         originPointId: originPoint.id,
         destinationPointId: destinationPoint.id,
         fecha: fechaValue,
-        cliente: customer.nombreComercial,
-        origen: originPoint.nombre,
-        destino: destinationPoint.nombre,
         ingreso,
         peajes,
         viaticos,
@@ -193,6 +190,6 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }

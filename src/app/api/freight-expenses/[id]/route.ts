@@ -6,7 +6,7 @@ import {
   jsonBadRequest,
   jsonNotFound,
   jsonOk,
-  jsonServerError,
+  jsonPrismaError,
   serializeMoney,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
@@ -16,7 +16,7 @@ const updateExpenseSchema = z.object({
   freightId: z.string().min(1).optional(),
   fecha: z.string().datetime().optional(),
   concepto: z.string().min(2).max(120).optional(),
-  monto: z.coerce.number().nonnegative().optional(),
+  monto: z.coerce.number().finite().nonnegative().optional(),
 });
 
 export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
@@ -40,8 +40,8 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
     });
     if (!expense) return jsonNotFound();
     return jsonOk({ expense: { ...expense, monto: serializeMoney(expense.monto) } });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonPrismaError(error);
   }
 }
 
@@ -80,8 +80,8 @@ export async function PATCH(
     });
 
     return jsonOk({ expense: { ...expense, monto: serializeMoney(expense.monto) } });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonPrismaError(error);
   }
 }
 
@@ -101,7 +101,7 @@ export async function DELETE(
 
     await prisma.freightExpense.delete({ where: { id: existing.id } });
     return jsonOk({ ok: true });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonPrismaError(error);
   }
 }

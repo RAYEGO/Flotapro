@@ -6,7 +6,7 @@ import {
   jsonBadRequest,
   jsonCreated,
   jsonOk,
-  jsonServerError,
+  jsonPrismaError,
 } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/tenant";
@@ -53,8 +53,11 @@ const getUbigeoSupport = async () => {
 
 const createPointSchema = z.object({
   nombre: z.string().min(2).max(120),
-  tipo: z.enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO"]).optional(),
+  tipo: z
+    .enum(["BALANZA", "PLANTA", "MINA", "PUERTO", "ALMACEN", "OTRO", "AGENCIA", "PROCESADOR"])
+    .optional(),
   clienteId: z.string().min(1).optional(),
+  activo: z.boolean().optional(),
   direccion: z.string().min(2).max(160),
   regionId: z.coerce.number().int().positive().optional(),
   provinceId: z.coerce.number().int().positive().optional(),
@@ -79,6 +82,7 @@ export async function GET(req: NextRequest) {
       createdAt: true,
       updatedAt: true,
       companyId: true,
+      activo: true,
       clienteId: true,
       nombre: true,
       tipo: true,
@@ -113,7 +117,7 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }
 
@@ -185,6 +189,7 @@ export async function POST(req: NextRequest) {
       nombre: parsed.data.nombre,
       tipo: parsed.data.tipo,
       direccion: parsed.data.direccion,
+      ...(parsed.data.activo !== undefined ? { activo: parsed.data.activo } : {}),
       ciudad,
       departamento,
       latitud: parsed.data.latitud === undefined ? null : decimal(parsed.data.latitud, 6),
@@ -202,11 +207,12 @@ export async function POST(req: NextRequest) {
     return jsonCreated({
       point: {
         ...point,
+        activo: point.activo,
         latitud: formatCoord(point.latitud),
         longitud: formatCoord(point.longitud),
       },
     });
   } catch (error) {
-    return jsonServerError(error instanceof Error ? error.message : undefined);
+    return jsonPrismaError(error);
   }
 }

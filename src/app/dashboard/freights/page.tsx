@@ -15,7 +15,7 @@ type ClientOption = { id: string; nombreComercial: string; estado: "ACTIVO" | "I
 type OperationalPointOption = {
   id: string;
   nombre: string;
-  tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO";
+  tipo: "BALANZA" | "PLANTA" | "MINA" | "PUERTO" | "ALMACEN" | "OTRO" | "AGENCIA" | "PROCESADOR";
   clienteId: string | null;
 };
 type RegionOption = { id: number; nombre: string };
@@ -25,12 +25,9 @@ type DistrictOption = { id: number; nombre: string; provinceId: number };
 type Freight = {
   id: string;
   fecha: string;
-  cliente: string;
-  origen: string;
-  destino: string;
-  customerId: string | null;
-  originPointId: string | null;
-  destinationPointId: string | null;
+  customerId: string;
+  originPointId: string;
+  destinationPointId: string;
   ingreso: string;
   peajes: string;
   viaticos: string;
@@ -48,9 +45,9 @@ type Freight = {
   estado: "PENDIENTE" | "COMPLETADO" | "ANULADO";
   truck?: { id: string; placa: string } | null;
   driver?: { id: string; nombre: string; dni: string } | null;
-  customer?: { id: string; nombreComercial: string } | null;
-  originPoint?: { id: string; nombre: string } | null;
-  destinationPoint?: { id: string; nombre: string } | null;
+  customer?: { id: string; nombreComercial: string };
+  originPoint?: { id: string; nombre: string };
+  destinationPoint?: { id: string; nombre: string };
   truckId: string;
   driverId: string;
 };
@@ -63,14 +60,11 @@ type FreightExpense = {
   freightId: string;
   freight?: {
     id: string;
-    cliente: string;
-    origen: string;
-    destino: string;
-    customer?: { id: string; nombreComercial: string } | null;
-    originPoint?: { id: string; nombre: string } | null;
-    destinationPoint?: { id: string; nombre: string } | null;
-    truck?: { id: string; placa: string } | null;
-    driver?: { id: string; nombre: string; dni: string } | null;
+    customer?: { id: string; nombreComercial: string };
+    originPoint?: { id: string; nombre: string };
+    destinationPoint?: { id: string; nombre: string };
+    truck?: { id: string; placa: string };
+    driver?: { id: string; nombre: string; dni: string };
   } | null;
 };
 
@@ -592,17 +586,15 @@ export default function FreightsPage() {
       : selectedTruck?.tipoCalculo === "MENSUAL"
         ? "Mensual"
         : "Viaje";
-  const getCustomerName = (freight: Freight) =>
-    freight.customer?.nombreComercial ?? freight.cliente ?? "—";
-  const getOriginName = (freight: Freight) => freight.originPoint?.nombre ?? freight.origen ?? "—";
-  const getDestinationName = (freight: Freight) =>
-    freight.destinationPoint?.nombre ?? freight.destino ?? "—";
+  const getCustomerName = (freight: Freight) => freight.customer?.nombreComercial ?? "—";
+  const getOriginName = (freight: Freight) => freight.originPoint?.nombre ?? "—";
+  const getDestinationName = (freight: Freight) => freight.destinationPoint?.nombre ?? "—";
   const getRoute = (freight: Freight) => `${getOriginName(freight)} → ${getDestinationName(freight)}`;
   const getExpenseCustomerName = (freight: FreightExpense["freight"]) =>
-    freight?.customer?.nombreComercial ?? freight?.cliente ?? "—";
+    freight?.customer?.nombreComercial ?? "—";
   const getExpenseRoute = (freight: FreightExpense["freight"]) => {
-    const origen = freight?.originPoint?.nombre ?? freight?.origen ?? "—";
-    const destino = freight?.destinationPoint?.nombre ?? freight?.destino ?? "—";
+    const origen = freight?.originPoint?.nombre ?? "—";
+    const destino = freight?.destinationPoint?.nombre ?? "—";
     return `${origen} → ${destino}`;
   };
   const renderFreightFormCard = (options?: {
@@ -1443,7 +1435,9 @@ export default function FreightsPage() {
                 value={pointTipo}
                 onChange={(e) => setPointTipo(e.target.value as OperationalPointOption["tipo"])}
               >
+                <option value="AGENCIA">Agencia</option>
                 <option value="BALANZA">Balanza</option>
+                <option value="PROCESADOR">Procesador</option>
                 <option value="PLANTA">Planta</option>
                 <option value="MINA">Mina</option>
                 <option value="PUERTO">Puerto</option>

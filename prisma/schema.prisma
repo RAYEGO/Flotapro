@@ -145,6 +145,7 @@ model OperationalPoint {
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
   companyId     String
+  activo        Boolean               @default(true)
   clienteId     String?
   nombre        String
   tipo          OperationalPointType  @default(OTRO)
@@ -180,14 +181,11 @@ model Freight {
   updatedAt   DateTime      @updatedAt
   companyId   String
   truckId     String
-  customerId  String?
-  originPointId String?
-  destinationPointId String?
+  customerId  String
+  originPointId String
+  destinationPointId String
   driverId    String
   fecha       DateTime
-  cliente     String
-  origen      String
-  destino     String
   ingreso     Decimal       @db.Decimal(12, 2)
   peajes      Decimal       @default(0) @db.Decimal(12, 2)
   viaticos    Decimal       @default(0) @db.Decimal(12, 2)
@@ -206,9 +204,9 @@ model Freight {
   company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   driver      Driver        @relation(fields: [driverId], references: [id])
   truck       Truck         @relation(fields: [truckId], references: [id])
-  customer    Client?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  originPoint OperationalPoint? @relation("FreightOriginPoint", fields: [originPointId], references: [id], onDelete: SetNull)
-  destinationPoint OperationalPoint? @relation("FreightDestinationPoint", fields: [destinationPointId], references: [id], onDelete: SetNull)
+  customer    Client       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  originPoint OperationalPoint @relation("FreightOriginPoint", fields: [originPointId], references: [id], onDelete: Restrict)
+  destinationPoint OperationalPoint @relation("FreightDestinationPoint", fields: [destinationPointId], references: [id], onDelete: Restrict)
   expenses    FreightExpense[]
 
   @@index([companyId, fecha])
@@ -321,6 +319,8 @@ enum ClientStatus {
 
 enum OperationalPointType {
   BALANZA
+  AGENCIA
+  PROCESADOR
   PLANTA
   MINA
   PUERTO
