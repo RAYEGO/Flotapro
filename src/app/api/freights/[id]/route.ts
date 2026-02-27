@@ -54,8 +54,8 @@ export async function GET(req: NextRequest, ctx: { params: { id: string } }) {
         montoFinal: serializeMoney(freight.montoFinal),
       },
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }
 
@@ -69,6 +69,10 @@ export async function PATCH(
   try {
     const parsed = updateFreightSchema.safeParse(await req.json());
     if (!parsed.success) return jsonBadRequest("Datos inválidos");
+    if (parsed.data.fecha) {
+      const fechaValue = new Date(parsed.data.fecha);
+      if (Number.isNaN(fechaValue.getTime())) return jsonBadRequest("Fecha inválida");
+    }
 
     const companyId = auth.session.companyId;
     const existing = await prisma.freight.findFirst({
@@ -206,8 +210,8 @@ export async function PATCH(
         montoFinal: serializeMoney(freight.montoFinal),
       },
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }
 
@@ -227,7 +231,7 @@ export async function DELETE(
 
     await prisma.freight.delete({ where: { id: existing.id } });
     return jsonOk({ ok: true });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }

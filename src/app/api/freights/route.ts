@@ -55,8 +55,8 @@ export async function GET(req: NextRequest) {
         montoFinal: serializeMoney(f.montoFinal),
       })),
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }
 
@@ -67,6 +67,8 @@ export async function POST(req: NextRequest) {
   try {
     const parsed = createFreightSchema.safeParse(await req.json());
     if (!parsed.success) return jsonBadRequest("Datos inválidos");
+    const fechaValue = new Date(parsed.data.fecha);
+    if (Number.isNaN(fechaValue.getTime())) return jsonBadRequest("Fecha inválida");
 
     const companyId = auth.session.companyId;
 
@@ -146,7 +148,7 @@ export async function POST(req: NextRequest) {
         customerId: customer.id,
         originPointId: originPoint.id,
         destinationPointId: destinationPoint.id,
-        fecha: new Date(parsed.data.fecha),
+        fecha: fechaValue,
         cliente: customer.nombreComercial,
         origen: originPoint.nombre,
         destino: destinationPoint.nombre,
@@ -184,7 +186,7 @@ export async function POST(req: NextRequest) {
         montoFinal: serializeMoney(freight.montoFinal),
       },
     });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    return jsonServerError(error instanceof Error ? error.message : undefined);
   }
 }
