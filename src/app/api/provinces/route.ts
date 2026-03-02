@@ -52,18 +52,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { prisma } = await import("@/lib/prisma");
-    const provinces = await prisma.province.findMany({
-      where: { regionId },
-      orderBy: { nombre: "asc" },
-    });
-    if (provinces.length > 0) return jsonOk({ provinces });
+    const provinces = await fetchProvincesFromRemote(regionId);
+    return jsonOk({ provinces });
   } catch (error) {
     console.error(error);
   }
 
   try {
-    const provinces = await fetchProvincesFromRemote(regionId);
+    const { prisma } = await import("@/lib/prisma");
+    const provinces = await prisma.province.findMany({
+      where: { regionId },
+      orderBy: { nombre: "asc" },
+    });
     return jsonOk({ provinces });
   } catch (error) {
     console.error(error);

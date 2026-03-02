@@ -39,15 +39,15 @@ export async function GET(req: NextRequest) {
   if (!auth.ok) return auth.response;
 
   try {
-    const { prisma } = await import("@/lib/prisma");
-    const regions = await prisma.region.findMany({ orderBy: { nombre: "asc" } });
-    if (regions.length > 0) return jsonOk({ regions });
+    const regions = await fetchRegionsFromRemote();
+    return jsonOk({ regions });
   } catch (error) {
     console.error(error);
   }
 
   try {
-    const regions = await fetchRegionsFromRemote();
+    const { prisma } = await import("@/lib/prisma");
+    const regions = await prisma.region.findMany({ orderBy: { nombre: "asc" } });
     return jsonOk({ regions });
   } catch (error) {
     console.error(error);
