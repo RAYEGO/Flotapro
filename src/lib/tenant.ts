@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { Role } from "@prisma/client";
 
 import { getSessionFromRequest } from "./auth";
 import { jsonForbidden, jsonUnauthorized } from "./http";
@@ -13,7 +12,7 @@ export async function requireSession(req: NextRequest) {
 export async function requireAdmin(req: NextRequest) {
   const auth = await requireSession(req);
   if (!auth.ok) return auth;
-  if (auth.session.role !== Role.ADMIN) {
+  if (auth.session.role !== "ADMIN") {
     return { ok: false as const, response: jsonForbidden() };
   }
   return auth;

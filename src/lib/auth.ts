@@ -1,12 +1,13 @@
-import { Role } from "@prisma/client";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
+export type SessionRole = "ADMIN" | "USER";
+
 export type Session = {
   userId: string;
   companyId: string;
-  role: Role;
+  role: SessionRole;
 };
 
 const SESSION_COOKIE = "fp_session";
@@ -42,7 +43,7 @@ export async function verifySessionToken(token: string): Promise<Session | null>
 
     if (typeof userId !== "string") return null;
     if (typeof companyId !== "string") return null;
-    if (role !== Role.ADMIN && role !== Role.USER) return null;
+    if (role !== "ADMIN" && role !== "USER") return null;
 
     return { userId, companyId, role };
   } catch {
