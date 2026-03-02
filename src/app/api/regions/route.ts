@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 import { jsonBadRequest, jsonOk, jsonServerError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/tenant";
+import { requireSession } from "@/lib/tenant";
 
 type UbigeoItem = {
   id_ubigeo: string;
@@ -36,7 +36,7 @@ const fetchRegionsFromRemote = async () => {
 };
 
 export async function GET(req: NextRequest) {
-  const auth = await requireAdmin(req);
+  const auth = await requireSession(req);
   if (!auth.ok) return auth.response;
 
   try {
