@@ -166,7 +166,7 @@ export default function Sidebar() {
                   return (
                     <Link
                       key={item.href}
-                      className="flex min-w-[72px] flex-1 flex-col items-center justify-center text-center text-[11px] font-medium text-[#DCEBFF]"
+                      className="flex flex-1 basis-0 min-w-0 flex-col items-center justify-center text-center text-[11px] font-medium text-[#DCEBFF]"
                       href="/dashboard/freights?quick=1"
                     >
                       <span
@@ -185,7 +185,7 @@ export default function Sidebar() {
                 return (
                   <Link
                     key={item.href}
-                    className={`flex min-w-[72px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs transition-colors duration-200 ${
+                    className={`flex flex-1 basis-0 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs transition-colors duration-200 ${
                       active
                         ? "bg-[#111F35] text-[#8DBBFF] shadow-[inset_0_2px_0_0_#7FB5FF]"
                         : "text-[#9FB2C5] hover:bg-[#111F35]"

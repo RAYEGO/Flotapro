@@ -43,8 +43,6 @@ export default function OperationalPointsPage() {
   const [regionId, setRegionId] = useState<number | "">("");
   const [provinciaId, setProvinciaId] = useState<number | "">("");
   const [distritoId, setDistritoId] = useState<number | "">("");
-  const [latitud, setLatitud] = useState("");
-  const [longitud, setLongitud] = useState("");
   const [linkGoogleMaps, setLinkGoogleMaps] = useState("");
   const [referencia, setReferencia] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -180,8 +178,6 @@ export default function OperationalPointsPage() {
     setRegionId("");
     setProvinciaId("");
     setDistritoId("");
-    setLatitud("");
-    setLongitud("");
     setLinkGoogleMaps("");
     setReferencia("");
     setEditingId(null);
@@ -210,8 +206,6 @@ export default function OperationalPointsPage() {
           }
         : null,
     );
-    setLatitud(point.latitud ?? "");
-    setLongitud(point.longitud ?? "");
     setLinkGoogleMaps(point.linkGoogleMaps ?? "");
     setReferencia(point.referencia ?? "");
   };
@@ -263,8 +257,6 @@ export default function OperationalPointsPage() {
       const direccionValue = direccion.trim();
       const linkValue = linkGoogleMaps.trim();
       const referenciaValue = referencia.trim();
-      const latNumber = latitud === "" ? null : Number(latitud);
-      const lngNumber = longitud === "" ? null : Number(longitud);
       if (!nombreValue) {
         setError("Nombre requerido");
         return;
@@ -285,22 +277,6 @@ export default function OperationalPointsPage() {
         setError("Selecciona el distrito");
         return;
       }
-      if (latNumber !== null && !Number.isFinite(latNumber)) {
-        setError("Latitud inválida");
-        return;
-      }
-      if (lngNumber !== null && !Number.isFinite(lngNumber)) {
-        setError("Longitud inválida");
-        return;
-      }
-      if (latNumber !== null && (latNumber < -90 || latNumber > 90)) {
-        setError("Latitud fuera de rango");
-        return;
-      }
-      if (lngNumber !== null && (lngNumber < -180 || lngNumber > 180)) {
-        setError("Longitud fuera de rango");
-        return;
-      }
 
       const res = await fetch(
         editingId ? `/api/operational-points/${editingId}` : "/api/operational-points",
@@ -316,8 +292,6 @@ export default function OperationalPointsPage() {
             regionId,
             provinceId: provinciaId,
             districtId: distritoId,
-            latitud: latNumber === null ? undefined : latNumber,
-            longitud: lngNumber === null ? undefined : lngNumber,
             linkGoogleMaps: linkValue,
             referencia: referenciaValue,
           }),
@@ -478,22 +452,6 @@ export default function OperationalPointsPage() {
               </option>
             ))}
           </select>
-          <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
-            placeholder="Latitud"
-            value={latitud}
-            onChange={(e) => setLatitud(e.target.value)}
-            type="number"
-            step="0.000001"
-          />
-          <input
-            className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:px-4 md:py-2 md:text-base"
-            placeholder="Longitud"
-            value={longitud}
-            onChange={(e) => setLongitud(e.target.value)}
-            type="number"
-            step="0.000001"
-          />
           <input
             className="h-10 rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400 placeholder:text-zinc-400 md:col-span-2 md:px-4 md:py-2 md:text-base"
             placeholder="Link Google Maps"
