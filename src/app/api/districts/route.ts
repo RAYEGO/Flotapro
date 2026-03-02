@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 
 import { jsonBadRequest, jsonOk, jsonServerError } from "@/lib/http";
-import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/tenant";
 
 type UbigeoItem = {
@@ -50,6 +49,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const { prisma } = await import("@/lib/prisma");
     const districts = await prisma.district.findMany({
       where: { provinceId },
       orderBy: { nombre: "asc" },

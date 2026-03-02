@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 
 import { jsonBadRequest, jsonOk, jsonServerError } from "@/lib/http";
-import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/tenant";
 
 type UbigeoItem = {
@@ -40,6 +39,7 @@ export async function GET(req: NextRequest) {
   if (!auth.ok) return auth.response;
 
   try {
+    const { prisma } = await import("@/lib/prisma");
     const regions = await prisma.region.findMany({ orderBy: { nombre: "asc" } });
     if (regions.length > 0) return jsonOk({ regions });
   } catch (error) {
