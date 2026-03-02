@@ -23,7 +23,8 @@ const fetchDistrictsFromRemote = async (provinceId: number) => {
     throw new Error(`Ubigeo fetch failed: ${res.status} ${res.statusText}`);
   }
 
-  const districtsRaw = (await res.json()) as UbigeoItem[];
+  const districtsByProvince = (await res.json()) as Record<string, UbigeoItem[]>;
+  const districtsRaw = districtsByProvince[String(provinceId)] ?? [];
   const districts = districtsRaw
     .map((item) => ({
       id: parseId(item.id_ubigeo),

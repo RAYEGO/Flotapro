@@ -31,7 +31,7 @@ const fetchRegionsFromRemote = async () => {
     }))
     .filter((item) => item.id !== null) as { id: number; nombre: string }[];
 
-  return regions;
+  return regions.sort((a, b) => a.nombre.localeCompare(b.nombre));
 };
 
 export async function GET(req: NextRequest) {
