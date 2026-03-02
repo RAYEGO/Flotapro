@@ -10,56 +10,32 @@ type UbigeoItem = {
   id_padre_ubigeo: string;
 };
 
+const UBIGEO_DISTRICTS_URL =
+  "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/distritos.json";
+
 const parseId = (value: string) => {
   const id = Number(value);
   return Number.isFinite(id) ? id : null;
 };
 
-const ensureUbigeoSeeded = async () => {
-  const count = await prisma.region.count();
-  if (count > 0) return;
+const fetchDistrictsFromRemote = async (provinceId: number) => {
+  const res = await fetch(UBIGEO_DISTRICTS_URL, { next: { revalidate: 60 * 60 * 24 } });
+  if (!res.ok) {
+    throw new Error(`Ubigeo fetch failed: ${res.status} ${res.statusText}`);
+  }
 
-  const [regionsRes, provincesRes, districtsRes] = await Promise.all([
-    fetch("https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/departamentos.json"),
-    fetch("https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/provincias.json"),
-    fetch("https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/distritos.json"),
-  ]);
-  const [regionsRaw, provincesRaw, districtsRaw] = await Promise.all([
-    regionsRes.json(),
-    provincesRes.json(),
-    districtsRes.json(),
-  ]);
-
-  const regions = (regionsRaw as UbigeoItem[])
-    .map((item) => ({
-      id: parseId(item.id_ubigeo),
-      nombre: item.nombre_ubigeo,
-    }))
-    .filter((item) => item.id !== null) as { id: number; nombre: string }[];
-  const provinces = (provincesRaw as UbigeoItem[])
-    .map((item) => ({
-      id: parseId(item.id_ubigeo),
-      nombre: item.nombre_ubigeo,
-      regionId: parseId(item.id_padre_ubigeo),
-    }))
-    .filter(
-      (item) => item.id !== null && item.regionId !== null,
-    ) as { id: number; nombre: string; regionId: number }[];
-  const districts = (districtsRaw as UbigeoItem[])
+  const districtsRaw = (await res.json()) as UbigeoItem[];
+  const districts = districtsRaw
     .map((item) => ({
       id: parseId(item.id_ubigeo),
       nombre: item.nombre_ubigeo,
       provinceId: parseId(item.id_padre_ubigeo),
     }))
     .filter(
-      (item) => item.id !== null && item.provinceId !== null,
+      (item) => item.id !== null && item.provinceId === provinceId,
     ) as { id: number; nombre: string; provinceId: number }[];
 
-  await prisma.$transaction(async (tx) => {
-    await tx.region.createMany({ data: regions, skipDuplicates: true });
-    await tx.province.createMany({ data: provinces, skipDuplicates: true });
-    await tx.district.createMany({ data: districts, skipDuplicates: true });
-  });
+  return districts.sort((a, b) => a.nombre.localeCompare(b.nombre));
 };
 
 export async function GET(req: NextRequest) {
@@ -74,13 +50,20 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await ensureUbigeoSeeded();
     const districts = await prisma.district.findMany({
       where: { provinceId },
       orderBy: { nombre: "asc" },
     });
+    if (districts.length > 0) return jsonOk({ districts });
+  } catch (error) {
+    console.error(error);
+  }
+
+  try {
+    const districts = await fetchDistrictsFromRemote(provinceId);
     return jsonOk({ districts });
-  } catch {
-    return jsonServerError();
+  } catch (error) {
+    console.error(error);
+    return jsonServerError("No se pudo cargar distritos");
   }
 }
