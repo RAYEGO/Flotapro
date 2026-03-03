@@ -34,6 +34,7 @@ export default function Sidebar() {
       title: "Operaciones",
       items: [
         { href: "/dashboard", label: "Resumen", icon: LayoutDashboard },
+        { href: "/dashboard/clients", label: "Clientes", icon: UserCircle },
         { href: "/dashboard/freights", label: "Fletes", icon: Map },
         { href: "/dashboard/operational-points", label: "Puntos operativos", icon: MapPin },
       ],
@@ -60,8 +61,8 @@ export default function Sidebar() {
     { href: "/dashboard/maintenance", label: "Taller", icon: Wrench },
   ];
   const secondaryMobileItems = [
+    { href: "/dashboard/clients", label: "Clientes", icon: UserCircle },
     { href: "/dashboard/drivers", label: "Choferes", icon: Users },
-    { href: "/dashboard/operational-points", label: "Puntos", icon: MapPin },
     { href: "/dashboard/fuels", label: "Combustible", icon: Fuel },
     { href: "/dashboard/settings", label: "Configuración", icon: Settings },
   ];

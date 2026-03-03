@@ -24,6 +24,84 @@ const formatCoord = (value: unknown) => {
   return null;
 };
 
+type UbigeoItem = {
+  id_ubigeo: string;
+  nombre_ubigeo: string;
+  id_padre_ubigeo: string;
+};
+
+const UBIGEO_REGIONS_URL =
+  "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/departamentos.json";
+const UBIGEO_PROVINCES_URL =
+  "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/provincias.json";
+const UBIGEO_DISTRICTS_URL =
+  "https://raw.githubusercontent.com/joseluisq/ubigeos-peru/master/json/distritos.json";
+
+const parseId = (value: string) => {
+  const id = Number(value);
+  return Number.isFinite(id) ? id : null;
+};
+
+const ensureRegion = async (regionId: number) => {
+  const existing = await prisma.region.findUnique({ where: { id: regionId } });
+  if (existing) return existing;
+
+  const res = await fetch(UBIGEO_REGIONS_URL, { next: { revalidate: 60 * 60 * 24 } });
+  if (!res.ok) throw new Error(`Ubigeo fetch failed: ${res.status} ${res.statusText}`);
+  const regions = (await res.json()) as UbigeoItem[];
+  const match = regions.find((item) => parseId(item.id_ubigeo) === regionId);
+  if (!match) return null;
+
+  return prisma.region.upsert({
+    where: { id: regionId },
+    update: { nombre: match.nombre_ubigeo },
+    create: { id: regionId, nombre: match.nombre_ubigeo },
+  });
+};
+
+const ensureProvince = async (regionId: number, provinceId: number) => {
+  const existing = await prisma.province.findUnique({ where: { id: provinceId } });
+  if (existing) return existing.regionId === regionId ? existing : null;
+
+  const res = await fetch(UBIGEO_PROVINCES_URL, { next: { revalidate: 60 * 60 * 24 } });
+  if (!res.ok) throw new Error(`Ubigeo fetch failed: ${res.status} ${res.statusText}`);
+  const provincesByRegion = (await res.json()) as Record<string, UbigeoItem[]>;
+  const provinces = provincesByRegion[String(regionId)] ?? [];
+  const match = provinces.find((item) => parseId(item.id_ubigeo) === provinceId);
+  if (!match) return null;
+
+  const parentId = parseId(match.id_padre_ubigeo);
+  if (parentId !== regionId) return null;
+
+  await ensureRegion(regionId);
+  return prisma.province.upsert({
+    where: { id: provinceId },
+    update: { nombre: match.nombre_ubigeo, regionId },
+    create: { id: provinceId, nombre: match.nombre_ubigeo, regionId },
+  });
+};
+
+const ensureDistrict = async (provinceId: number, districtId: number) => {
+  const existing = await prisma.district.findUnique({ where: { id: districtId } });
+  if (existing) return existing.provinceId === provinceId ? existing : null;
+
+  const res = await fetch(UBIGEO_DISTRICTS_URL, { next: { revalidate: 60 * 60 * 24 } });
+  if (!res.ok) throw new Error(`Ubigeo fetch failed: ${res.status} ${res.statusText}`);
+  const districtsByProvince = (await res.json()) as Record<string, UbigeoItem[]>;
+  const districts = districtsByProvince[String(provinceId)] ?? [];
+  const match = districts.find((item) => parseId(item.id_ubigeo) === districtId);
+  if (!match) return null;
+
+  const parentId = parseId(match.id_padre_ubigeo);
+  if (parentId !== provinceId) return null;
+
+  return prisma.district.upsert({
+    where: { id: districtId },
+    update: { nombre: match.nombre_ubigeo, provinceId },
+    create: { id: districtId, nombre: match.nombre_ubigeo, provinceId },
+  });
+};
+
 const getUbigeoSupport = async () => {
   const [tableRows, columnRows] = await Promise.all([
     prisma.$queryRaw<{ table_name: string }[]>`
@@ -163,30 +241,28 @@ export async function PATCH(
     const candidateDistrictId = parsed.data.districtId ?? existing.districtId ?? undefined;
 
     if (hasUbigeoChange) {
-      if (candidateDistrictId !== undefined) {
-        district = await prisma.district.findFirst({
-          where: {
-            id: candidateDistrictId,
-            ...(candidateProvinceId ? { provinceId: candidateProvinceId } : {}),
-          },
-        });
-        if (!district) return jsonBadRequest("Distrito inválido");
+      if (candidateRegionId !== undefined) {
+        region = await ensureRegion(candidateRegionId);
+        if (!region) return jsonBadRequest("Región inválida");
       }
       if (candidateProvinceId !== undefined) {
-        province = await prisma.province.findFirst({
-          where: {
-            id: candidateProvinceId,
-            ...(candidateRegionId ? { regionId: candidateRegionId } : {}),
-          },
-        });
+        if (candidateRegionId !== undefined) {
+          province = await ensureProvince(candidateRegionId, candidateProvinceId);
+        } else {
+          province = await prisma.province.findUnique({ where: { id: candidateProvinceId } });
+        }
         if (!province) return jsonBadRequest("Provincia inválida");
+      }
+      if (candidateDistrictId !== undefined) {
+        if (candidateProvinceId !== undefined) {
+          district = await ensureDistrict(candidateProvinceId, candidateDistrictId);
+        } else {
+          district = await prisma.district.findUnique({ where: { id: candidateDistrictId } });
+        }
+        if (!district) return jsonBadRequest("Distrito inválido");
       }
       if (!province && district) {
         province = await prisma.province.findFirst({ where: { id: district.provinceId } });
-      }
-      if (candidateRegionId !== undefined) {
-        region = await prisma.region.findFirst({ where: { id: candidateRegionId } });
-        if (!region) return jsonBadRequest("Región inválida");
       }
       if (!region && province) {
         region = await prisma.region.findFirst({ where: { id: province.regionId } });
