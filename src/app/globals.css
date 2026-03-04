@@ -81,3 +81,45 @@ textarea::placeholder {
     min-height: 90px;
   }
 }
+
+@keyframes fp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .fp-dashboard-bg {
+    background: linear-gradient(135deg, #0f2a3d 0%, #133b54 50%, #1c4e6d 100%);
+  }
+
+  .fp-text-gradient {
+    background: linear-gradient(90deg, #42a5f5, #1e88e5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .fp-glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .fp-glass-nav {
+    background: rgba(11, 23, 38, 0.72);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .fp-fade-up {
+    animation: fp-fade-up 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}

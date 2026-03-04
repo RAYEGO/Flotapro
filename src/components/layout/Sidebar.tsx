@@ -158,7 +158,7 @@ export default function Sidebar() {
           </div>
         )}
         <nav className="fixed bottom-0 left-0 right-0 z-40">
-          <div className="rounded-t-[24px] bg-[#0D1B2C] px-2 pb-2 pt-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
+          <div className="fp-glass-nav rounded-t-[24px] px-2 pb-2 pt-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)]">
             <div className="flex items-center justify-between gap-2 px-1">
               {primaryMobileItems.map((item) => {
                 const Icon = item.icon;
@@ -167,14 +167,14 @@ export default function Sidebar() {
                   return (
                     <Link
                       key={item.href}
-                      className="flex flex-1 basis-0 min-w-0 flex-col items-center justify-center text-center text-[11px] font-medium text-[#DCEBFF]"
+                      className="flex flex-1 basis-0 min-w-0 flex-col items-center justify-center text-center text-[11px] font-medium text-white/85 transition-all duration-300"
                       href="/dashboard/freights?quick=1"
                     >
                       <span
-                        className={`flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full text-white shadow-[0_10px_20px_rgba(0,0,0,0.35)] transition-transform ${
+                        className={`flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full text-white shadow-[0_0_20px_rgba(30,136,229,0.5),0_10px_20px_rgba(0,0,0,0.35)] transition-all duration-300 ${
                           active
-                            ? "bg-[#2C7FD1] ring-2 ring-[#8DBBFF]/60"
-                            : "bg-[#256EB7]"
+                            ? "bg-[#1E88E5] ring-2 ring-white/20 scale-[1.03]"
+                            : "bg-[#1E88E5]/90 hover:scale-[1.03]"
                         }`}
                       >
                         <Plus className="h-6 w-6" strokeWidth={2} />
@@ -186,15 +186,15 @@ export default function Sidebar() {
                 return (
                   <Link
                     key={item.href}
-                    className={`flex flex-1 basis-0 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs transition-colors duration-200 ${
+                    className={`flex flex-1 basis-0 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs transition-all duration-300 ${
                       active
-                        ? "bg-[#111F35] text-[#8DBBFF] shadow-[inset_0_2px_0_0_#7FB5FF]"
-                        : "text-[#9FB2C5] hover:bg-[#111F35]"
+                        ? "bg-white/[0.08] text-[#42A5F5] shadow-[inset_0_1px_0_0_rgba(66,165,245,0.55)] scale-[1.05]"
+                        : "text-white/70 hover:bg-white/[0.06] hover:-translate-y-0.5"
                     }`}
                     href={item.href}
                   >
                     <Icon
-                      className={`h-5 w-5 ${active ? "text-[#7FB5FF]" : "text-[#93A8BB]"}`}
+                      className={`h-5 w-5 ${active ? "text-[#42A5F5]" : "text-white/55"}`}
                       strokeWidth={1.5}
                     />
                     <span className="whitespace-nowrap">{item.label}</span>

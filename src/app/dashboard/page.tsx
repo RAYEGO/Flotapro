@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { BadgeDollarSign, Percent, ReceiptText, TrendingUp } from "lucide-react";
+import { BadgeDollarSign, Percent, ReceiptText, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type Summary = {
@@ -20,6 +20,9 @@ type Alert = {
   kilometrajeActual: number;
   restanteKm: number;
 };
+type KpiDelta = {
+  delta: number | null;
+};
 type KpiCurrency = {
   label: string;
   icon: LucideIcon;
@@ -27,14 +30,14 @@ type KpiCurrency = {
   isCurrency: true;
   currency?: string;
   number?: string;
-};
+} & KpiDelta;
 type KpiValue = {
   label: string;
   icon: LucideIcon;
   tone: string;
   isCurrency: false;
   value: string;
-};
+} & KpiDelta;
 
 export default function DashboardPage() {
   const [activeTrucks, setActiveTrucks] = useState<number | null>(null);
@@ -45,6 +48,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [previousSummary, setPreviousSummary] = useState<Summary | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const query = useMemo(() => new URLSearchParams({ month }).toString(), [month]);
@@ -57,6 +61,15 @@ export default function DashboardPage() {
   const monthLabel = useMemo(() => {
     const date = new Date(`${month}-01T00:00:00`);
     return date.toLocaleDateString("es-PE", { month: "long", year: "numeric" });
+  }, [month]);
+  const previousMonth = useMemo(() => {
+    const [yearStr, monthStr] = month.split("-");
+    const year = Number(yearStr);
+    const monthIndex = Number(monthStr) - 1;
+    if (!Number.isFinite(year) || !Number.isFinite(monthIndex)) return null;
+    const date = new Date(Date.UTC(year, monthIndex, 1));
+    date.setUTCMonth(date.getUTCMonth() - 1);
+    return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
   }, [month]);
   const toNumber = (value?: string | null) => {
     if (!value) return null;
@@ -92,6 +105,22 @@ export default function DashboardPage() {
       : combustibleNum + mantenimientoNum;
   const rentabilidadNum =
     ingresosNum && utilidadNum !== null ? (utilidadNum / ingresosNum) * 100 : null;
+  const prevIngresosNum = toNumber(previousSummary?.ingresos);
+  const prevCombustibleNum = toNumber(previousSummary?.gastoCombustible);
+  const prevMantenimientoNum = toNumber(previousSummary?.gastoMantenimiento);
+  const prevUtilidadNum = toNumber(previousSummary?.utilidadNeta);
+  const prevCostosNum =
+    prevCombustibleNum === null || prevMantenimientoNum === null
+      ? null
+      : prevCombustibleNum + prevMantenimientoNum;
+  const prevRentabilidadNum =
+    prevIngresosNum && prevUtilidadNum !== null ? (prevUtilidadNum / prevIngresosNum) * 100 : null;
+
+  const deltaPercent = (current: number | null, previous: number | null) => {
+    if (current === null || previous === null) return null;
+    if (previous === 0) return null;
+    return ((current - previous) / Math.abs(previous)) * 100;
+  };
   const alertStatus = (restanteKm: number) => {
     if (restanteKm <= 0) {
       return { label: "Urgente", className: "bg-danger/15 text-danger" };
@@ -108,25 +137,46 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/dashboard/summary?${query}`, {
-          headers: { "content-type": "application/json" },
-        });
-        if (!res.ok) {
-          const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        const previousQuery = previousMonth ? new URLSearchParams({ month: previousMonth }).toString() : null;
+        const [currentRes, previousRes] = await Promise.all([
+          fetch(`/api/dashboard/summary?${query}`, {
+            headers: { "content-type": "application/json" },
+          }),
+          previousQuery
+            ? fetch(`/api/dashboard/summary?${previousQuery}`, {
+                headers: { "content-type": "application/json" },
+              })
+            : Promise.resolve(null),
+        ]);
+
+        if (!currentRes.ok) {
+          const data = (await currentRes.json().catch(() => null)) as { error?: string } | null;
           throw new Error(data?.error ?? "No se pudo cargar el resumen");
         }
-        const data = (await res.json()) as {
+
+        const currentData = (await currentRes.json()) as {
           month: string;
           summary: Summary;
           maintenanceAlerts: Alert[];
         };
+        const previousData =
+          previousRes && previousRes.ok
+            ? ((await previousRes.json()) as {
+                month: string;
+                summary: Summary;
+                maintenanceAlerts: Alert[];
+              })
+            : null;
+
         if (cancelled) return;
-        setSummary(data.summary);
-        setAlerts(data.maintenanceAlerts);
+        setSummary(currentData.summary);
+        setPreviousSummary(previousData?.summary ?? null);
+        setAlerts(currentData.maintenanceAlerts);
       } catch (e) {
         if (cancelled) return;
         setError(e instanceof Error ? e.message : "Error");
         setSummary(null);
+        setPreviousSummary(null);
         setAlerts([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -137,7 +187,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, previousMonth]);
 
   useEffect(() => {
     let cancelled = false;
@@ -162,41 +212,42 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-3xl bg-white p-8 shadow-[0_20px_50px_rgba(15,42,61,0.08)] ring-1 ring-black/5">
+      <div className="fp-glass-card fp-fade-up p-8 max-[1366px]:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+            <p className="text-xs font-medium uppercase tracking-wider text-white/60">
               {greeting}
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-dark">
-              Centro de control de flota
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white max-[1366px]:text-3xl">
+              <span className="font-medium text-white/80">Centro de control</span>{" "}
+              <span className="fp-text-gradient font-bold">Flota</span>
             </h1>
-            <p className="mt-3 text-base text-[#A8C1D1]">
+            <p className="mt-3 text-base text-white/65">
               Visión estratégica de ingresos, costos y alertas críticas.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex items-center gap-2 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white transition-all duration-200 border border-white/10 focus-within:border-[#F4A300]">
+            <label className="flex items-center gap-2 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-white/90 transition-all duration-300 border border-white/10 focus-within:border-[#42A5F5]/60 hover:bg-white/[0.08]">
               Mes
               <input
-                className="!bg-transparent !text-[#D6E2EA] placeholder:text-[#A8C1D1] focus:outline-none [color-scheme:dark] appearance-none shadow-none border-0 ring-0 focus:ring-0"
+                className="!bg-transparent !text-white placeholder:text-white/50 focus:outline-none [color-scheme:dark] appearance-none shadow-none border-0 ring-0 focus:ring-0"
                 type="month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
               />
             </label>
-            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white ring-1 ring-white/10">
-              <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-white ring-1 ring-white/10">
+              <span className="text-xs font-medium uppercase tracking-wider text-white/60">
                 Mes actual
               </span>
-              <span className="text-base font-semibold text-[#D6E2EA]">{monthLabel}</span>
+              <span className="text-base font-semibold text-white/90">{monthLabel}</span>
             </div>
-            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-[#112E42] px-4 py-3 text-sm text-white ring-1 ring-white/10">
-              <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-white ring-1 ring-white/10">
+              <span className="text-xs font-medium uppercase tracking-wider text-white/60">
                 Camiones activos
               </span>
-              <span className="text-base font-semibold text-white">
+              <span className="text-base font-semibold text-white/90">
                 {activeTrucks === null ? "—" : activeTrucks}
               </span>
             </div>
@@ -205,7 +256,7 @@ export default function DashboardPage() {
       </div>
 
       {error ? (
-        <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700 ring-1 ring-red-100">
+        <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-200 ring-1 ring-red-400/20">
           {error}
         </div>
       ) : null}
@@ -213,100 +264,125 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         {(
           [
-          {
-            label: "Ingresos",
-            ...formatCurrencyParts(ingresosNum),
-            icon: BadgeDollarSign,
-            tone: "text-primary",
-            isCurrency: true,
-          },
-          {
-            label: "Costos totales",
-            ...formatCurrencyParts(costosNum),
-            icon: ReceiptText,
-            tone: "text-dark",
-            isCurrency: true,
-          },
-          {
-            label: "Utilidad neta",
-            ...formatCurrencyParts(utilidadNum),
-            icon: TrendingUp,
-            tone: utilidadNum !== null && utilidadNum < 0 ? "text-danger" : "text-secondary",
-            isCurrency: true,
-          },
-          {
-            label: "Rentabilidad",
-            value: formatPercent(rentabilidadNum),
-            icon: Percent,
-            tone:
-              rentabilidadNum !== null && rentabilidadNum < 0
-                ? "text-danger"
-                : "text-secondary",
-            isCurrency: false,
-          },
+            {
+              label: "Ingresos",
+              ...formatCurrencyParts(ingresosNum),
+              icon: BadgeDollarSign,
+              tone: "text-[#42A5F5]",
+              isCurrency: true,
+              delta: deltaPercent(ingresosNum, prevIngresosNum),
+            },
+            {
+              label: "Costos totales",
+              ...formatCurrencyParts(costosNum),
+              icon: ReceiptText,
+              tone: "text-white",
+              isCurrency: true,
+              delta: deltaPercent(costosNum, prevCostosNum),
+            },
+            {
+              label: "Utilidad neta",
+              ...formatCurrencyParts(utilidadNum),
+              icon: TrendingUp,
+              tone:
+                utilidadNum !== null && utilidadNum < 0 ? "text-red-200" : "text-emerald-200",
+              isCurrency: true,
+              delta: deltaPercent(utilidadNum, prevUtilidadNum),
+            },
+            {
+              label: "Rentabilidad",
+              value: formatPercent(rentabilidadNum),
+              icon: Percent,
+              tone:
+                rentabilidadNum !== null && rentabilidadNum < 0 ? "text-red-200" : "text-emerald-200",
+              isCurrency: false,
+              delta: deltaPercent(rentabilidadNum, prevRentabilidadNum),
+            },
         ] as (KpiCurrency | KpiValue)[]
         ).map((kpi) => {
           const Icon = kpi.icon;
+          const deltaValue = kpi.delta;
+          const deltaIsUp = deltaValue !== null ? deltaValue >= 0 : null;
+          const deltaLabel =
+            deltaValue === null ? "—" : `${Math.abs(deltaValue).toFixed(1)}%`;
           return (
             <div
               key={kpi.label}
-              className="rounded-2xl bg-white p-6 shadow-[0_15px_40px_rgba(15,42,61,0.08)] ring-1 ring-black/5 overflow-hidden"
+              className="fp-glass-card fp-fade-up group overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_44px_rgba(0,0,0,0.22)]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-wider text-[#8FAFC4]">
+                <span className="text-xs font-medium uppercase tracking-wider text-white/60">
                   {kpi.label}
                 </span>
-                <span className="rounded-full bg-[#112E42] p-2 text-white">
-                  <Icon className="h-5 w-5 text-[#F4A300]" strokeWidth={1.5} />
+                <span className="rounded-full bg-[#42A5F5]/15 p-2 text-white ring-1 ring-white/10">
+                  <Icon className="h-5 w-5 text-[#42A5F5]" strokeWidth={1.5} />
                 </span>
               </div>
               <div className={`mt-5 ${kpi.tone}`}>
                 {loading ? (
-                  <span className="text-2xl font-bold tracking-tight leading-none">...</span>
+                  <span className="text-3xl font-semibold tracking-tight leading-none">...</span>
                 ) : kpi.isCurrency && kpi.currency && kpi.number ? (
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-[11px] font-medium text-dark/70">
+                    <span className="text-[11px] font-medium text-white/60">
                       {kpi.currency}
                     </span>
-                    <span className="text-2xl font-bold tracking-tight leading-none break-words">
+                    <span className="text-4xl font-semibold tracking-tight leading-none break-words max-[1366px]:text-3xl">
                       {kpi.number}
                     </span>
                   </div>
                 ) : kpi.isCurrency ? (
-                  <span className="text-2xl font-bold tracking-tight leading-none">—</span>
+                  <span className="text-4xl font-semibold tracking-tight leading-none max-[1366px]:text-3xl">
+                    —
+                  </span>
                 ) : (
-                  <span className="text-2xl font-bold tracking-tight leading-none break-words">
+                  <span className="text-4xl font-semibold tracking-tight leading-none break-words max-[1366px]:text-3xl">
                     {kpi.value}
                   </span>
                 )}
               </div>
-              <div className="mt-3 text-xs font-medium text-dark/70">
-                Vs mes anterior · <span className="font-semibold text-dark/80">—</span>
+              <div className="mt-4 flex items-center justify-between gap-3 text-xs font-medium text-white/60">
+                <span>Vs mes anterior</span>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ring-1 ${
+                    deltaIsUp === null
+                      ? "bg-white/5 text-white/70 ring-white/10"
+                      : deltaIsUp
+                        ? "bg-[#42A5F5]/15 text-[#42A5F5] ring-[#42A5F5]/20"
+                        : "bg-red-400/15 text-red-200 ring-red-300/20"
+                  }`}
+                >
+                  {deltaIsUp === null ? null : deltaIsUp ? (
+                    <TrendingUp className="h-3.5 w-3.5" strokeWidth={2} />
+                  ) : (
+                    <TrendingDown className="h-3.5 w-3.5" strokeWidth={2} />
+                  )}
+                  <span className="font-semibold">{deltaLabel}</span>
+                </span>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-[0_18px_40px_rgba(15,42,61,0.08)] ring-1 ring-black/5">
+      <div className="fp-glass-card fp-fade-up p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-dark">Alertas de mantenimiento</h2>
-            <p className="mt-1 text-sm text-dark/70">
+            <h2 className="text-sm font-semibold text-white">Alertas de mantenimiento</h2>
+            <p className="mt-1 text-sm text-white/65">
               Planes activos a 1000 km o menos del próximo mantenimiento.
             </p>
           </div>
-          <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">
+          <span className="rounded-full bg-[#42A5F5]/15 px-3 py-1 text-xs font-semibold text-[#42A5F5] ring-1 ring-white/10">
             {alerts.length} alertas
           </span>
         </div>
 
         {loading ? (
-          <div className="mt-6 rounded-2xl bg-white px-4 py-6 text-sm text-zinc-600 ring-1 ring-black/5">
+          <div className="mt-6 rounded-2xl bg-white/[0.06] px-4 py-6 text-sm text-white/70 ring-1 ring-white/10">
             Cargando alertas...
           </div>
         ) : alerts.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-white px-4 py-6 text-sm text-zinc-600 ring-1 ring-black/5">
+          <div className="mt-6 rounded-2xl bg-white/[0.06] px-4 py-6 text-sm text-white/70 ring-1 ring-white/10">
             Sin alertas. Todo en orden con los mantenimientos.
           </div>
         ) : (
@@ -316,31 +392,31 @@ export default function DashboardPage() {
               return (
                 <div
                   key={a.id}
-                  className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_10px_24px_rgba(15,42,61,0.08)]"
+                  className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.08]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-dark">{a.placa}</p>
-                      <p className="text-xs text-dark/60">{a.tipo}</p>
+                      <p className="text-sm font-semibold text-white">{a.placa}</p>
+                      <p className="text-xs text-white/60">{a.tipo}</p>
                     </div>
                     <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}
+                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ring-1 ring-white/10 ${status.className}`}
                     >
                       {status.label}
                     </span>
                   </div>
-                  <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-dark/70">
+                  <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-white/70">
                     <div>
-                      <p className="text-dark/50">Km actual</p>
-                      <p className="font-semibold text-dark">{a.kilometrajeActual}</p>
+                      <p className="text-white/50">Km actual</p>
+                      <p className="font-semibold text-white">{a.kilometrajeActual}</p>
                     </div>
                     <div>
-                      <p className="text-dark/50">Próximo</p>
-                      <p className="font-semibold text-dark">{a.proximoKm}</p>
+                      <p className="text-white/50">Próximo</p>
+                      <p className="font-semibold text-white">{a.proximoKm}</p>
                     </div>
                     <div>
-                      <p className="text-dark/50">Restante</p>
-                      <p className="font-semibold text-dark">{a.restanteKm} km</p>
+                      <p className="text-white/50">Restante</p>
+                      <p className="font-semibold text-white">{a.restanteKm} km</p>
                     </div>
                   </div>
                 </div>
