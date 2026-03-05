@@ -262,7 +262,7 @@ export default function MaintenancePage() {
 
   return (
     <div className="space-y-6 max-[1366px]:space-y-4">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+      <div className="fp-card p-6 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Mantenimiento</h1>
         <p className="mt-1 text-sm text-zinc-600">
           Planes por kilometraje y registro de servicios.
@@ -272,8 +272,8 @@ export default function MaintenancePage() {
           <button
             className={`rounded-lg px-3 py-2 text-sm font-medium ${
               tab === "plans"
-                ? "bg-zinc-900 text-white"
-                : "bg-zinc-100 text-zinc-800"
+                ? "bg-primary text-white"
+                : "bg-background text-zinc-800 ring-1 ring-black/5"
             }`}
             onClick={() => setTab("plans")}
             type="button"
@@ -283,8 +283,8 @@ export default function MaintenancePage() {
           <button
             className={`rounded-lg px-3 py-2 text-sm font-medium ${
               tab === "records"
-                ? "bg-zinc-900 text-white"
-                : "bg-zinc-100 text-zinc-800"
+                ? "bg-primary text-white"
+                : "bg-background text-zinc-800 ring-1 ring-black/5"
             }`}
             onClick={() => setTab("records")}
             type="button"
@@ -302,7 +302,7 @@ export default function MaintenancePage() {
 
       {tab === "plans" ? (
         <>
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+          <div className="fp-card p-6 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Nuevo plan</h2>
             <form
               className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
@@ -348,7 +348,7 @@ export default function MaintenancePage() {
               />
               <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
                 <button
-                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
                   disabled={planSubmitting}
                 >
@@ -367,17 +367,13 @@ export default function MaintenancePage() {
             </form>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+          <div className="fp-card p-6 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
             <div className="mt-4 space-y-4 md:hidden">
               {loading ? (
-                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-                  Cargando...
-                </div>
+                <div className="fp-card p-4 text-sm text-zinc-600">Cargando...</div>
               ) : plans.length === 0 ? (
-                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-                  Sin registros
-                </div>
+                <div className="fp-card p-4 text-sm text-zinc-600">Sin registros</div>
               ) : (
                 plans.map((p) => {
                   const kmActual = getTruckKm(p);
@@ -387,7 +383,7 @@ export default function MaintenancePage() {
                   return (
                     <div
                       key={p.id}
-                      className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                      className="fp-card p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -528,7 +524,7 @@ export default function MaintenancePage() {
         </>
       ) : (
         <>
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+          <div className="fp-card p-6 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Nuevo registro</h2>
             <form
               className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 min-[1600px]:grid-cols-3 min-[1920px]:grid-cols-4 max-[1366px]:gap-2"
@@ -584,7 +580,7 @@ export default function MaintenancePage() {
               />
               <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
                 <button
-                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
                   disabled={recordSubmitting}
                 >
@@ -603,22 +599,18 @@ export default function MaintenancePage() {
             </form>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+          <div className="fp-card p-6 max-[1366px]:p-4">
             <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
             <div className="mt-4 space-y-4 md:hidden">
               {loading ? (
-                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-                  Cargando...
-                </div>
+                <div className="fp-card p-4 text-sm text-zinc-600">Cargando...</div>
               ) : records.length === 0 ? (
-                <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-                  Sin registros
-                </div>
+                <div className="fp-card p-4 text-sm text-zinc-600">Sin registros</div>
               ) : (
                 records.map((r) => (
                   <div
                     key={r.id}
-                    className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                    className="fp-card p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>

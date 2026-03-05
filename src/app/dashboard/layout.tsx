@@ -16,9 +16,9 @@ export default async function DashboardLayout({
 
   return (
     <div className="dashboard-shell fp-dashboard-bg relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(66,165,245,0.22)_0%,rgba(15,42,61,0)_45%)]" />
-      <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-[#42A5F5]/12 blur-[140px]" />
-      <div className="pointer-events-none absolute -bottom-32 right-8 h-80 w-80 rounded-full bg-[#1E88E5]/10 blur-[160px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(11,60,93,0.16)_0%,rgba(244,246,248,0)_45%)]" />
+      <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-primary/12 blur-[140px]" />
+      <div className="pointer-events-none absolute -bottom-32 right-8 h-80 w-80 rounded-full bg-secondary/10 blur-[160px]" />
       <div className="relative mx-auto grid max-w-[1760px] grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[var(--sidebar-width)_1fr] max-[1366px]:gap-4 max-[1366px]:px-4 max-[1366px]:py-4">
         <Sidebar />
 

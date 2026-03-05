@@ -107,7 +107,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={() => setIsProfileOpen(true)}
-          className="fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0D1B2C] text-[#8DBBFF] shadow-[0_12px_30px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
+          className="fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-accent shadow-[0_12px_30px_rgba(11,60,93,0.25)] ring-1 ring-black/5"
         >
           <UserCircle className="h-6 w-6" strokeWidth={1.5} />
         </button>
@@ -118,7 +118,7 @@ export default function Sidebar() {
               onClick={() => setIsProfileOpen(false)}
               className="absolute inset-0 bg-black/40"
             />
-            <div className="absolute right-4 top-4 w-64 rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] p-4 shadow-[0_16px_36px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
+            <div className="absolute right-4 top-4 w-64 rounded-[24px] bg-[linear-gradient(180deg,_rgba(11,60,93,0.96)_0%,_rgba(11,60,93,0.86)_100%)] p-4 shadow-[0_16px_36px_rgba(11,60,93,0.28)] ring-1 ring-white/10">
               <div className="space-y-1">
                 {secondaryMobileItems.map((item) => {
                   const Icon = item.icon;
@@ -128,14 +128,14 @@ export default function Sidebar() {
                       key={item.href}
                       className={`flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-colors duration-200 ${
                         active
-                          ? "bg-[#111F35] text-[#8DBBFF]"
-                          : "text-[#9FB2C5] hover:bg-[#111F35]"
+                          ? "bg-white/10 text-accent"
+                          : "text-white/80 hover:bg-white/10"
                       }`}
                       href={item.href}
                       onClick={() => setIsProfileOpen(false)}
                     >
                       <Icon
-                        className={`h-5 w-5 ${active ? "text-[#7FB5FF]" : "text-[#93A8BB]"}`}
+                        className={`h-5 w-5 ${active ? "text-accent" : "text-white/60"}`}
                         strokeWidth={1.5}
                       />
                       <span>{item.label}</span>
@@ -146,10 +146,10 @@ export default function Sidebar() {
               <div className="mt-3 border-t border-white/10 pt-3">
                 <form action="/api/auth/logout" method="post">
                   <button
-                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm text-[#9FB2C5] transition-colors duration-200 hover:bg-[#111F35]"
+                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm text-white/80 transition-colors duration-200 hover:bg-white/10"
                     type="submit"
                   >
-                    <LogOut className="h-5 w-5 text-[#93A8BB]" strokeWidth={1.5} />
+                    <LogOut className="h-5 w-5 text-white/60" strokeWidth={1.5} />
                     <span>Salir</span>
                   </button>
                 </form>
@@ -171,10 +171,10 @@ export default function Sidebar() {
                       href="/dashboard/freights?quick=1"
                     >
                       <span
-                        className={`flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full text-white shadow-[0_0_20px_rgba(30,136,229,0.5),0_10px_20px_rgba(0,0,0,0.35)] transition-all duration-300 ${
+                        className={`flex h-14 w-14 -translate-y-4 items-center justify-center rounded-full text-white shadow-[0_0_20px_rgba(244,163,0,0.45),0_10px_20px_rgba(11,60,93,0.25)] transition-all duration-300 ${
                           active
-                            ? "bg-[#1E88E5] ring-2 ring-white/20 scale-[1.03]"
-                            : "bg-[#1E88E5]/90 hover:scale-[1.03]"
+                            ? "bg-accent ring-2 ring-white/20 scale-[1.03]"
+                            : "bg-accent/90 hover:scale-[1.03]"
                         }`}
                       >
                         <Plus className="h-6 w-6" strokeWidth={2} />
@@ -188,13 +188,13 @@ export default function Sidebar() {
                     key={item.href}
                     className={`flex flex-1 basis-0 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs transition-all duration-300 ${
                       active
-                        ? "bg-white/[0.08] text-[#42A5F5] shadow-[inset_0_1px_0_0_rgba(66,165,245,0.55)] scale-[1.05]"
+                        ? "bg-white/[0.1] text-accent shadow-[inset_0_1px_0_0_rgba(244,163,0,0.55)] scale-[1.05]"
                         : "text-white/70 hover:bg-white/[0.06] hover:-translate-y-0.5"
                     }`}
                     href={item.href}
                   >
                     <Icon
-                      className={`h-5 w-5 ${active ? "text-[#42A5F5]" : "text-white/55"}`}
+                      className={`h-5 w-5 ${active ? "text-accent" : "text-white/55"}`}
                       strokeWidth={1.5}
                     />
                     <span className="whitespace-nowrap">{item.label}</span>
@@ -207,7 +207,7 @@ export default function Sidebar() {
       </aside>
 
       <aside
-        className={`hidden rounded-[24px] bg-[linear-gradient(180deg,_#0F1C2F_0%,_#0B1726_100%)] shadow-[0_10px_30px_rgba(0,0,0,0.25)] ring-1 ring-white/5 md:block md:w-[var(--sidebar-width)] md:max-h-[calc(100vh-3rem)] md:overflow-y-auto md:overflow-x-hidden md:overscroll-contain md:sticky md:top-6 md:self-start ${
+        className={`hidden rounded-[24px] bg-[linear-gradient(180deg,_rgba(11,60,93,0.98)_0%,_rgba(11,60,93,0.86)_100%)] shadow-[0_10px_30px_rgba(11,60,93,0.22)] ring-1 ring-white/10 md:block md:w-[var(--sidebar-width)] md:max-h-[calc(100vh-3rem)] md:overflow-y-auto md:overflow-x-hidden md:overscroll-contain md:sticky md:top-6 md:self-start ${
           isCollapsed ? "p-3 min-[1366px]:p-3" : "p-4 min-[1366px]:p-5 min-[1920px]:p-6"
         }`}
       >
@@ -230,13 +230,13 @@ export default function Sidebar() {
             </span>
             <span className={`flex min-w-0 flex-col ${isCollapsed ? "hidden" : "min-[1366px]:flex"}`}>
               <span className="text-base font-semibold text-white">FlotaPro</span>
-              <span className="text-xs text-[#9FB2C5]">Gestión inteligente</span>
+              <span className="text-xs text-white/70">Gestión inteligente</span>
             </span>
           </Link>
           <button
             type="button"
             onClick={() => setIsCollapsed((prev) => !prev)}
-            className="hidden h-9 w-9 items-center justify-center rounded-xl text-[#9FB2C5] transition hover:bg-white/5 hover:text-[#DCEBFF] min-[1366px]:flex min-[1920px]:hidden"
+            className="hidden h-9 w-9 items-center justify-center rounded-xl text-white/70 transition hover:bg-white/10 hover:text-white min-[1366px]:flex min-[1920px]:hidden"
             aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
             title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
           >
@@ -253,12 +253,12 @@ export default function Sidebar() {
             isCollapsed ? "hidden" : "min-[1366px]:block"
           }`}
         >
-          <div className="text-xs uppercase tracking-[0.2em] text-[#7B91AA]">Usuario activo</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-white/60">Usuario activo</div>
           <div className="mt-2 flex items-center gap-2">
-            <UserCircle className="h-5 w-5 text-[#9FC5FF]" strokeWidth={1.4} />
+            <UserCircle className="h-5 w-5 text-accent" strokeWidth={1.4} />
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-white">{userLabel}</div>
-              <div className="text-xs text-[#9FB2C5]">{userRole}</div>
+              <div className="text-xs text-white/70">{userRole}</div>
             </div>
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function Sidebar() {
           {navSections.map((section) => (
             <div key={section.title} className="space-y-2">
               <div
-                className={`px-3 text-[11px] uppercase tracking-[0.2em] text-[#6E86A3] ${
+                className={`px-3 text-[11px] uppercase tracking-[0.2em] text-white/55 ${
                   isCollapsed ? "hidden" : "min-[1366px]:block"
                 }`}
               >
@@ -286,14 +286,14 @@ export default function Sidebar() {
                           : "min-[1366px]:justify-start min-[1366px]:pl-3"
                       } ${
                         active
-                          ? "border-[#9FC5FF] bg-[#13263E] text-[#DCEBFF] font-semibold"
-                          : "border-transparent text-[#9FB2C5] hover:bg-[#12263D] hover:text-[#D5E6FF]"
+                          ? "border-accent bg-white/10 text-white font-semibold"
+                          : "border-transparent text-white/70 hover:bg-white/10 hover:text-white"
                       }`}
                       href={item.href}
                     >
                       <Icon
                         className={`h-5 w-5 flex-shrink-0 ${
-                          active ? "text-[#A7CCFF]" : "text-[#93A8BB]"
+                          active ? "text-accent" : "text-white/55"
                         }`}
                         strokeWidth={1.5}
                       />
@@ -315,12 +315,12 @@ export default function Sidebar() {
         <div className="mt-6 border-t border-white/10 pt-4">
           <form action="/api/auth/logout" method="post">
             <button
-              className={`group flex w-full min-w-0 items-center gap-3 rounded-2xl border-l-4 border-transparent px-3 py-2 text-sm text-[#9FB2C5] transition-colors duration-200 hover:bg-[#12263D] hover:text-[#D5E6FF] ${
+              className={`group flex w-full min-w-0 items-center gap-3 rounded-2xl border-l-4 border-transparent px-3 py-2 text-sm text-white/75 transition-colors duration-200 hover:bg-white/10 hover:text-white ${
                 isCollapsed ? "justify-center" : "min-[1366px]:justify-start"
               }`}
               type="submit"
             >
-              <LogOut className="h-5 w-5 text-[#93A8BB]" strokeWidth={1.5} />
+              <LogOut className="h-5 w-5 text-white/55" strokeWidth={1.5} />
               <span className={`${isCollapsed ? "hidden" : "hidden min-[1366px]:inline"}`}>
                 Salir
               </span>

@@ -604,7 +604,7 @@ export default function FreightsPage() {
     onClose?: () => void;
   }) => (
     <div
-      className={`rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4 ${options?.className ?? ""}`}
+      className={`fp-card p-6 max-[1366px]:p-4 ${options?.className ?? ""}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -836,7 +836,7 @@ export default function FreightsPage() {
 
         <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
           <button
-            className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+            className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
             type="submit"
             disabled={submitting}
           >
@@ -871,7 +871,7 @@ export default function FreightsPage() {
     <div className="space-y-6 max-[1366px]:space-y-4">
       {showQuickFreightModal ? null : renderFreightFormCard()}
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+      <div className="fp-card p-6 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Gastos por flete</h2>
 
         <form
@@ -926,7 +926,7 @@ export default function FreightsPage() {
 
           <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
             <button
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+              className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
               disabled={expenseSubmitting}
             >
@@ -950,18 +950,14 @@ export default function FreightsPage() {
 
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
-            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-              Cargando...
-            </div>
+            <div className="fp-card p-4 text-sm text-zinc-600">Cargando...</div>
           ) : expenses.length === 0 ? (
-            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-              Sin gastos
-            </div>
+            <div className="fp-card p-4 text-sm text-zinc-600">Sin gastos</div>
           ) : (
             expenses.map((e) => (
               <div
                 key={e.id}
-                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                className="fp-card p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -1086,22 +1082,18 @@ export default function FreightsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+      <div className="fp-card p-6 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
-            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-              Cargando...
-            </div>
+            <div className="fp-card p-4 text-sm text-zinc-600">Cargando...</div>
           ) : items.length === 0 ? (
-            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-              Sin registros
-            </div>
+            <div className="fp-card p-4 text-sm text-zinc-600">Sin registros</div>
           ) : (
             items.map((f) => (
               <div
                 key={f.id}
-                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                className="fp-card p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -1320,7 +1312,7 @@ export default function FreightsPage() {
       </div>
       {showClientModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg max-[1366px]:p-4">
+          <div className="fp-card w-full max-w-2xl p-6 max-[1366px]:p-4">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-base font-semibold text-zinc-900">Nuevo cliente</h3>
               <button
@@ -1388,7 +1380,7 @@ export default function FreightsPage() {
               </select>
               <div className="flex flex-wrap gap-2 md:col-span-2">
                 <button
-                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
                   disabled={clientSubmitting}
                 >
@@ -1408,7 +1400,7 @@ export default function FreightsPage() {
       ) : null}
       {showPointModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-lg max-[1366px]:p-4">
+          <div className="fp-card w-full max-w-3xl p-6 max-[1366px]:p-4">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-base font-semibold text-zinc-900">Nuevo punto operativo</h3>
               <button
@@ -1537,7 +1529,7 @@ export default function FreightsPage() {
               />
               <div className="flex flex-wrap gap-2 md:col-span-2 lg:col-span-3">
                 <button
-                  className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
                   type="submit"
                   disabled={pointSubmitting}
                 >

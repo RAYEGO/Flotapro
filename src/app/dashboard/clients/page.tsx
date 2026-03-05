@@ -138,7 +138,7 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-6 max-[1366px]:space-y-4">
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+      <div className="fp-card p-6 max-[1366px]:p-4">
         <h1 className="text-lg font-semibold text-zinc-900">Clientes</h1>
         <p className="mt-1 text-sm text-zinc-600">Registro de clientes.</p>
 
@@ -205,7 +205,7 @@ export default function ClientsPage() {
 
           <div className="flex flex-wrap gap-2 md:col-span-2 min-[1600px]:col-span-3 min-[1920px]:col-span-4">
             <button
-              className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60 md:px-4 md:py-3 md:text-base"
+              className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-60 md:px-4 md:py-3 md:text-base"
               type="submit"
               disabled={submitting}
             >
@@ -230,22 +230,18 @@ export default function ClientsPage() {
         ) : null}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 max-[1366px]:p-4">
+      <div className="fp-card p-6 max-[1366px]:p-4">
         <h2 className="text-sm font-semibold text-zinc-900">Listado</h2>
         <div className="mt-4 space-y-4 md:hidden">
           {loading ? (
-            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-              Cargando...
-            </div>
+            <div className="fp-card p-4 text-sm text-zinc-600">Cargando...</div>
           ) : items.length === 0 ? (
-            <div className="rounded-2xl bg-white p-4 text-sm text-zinc-600 shadow-sm ring-1 ring-black/5">
-              Sin registros
-            </div>
+            <div className="fp-card p-4 text-sm text-zinc-600">Sin registros</div>
           ) : (
             items.map((c) => (
               <div
                 key={c.id}
-                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5"
+                className="fp-card p-4"
               >
                 <div className="text-base font-semibold text-zinc-900">
                   {c.nombreComercial}
@@ -373,4 +369,3 @@ export default function ClientsPage() {
     </div>
   );
 }
-

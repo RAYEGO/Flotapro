@@ -212,42 +212,42 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="fp-glass-card fp-fade-up p-8 max-[1366px]:p-6">
+      <div className="fp-card fp-fade-up p-8 max-[1366px]:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-white/60">
+            <p className="text-xs font-medium uppercase tracking-wider text-dark/60">
               {greeting}
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white max-[1366px]:text-3xl">
-              <span className="font-medium text-white/80">Centro de control</span>{" "}
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-dark max-[1366px]:text-3xl">
+              <span className="font-medium text-dark/80">Centro de control</span>{" "}
               <span className="fp-text-gradient font-bold">Flota</span>
             </h1>
-            <p className="mt-3 text-base text-white/65">
+            <p className="mt-3 text-base text-dark/70">
               Visión estratégica de ingresos, costos y alertas críticas.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex items-center gap-2 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-white/90 transition-all duration-300 border border-white/10 focus-within:border-[#42A5F5]/60 hover:bg-white/[0.08]">
+            <label className="flex items-center gap-2 rounded-2xl bg-background px-4 py-3 text-sm text-dark transition-all duration-300 border border-primary/10 focus-within:border-accent hover:bg-white">
               Mes
               <input
-                className="!bg-transparent !text-white placeholder:text-white/50 focus:outline-none [color-scheme:dark] appearance-none shadow-none border-0 ring-0 focus:ring-0"
+                className="!bg-transparent !text-dark placeholder:text-dark/40 focus:outline-none appearance-none shadow-none border-0 ring-0 focus:ring-0"
                 type="month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
               />
             </label>
-            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-white ring-1 ring-white/10">
-              <span className="text-xs font-medium uppercase tracking-wider text-white/60">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-background px-4 py-3 text-sm text-dark ring-1 ring-primary/10">
+              <span className="text-xs font-medium uppercase tracking-wider text-dark/60">
                 Mes actual
               </span>
-              <span className="text-base font-semibold text-white/90">{monthLabel}</span>
+              <span className="text-base font-semibold text-dark">{monthLabel}</span>
             </div>
-            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-white ring-1 ring-white/10">
-              <span className="text-xs font-medium uppercase tracking-wider text-white/60">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-background px-4 py-3 text-sm text-dark ring-1 ring-primary/10">
+              <span className="text-xs font-medium uppercase tracking-wider text-dark/60">
                 Camiones activos
               </span>
-              <span className="text-base font-semibold text-white/90">
+              <span className="text-base font-semibold text-dark">
                 {activeTrucks === null ? "—" : activeTrucks}
               </span>
             </div>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
       </div>
 
       {error ? (
-        <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-200 ring-1 ring-red-400/20">
+        <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700 ring-1 ring-red-100">
           {error}
         </div>
       ) : null}
@@ -268,7 +268,7 @@ export default function DashboardPage() {
               label: "Ingresos",
               ...formatCurrencyParts(ingresosNum),
               icon: BadgeDollarSign,
-              tone: "text-[#42A5F5]",
+              tone: "text-primary",
               isCurrency: true,
               delta: deltaPercent(ingresosNum, prevIngresosNum),
             },
@@ -276,7 +276,7 @@ export default function DashboardPage() {
               label: "Costos totales",
               ...formatCurrencyParts(costosNum),
               icon: ReceiptText,
-              tone: "text-white",
+              tone: "text-dark",
               isCurrency: true,
               delta: deltaPercent(costosNum, prevCostosNum),
             },
@@ -285,7 +285,7 @@ export default function DashboardPage() {
               ...formatCurrencyParts(utilidadNum),
               icon: TrendingUp,
               tone:
-                utilidadNum !== null && utilidadNum < 0 ? "text-red-200" : "text-emerald-200",
+                utilidadNum !== null && utilidadNum < 0 ? "text-danger" : "text-secondary",
               isCurrency: true,
               delta: deltaPercent(utilidadNum, prevUtilidadNum),
             },
@@ -294,7 +294,7 @@ export default function DashboardPage() {
               value: formatPercent(rentabilidadNum),
               icon: Percent,
               tone:
-                rentabilidadNum !== null && rentabilidadNum < 0 ? "text-red-200" : "text-emerald-200",
+                rentabilidadNum !== null && rentabilidadNum < 0 ? "text-danger" : "text-secondary",
               isCurrency: false,
               delta: deltaPercent(rentabilidadNum, prevRentabilidadNum),
             },
@@ -308,14 +308,14 @@ export default function DashboardPage() {
           return (
             <div
               key={kpi.label}
-              className="fp-glass-card fp-fade-up group overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_44px_rgba(0,0,0,0.22)]"
+              className="fp-card fp-fade-up group overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_44px_rgba(11,60,93,0.16)]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-wider text-white/60">
+                <span className="text-xs font-medium uppercase tracking-wider text-dark/60">
                   {kpi.label}
                 </span>
-                <span className="rounded-full bg-[#42A5F5]/15 p-2 text-white ring-1 ring-white/10">
-                  <Icon className="h-5 w-5 text-[#42A5F5]" strokeWidth={1.5} />
+                <span className="rounded-full bg-primary/10 p-2 ring-1 ring-primary/10">
+                  <Icon className="h-5 w-5 text-accent" strokeWidth={1.5} />
                 </span>
               </div>
               <div className={`mt-5 ${kpi.tone}`}>
@@ -323,7 +323,7 @@ export default function DashboardPage() {
                   <span className="text-3xl font-semibold tracking-tight leading-none">...</span>
                 ) : kpi.isCurrency && kpi.currency && kpi.number ? (
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-[11px] font-medium text-white/60">
+                    <span className="text-[11px] font-medium text-dark/60">
                       {kpi.currency}
                     </span>
                     <span className="text-4xl font-semibold tracking-tight leading-none break-words max-[1366px]:text-3xl">
@@ -340,15 +340,15 @@ export default function DashboardPage() {
                   </span>
                 )}
               </div>
-              <div className="mt-4 flex items-center justify-between gap-3 text-xs font-medium text-white/60">
+              <div className="mt-4 flex items-center justify-between gap-3 text-xs font-medium text-dark/60">
                 <span>Vs mes anterior</span>
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ring-1 ${
                     deltaIsUp === null
-                      ? "bg-white/5 text-white/70 ring-white/10"
+                      ? "bg-dark/5 text-dark/70 ring-black/5"
                       : deltaIsUp
-                        ? "bg-[#42A5F5]/15 text-[#42A5F5] ring-[#42A5F5]/20"
-                        : "bg-red-400/15 text-red-200 ring-red-300/20"
+                        ? "bg-secondary/10 text-secondary ring-secondary/20"
+                        : "bg-danger/10 text-danger ring-danger/20"
                   }`}
                 >
                   {deltaIsUp === null ? null : deltaIsUp ? (
@@ -364,25 +364,25 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <div className="fp-glass-card fp-fade-up p-6">
+      <div className="fp-card fp-fade-up p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white">Alertas de mantenimiento</h2>
-            <p className="mt-1 text-sm text-white/65">
+            <h2 className="text-sm font-semibold text-dark">Alertas de mantenimiento</h2>
+            <p className="mt-1 text-sm text-dark/70">
               Planes activos a 1000 km o menos del próximo mantenimiento.
             </p>
           </div>
-          <span className="rounded-full bg-[#42A5F5]/15 px-3 py-1 text-xs font-semibold text-[#42A5F5] ring-1 ring-white/10">
+          <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent ring-1 ring-accent/20">
             {alerts.length} alertas
           </span>
         </div>
 
         {loading ? (
-          <div className="mt-6 rounded-2xl bg-white/[0.06] px-4 py-6 text-sm text-white/70 ring-1 ring-white/10">
+          <div className="mt-6 rounded-2xl bg-background px-4 py-6 text-sm text-zinc-600 ring-1 ring-black/5">
             Cargando alertas...
           </div>
         ) : alerts.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-white/[0.06] px-4 py-6 text-sm text-white/70 ring-1 ring-white/10">
+          <div className="mt-6 rounded-2xl bg-background px-4 py-6 text-sm text-zinc-600 ring-1 ring-black/5">
             Sin alertas. Todo en orden con los mantenimientos.
           </div>
         ) : (
@@ -392,31 +392,31 @@ export default function DashboardPage() {
               return (
                 <div
                   key={a.id}
-                  className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.08]"
+                  className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_10px_24px_rgba(11,60,93,0.12)] transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-white">{a.placa}</p>
-                      <p className="text-xs text-white/60">{a.tipo}</p>
+                      <p className="text-sm font-semibold text-dark">{a.placa}</p>
+                      <p className="text-xs text-dark/60">{a.tipo}</p>
                     </div>
                     <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ring-1 ring-white/10 ${status.className}`}
+                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}
                     >
                       {status.label}
                     </span>
                   </div>
-                  <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-white/70">
+                  <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-dark/70">
                     <div>
-                      <p className="text-white/50">Km actual</p>
-                      <p className="font-semibold text-white">{a.kilometrajeActual}</p>
+                      <p className="text-dark/50">Km actual</p>
+                      <p className="font-semibold text-dark">{a.kilometrajeActual}</p>
                     </div>
                     <div>
-                      <p className="text-white/50">Próximo</p>
-                      <p className="font-semibold text-white">{a.proximoKm}</p>
+                      <p className="text-dark/50">Próximo</p>
+                      <p className="font-semibold text-dark">{a.proximoKm}</p>
                     </div>
                     <div>
-                      <p className="text-white/50">Restante</p>
-                      <p className="font-semibold text-white">{a.restanteKm} km</p>
+                      <p className="text-dark/50">Restante</p>
+                      <p className="font-semibold text-dark">{a.restanteKm} km</p>
                     </div>
                   </div>
                 </div>
