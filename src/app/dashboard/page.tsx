@@ -228,7 +228,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex items-center gap-2 rounded-2xl bg-background px-4 py-3 text-sm text-dark transition-all duration-300 border border-primary/10 focus-within:border-accent hover:bg-white">
+            <label className="flex items-center gap-2 rounded-2xl bg-white/70 px-4 py-3 text-sm text-dark transition-all duration-300 border border-black/5 focus-within:border-accent hover:bg-white">
               Mes
               <input
                 className="!bg-transparent !text-dark placeholder:text-dark/40 focus:outline-none appearance-none shadow-none border-0 ring-0 focus:ring-0"
@@ -237,13 +237,13 @@ export default function DashboardPage() {
                 onChange={(e) => setMonth(e.target.value)}
               />
             </label>
-            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-background px-4 py-3 text-sm text-dark ring-1 ring-primary/10">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-white/70 px-4 py-3 text-sm text-dark ring-1 ring-black/5">
               <span className="text-xs font-medium uppercase tracking-wider text-dark/60">
                 Mes actual
               </span>
               <span className="text-base font-semibold text-dark">{monthLabel}</span>
             </div>
-            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-background px-4 py-3 text-sm text-dark ring-1 ring-primary/10">
+            <div className="flex min-w-[150px] flex-col gap-1 rounded-2xl bg-white/70 px-4 py-3 text-sm text-dark ring-1 ring-black/5">
               <span className="text-xs font-medium uppercase tracking-wider text-dark/60">
                 Camiones activos
               </span>
@@ -305,17 +305,47 @@ export default function DashboardPage() {
           const deltaIsUp = deltaValue !== null ? deltaValue >= 0 : null;
           const deltaLabel =
             deltaValue === null ? "—" : `${Math.abs(deltaValue).toFixed(1)}%`;
+          const cardTopBorder =
+            kpi.label === "Costos totales"
+              ? "border-t-accent"
+              : kpi.tone.includes("danger")
+                ? "border-t-danger"
+                : kpi.tone.includes("secondary")
+                  ? "border-t-secondary"
+                  : kpi.tone.includes("primary")
+                    ? "border-t-primary"
+                    : "border-t-accent";
+          const iconWrapTone =
+            kpi.label === "Costos totales"
+              ? "bg-accent/15 ring-1 ring-accent/20"
+              : kpi.tone.includes("danger")
+                ? "bg-danger/10 ring-1 ring-danger/20"
+                : kpi.tone.includes("secondary")
+                  ? "bg-secondary/10 ring-1 ring-secondary/20"
+                  : kpi.tone.includes("primary")
+                    ? "bg-primary/10 ring-1 ring-primary/15"
+                    : "bg-accent/15 ring-1 ring-accent/20";
+          const iconTone =
+            kpi.label === "Costos totales"
+              ? "text-accent"
+              : kpi.tone.includes("danger")
+                ? "text-danger"
+                : kpi.tone.includes("secondary")
+                  ? "text-secondary"
+                  : kpi.tone.includes("primary")
+                    ? "text-primary"
+                    : "text-accent";
           return (
             <div
               key={kpi.label}
-              className="fp-card fp-fade-up group overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_44px_rgba(11,60,93,0.16)]"
+              className={`fp-card fp-fade-up group overflow-hidden border-t-4 ${cardTopBorder} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(30,30,30,0.14)]`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-wider text-dark/60">
                   {kpi.label}
                 </span>
-                <span className="rounded-full bg-primary/10 p-2 ring-1 ring-primary/10">
-                  <Icon className="h-5 w-5 text-accent" strokeWidth={1.5} />
+                <span className={`rounded-full p-2 ${iconWrapTone}`}>
+                  <Icon className={`h-5 w-5 ${iconTone}`} strokeWidth={1.5} />
                 </span>
               </div>
               <div className={`mt-5 ${kpi.tone}`}>
@@ -392,7 +422,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={a.id}
-                  className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_10px_24px_rgba(11,60,93,0.12)] transition-all duration-300 hover:-translate-y-0.5"
+                  className="fp-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(30,30,30,0.14)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>

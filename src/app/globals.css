@@ -95,7 +95,7 @@ textarea::placeholder {
 
 @layer utilities {
   .fp-dashboard-bg {
-    background: linear-gradient(135deg, #f4f6f8 0%, #eef4f7 50%, #e8f0f4 100%);
+    background: linear-gradient(135deg, var(--background) 0%, #ffffff 45%, #eef4f7 100%);
   }
 
   .fp-text-gradient {
@@ -108,9 +108,10 @@ textarea::placeholder {
   .fp-glass-card {
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(14px);
-    border: 1px solid rgba(11, 60, 93, 0.12);
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(11, 60, 93, 0.12);
+    border-radius: 20px;
+    box-shadow:
+      0 0 0 1px rgba(30, 30, 30, 0.06),
+      0 14px 36px rgba(30, 30, 30, 0.12);
   }
 
   .fp-glass-nav {
@@ -124,10 +125,10 @@ textarea::placeholder {
   }
 
   .fp-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(11, 60, 93, 0.08);
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(11, 60, 93, 0.1);
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow:
+      0 0 0 1px rgba(30, 30, 30, 0.06),
+      0 12px 28px rgba(30, 30, 30, 0.1);
   }
 }
