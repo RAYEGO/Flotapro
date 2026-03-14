@@ -14,15 +14,17 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="relative min-h-screen overflow-hidden">
+        <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-40"
+            className="absolute inset-0 bg-cover bg-center opacity-30"
             style={{ backgroundImage: `url(${BG_IMAGE_URL})` }}
           />
-          <div className="absolute inset-0 bg-zinc-950/40" />
+          <div className="absolute inset-0 bg-background/85" />
+          <div className="pointer-events-none absolute -top-28 left-10 h-80 w-80 rounded-full bg-accent/10 blur-[160px]" />
+          <div className="pointer-events-none absolute -bottom-36 right-8 h-96 w-96 rounded-full bg-secondary/10 blur-[170px]" />
           <div className="relative flex min-h-screen items-center justify-center px-6 py-10">
-            <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
-              <div className="text-sm text-zinc-600">Cargando...</div>
+            <div className="fp-glass-card w-full max-w-md p-6">
+              <div className="text-sm text-dark/70">Cargando...</div>
             </div>
           </div>
         </div>
@@ -69,27 +71,37 @@ function LoginForm() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-40"
+        className="absolute inset-0 bg-cover bg-center opacity-30"
         style={{ backgroundImage: `url(${BG_IMAGE_URL})` }}
       />
-      <div className="absolute inset-0 bg-zinc-950/40" />
+      <div className="absolute inset-0 bg-background/85" />
+      <div className="pointer-events-none absolute -top-28 left-10 h-80 w-80 rounded-full bg-accent/10 blur-[160px]" />
+      <div className="pointer-events-none absolute -bottom-36 right-8 h-96 w-96 rounded-full bg-secondary/10 blur-[170px]" />
       <div className="relative flex min-h-screen items-center justify-center px-6 py-10">
-        <div className="w-full max-w-md rounded-2xl bg-white/95 p-6 shadow-sm ring-1 ring-black/10 backdrop-blur">
+        <div className="fp-glass-card w-full max-w-md p-7 sm:p-8">
           <div className="flex justify-center">
-            <Image src="/logo.png" alt="FlotaPro" width={280} height={72} className="h-16 w-auto" priority />
+            <Image
+              src="/logo.png"
+              alt="FlotaPro"
+              width={520}
+              height={140}
+              className="h-20 w-auto max-w-[280px] sm:h-24 sm:max-w-[340px]"
+              priority
+            />
           </div>
-          <h1 className="mt-4 text-xl font-semibold text-zinc-900">Ingresar</h1>
-          <p className="mt-2 text-sm text-zinc-600">
+          <div className="mx-auto mt-5 h-1 w-14 rounded-full bg-accent/80" />
+          <h1 className="mt-5 text-2xl font-semibold tracking-tight text-dark">Ingresar</h1>
+          <p className="mt-2 text-sm text-dark/70">
             Accede a tu empresa en FlotaPro.
           </p>
 
           <form className="mt-6 space-y-4" onSubmit={onSubmit}>
             <label className="block">
-              <span className="text-sm font-medium text-zinc-700">Email</span>
+              <span className="text-sm font-medium text-dark/80">Email</span>
               <input
-                className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-dark outline-none placeholder:text-dark/40 focus:border-accent focus:ring-2 focus:ring-accent/15"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
@@ -99,9 +111,9 @@ function LoginForm() {
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-zinc-700">Contraseña</span>
+              <span className="text-sm font-medium text-dark/80">Contraseña</span>
               <input
-                className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-400"
+                className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-dark outline-none placeholder:text-dark/40 focus:border-accent focus:ring-2 focus:ring-accent/15"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
@@ -111,13 +123,13 @@ function LoginForm() {
             </label>
 
             {error ? (
-              <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger ring-1 ring-danger/20">
                 {error}
               </div>
             ) : null}
 
             <button
-              className="w-full rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+              className="w-full rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(11,60,93,0.22)] transition-colors hover:bg-primary/90 disabled:opacity-60"
               type="submit"
               disabled={submitting}
             >
@@ -125,9 +137,9 @@ function LoginForm() {
             </button>
           </form>
 
-          <div className="mt-6 text-sm text-zinc-600">
+          <div className="mt-6 text-sm text-dark/70">
             ¿No tienes cuenta?{" "}
-            <Link className="font-medium text-zinc-900 underline" href="/register">
+            <Link className="font-semibold text-primary underline decoration-accent/70 underline-offset-4" href="/register">
               Crear empresa
             </Link>
           </div>
